@@ -1,0 +1,37 @@
+services:
+  zwd-backend:
+    build: app
+    hostname: zwd-backend
+    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
+    ports:
+      - 8081:8000
+    networks:
+      - zwd_network
+    depends_on:
+      - database
+    env_file:
+      - .env
+    command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m manage runserver 0.0.0.0:8000"
+    volumes:
+      - ./app:/app
+    stdin_open: true
+    tty: true
+
+  database:
+    networks:
+      - zwd_network
+    image: postgres:15.7
+    shm_size: "512m"
+    ports:
+      - "6410:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+
+networks:
+  zwd_network:
+    external: true
+ 
+volumes:
+  postgresql-data:

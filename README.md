@@ -1,2 +1,1 @@
-# zwd-backend
-Zaken Woningkwaliteit Duurzaamheid Backend
+# Zaken Woningkwaliteit Duurzaamheid (ZWD)
