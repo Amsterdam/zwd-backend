@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-p9v7bvv$nx#qmrxu(yl08=@zygn6mcc-r*xa5+@9p5-+%hvis)'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ENVIRONMENT = os.getenv("ENVIRONMENT")
+DEBUG = ENVIRONMENT == "local"
 
 ALLOWED_HOSTS = []
 
@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.cases',
     'django_spaghetti',
-    'drf_spectacular'
+    'drf_spectacular',
+    'django_celery_results'
 ]
 
 SPAGHETTI_SAUCE = {
@@ -73,7 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -91,7 +92,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
@@ -114,6 +115,27 @@ DATABASES = {
     },
 }
 
+
+def get_redis_url():
+    REDIS_HOST = os.getenv("REDIS_HOST")
+    REDIS_PORT = os.getenv("REDIS_PORT")
+    REDIS_USERNAME = ""
+    REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
+    REDIS_PREFIX = "redis" if DEBUG else "rediss"
+    if "windows.net" in REDIS_HOST:
+        REDIS_USERNAME = os.getenv("REDIS_USERNAME")
+        REDIS_PASSWORD = "todo"
+    return f"{REDIS_PREFIX}://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}"
+
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+BROKER_URL = get_redis_url()
+CELERY_BROKER_URL = get_redis_url()
+BROKER_CONNECTION_MAX_RETRIES = None
+BROKER_CONNECTION_TIMEOUT = 120
+CELERY_TASK_TRACK_STARTED = True
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_TASK_TIME_LIMIT = 30 * 60
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

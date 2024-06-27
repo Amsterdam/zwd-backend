@@ -29,6 +29,31 @@ services:
     volumes:
       - postgresql-data:/var/lib/postgresql/data
 
+  zwd-redis:
+    build: redis
+    environment:
+      - REDIS_PASSWORD=password
+      - REDIS_MAXMEM=100mb
+    networks:
+      - zwd_network
+    ports:
+      - "6378:6379"
+
+  zwd_celery_worker:
+    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
+    container_name: zwd_celery_worker
+    hostname: zwd_celery_worker
+    command: bash -c '/app/celery.sh'
+    depends_on:
+      - zwd-backend
+      - database
+      - zwd-redis
+    env_file:
+      - .env
+    networks:
+      - zwd_network
+    restart: on-failure
+
 networks:
   zwd_network:
     external: true
