@@ -1,6 +1,3 @@
-
-
-
 import celery
 
 DEFAULT_RETRY_DELAY = 2
