@@ -5,13 +5,14 @@ services:
     image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
     ports:
       - 8081:8000
+      - 5679:5678
     networks:
       - zwd_network
     depends_on:
       - database
     env_file:
       - .env
-    command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m manage runserver 0.0.0.0:8000"
+    command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m debugpy --listen 0.0.0.0:5678 ./manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./app:/app
     stdin_open: true

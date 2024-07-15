@@ -14,8 +14,13 @@ from .tasks import task_create_case
 
 
 class Case(models.Model):
+<<<<<<< HEAD
     description = models.TextField()
 
+=======
+    description = models.TextField(null=True)
+    # housing_association = models.ForeignKey(HousingAssociation, on_delete=models.CASCADE, related_name='cases')
+>>>>>>> 6a896e0 (wip)
     def save(self, *args, **kwargs):
         task_create_case.delay(self.description)
         super().save(*args, **kwargs)
