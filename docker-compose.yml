@@ -7,8 +7,6 @@ services:
       - 8081:8000
     networks:
       - zwd_network
-    env_file:
-      - .env
     command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m manage runserver 0.0.0.0:8000"
     volumes:
       - ./app:/app
@@ -22,8 +20,6 @@ services:
     command: bash -c '/app/celery.sh'
     depends_on:
       - zwd-backend
-    env_file:
-      - .env
     networks:
       - zwd_network
     restart: on-failure
