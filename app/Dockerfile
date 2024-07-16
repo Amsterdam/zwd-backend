@@ -6,7 +6,7 @@ RUN apt-get install libpq-dev -y
 RUN apt-get install gcc -y
 
 RUN pip install --upgrade pip
-
+RUN pip install uwsgi
 WORKDIR /app
 
 COPY requirements.txt /app/
