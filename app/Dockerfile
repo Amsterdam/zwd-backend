@@ -17,4 +17,4 @@ COPY . /app/
 RUN chmod +x /app/celery.sh
 
 ENTRYPOINT ["/app/deploy/docker-entrypoint.sh"]
-CMD ["uwsgi", "--ini", "/app/deploy/config.ini"]
+CMD ["uwsgi", "--ini", "/app/config/config.ini"]
