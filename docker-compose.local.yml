@@ -11,7 +11,7 @@ services:
       - database
     env_file:
       - .env
-    command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m manage runserver 0.0.0.0:8000"
+    # command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m manage runserver 0.0.0.0:8000"
     volumes:
       - ./app:/app
     stdin_open: true

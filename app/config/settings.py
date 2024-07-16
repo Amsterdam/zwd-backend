@@ -31,10 +31,7 @@ SECRET_KEY = 'django-insecure-p9v7bvv$nx#qmrxu(yl08=@zygn6mcc-r*xa5+@9p5-+%hvis)
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 DEBUG = ENVIRONMENT == "local"
 
-ALLOWED_HOSTS = []
-
-
-# Application definition
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
