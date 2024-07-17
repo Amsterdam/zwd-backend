@@ -146,7 +146,7 @@
     <bpmn:sequenceFlow id="Flow_07yq2lt" sourceRef="gateway_merge_0h60qot" targetRef="task_create_schedule" />
     <bpmn:sequenceFlow id="Flow_1mmzhem" sourceRef="task_create_visit" targetRef="gateway_what_is_result_visit" />
     <bpmn:sequenceFlow id="Flow_0aiyxmw" name="Machtiging nodig = YES" sourceRef="gateway_is_authorisation_required" targetRef="Gateway_19hfteh">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">authorization.value == "Yes"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">authorization.get('value') == "Yes"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1ud05n0" name="Mactiging nodig = NO" sourceRef="gateway_is_authorisation_required" targetRef="gateway_merge_0h60qot" />
     <bpmn:sequenceFlow id="Flow_100ib64" name="situation == &#34;nobody_present&#34; and can_next_visit_go_ahead == True" sourceRef="gateway_what_is_result_visit" targetRef="gateway_merge_1fmcb00">
@@ -210,7 +210,7 @@
     <bpmn:sequenceFlow id="Flow_1tx62ja" sourceRef="service_status_inplannen_huisbezoek_hercontrole" targetRef="gateway_bepalen_processtap" />
     <bpmn:sequenceFlow id="Flow_1921ocy" sourceRef="start_xbisnr1" targetRef="gateway_merge_1fmcb00" />
     <bpmn:sequenceFlow id="Flow_1glf0ko" name="bepalen_processtap = ja" sourceRef="gateway_bepalen_processtap" targetRef="Gateway_1r1i4zw">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">bepalen_processtap.value == "ja"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">bepalen_processtap.get('value') == "ja"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_07mixd1" name="theme == theme_ondermijning" sourceRef="Gateway_1r1i4zw" targetRef="task_bepalen_processtap">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">theme.value == "theme_ondermijning"</bpmn:conditionExpression>

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 from os.path import join
@@ -229,6 +230,22 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'WARNING',
+        },
+    },
+}
+
+
+WORKFLOW_SPEC_CONFIG = {
+    "default": {
+        "visit": {
+            "initial_data": {
+                "bepalen_processtap": {"value": "123"},
+                "status_name": "test123",
+                "authorization": {"value": "No"},
+            },
+            "versions": {
+                "1.1.0": {},
+            },
         },
     },
 }

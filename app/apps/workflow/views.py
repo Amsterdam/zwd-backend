@@ -1,3 +1,4 @@
+from argparse import Action
 from .serializers import  CaseWorkflowSerializer
 from .models import CaseWorkflow
 from rest_framework import viewsets
@@ -8,6 +9,8 @@ class CaseWorkflowViewset(viewsets.ModelViewSet):
     serializer_class = CaseWorkflowSerializer
 
     def list(self, request, *args, **kwargs):
-        self.queryset.model().get_workflow_spec("summon")
+        instance = self.queryset.first()
+        if instance:
+            result = instance.get_workflow_spec("visit")
+            print(f"Workflow Spec Result: {result}")
         return super().list(request, *args, **kwargs)
-
