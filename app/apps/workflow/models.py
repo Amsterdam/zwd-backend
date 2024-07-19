@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import re
+from string import Template
 from django.conf import settings
 from django.db import models, transaction
 from apps.cases.models import Case
@@ -11,7 +12,9 @@ from SpiffWorkflow.bpmn.script_engine import PythonScriptEngine, TaskDataEnviron
 from SpiffWorkflow import TaskState
 from SpiffWorkflow.bpmn.specs.mixins.events.event_types import CatchingEvent
 from django.utils.dateparse import parse_duration
-from SpiffWorkflow.bpmn.exceptions import WorkflowTaskException
+from SpiffWorkflow.bpmn.serializer import BpmnWorkflowSerializer
+from django.contrib.postgres.fields import ArrayField
+from .managers import BulkCreateSignalsManager
 from .tasks import (
     redis_lock,
     release_lock,
@@ -50,19 +53,24 @@ class CaseWorkflow(models.Model):
         max_length=100,
         null=True,
         blank=True,
-    )   
-
+    )
+    data = models.JSONField(null=True)
+    serializer = BpmnWorkflowSerializer
     # TODO copy frm aza
     case_state_type = models.CharField(
         max_length=100,
         null=True,
     ) 
-    def get_workflow_spec(self, workflow_type):
+    main_workflow = models.BooleanField(
+        default=False,
+    )
+
+    def start(self):
         parser = CamundaParser()
-        path = self.get_workflow_path(workflow_type)
+        path = self.get_workflow_path(self.workflow_type)
         for f in self.get_workflow_spec_files(path):
             parser.add_bpmn_file(f)
-        spec = parser.get_spec(workflow_type)
+        spec = parser.get_spec(self.workflow_type)
         workflow = BpmnWorkflow(spec)
         workflow = self.get_script_engine(workflow)
         initial_data = get_initial_data_from_config(
@@ -73,6 +81,8 @@ class CaseWorkflow(models.Model):
         )
         success = False
         jump_to = initial_data.pop("jump_to", None)
+
+        #TODO: Figure this out
         # if jump_to:
         #     result = self.reset_subworkflow(jump_to, test=False)
         #     success = result.get("success")
@@ -81,7 +91,7 @@ class CaseWorkflow(models.Model):
             workflow = self._initial_data(workflow, initial_data)
 
             workflow = self._update_workflow(workflow)
-
+            #TODO: Figure this out, method is change/gone
             # if self.workflow_message_name:
             #     workflow.message(
             #         self.workflow_message_name,
@@ -174,14 +184,76 @@ class CaseWorkflow(models.Model):
         return wf
 
     def _update_db(self, wf):
-        with transaction.atomic():
+        #TODO: Locks not implemented yet, not sure if required
+        # with transaction.atomic():
             self.save_workflow_state(wf)
             self.update_tasks(wf)
-            transaction.on_commit(lambda: self.release_lock())
-            
+            # transaction.on_commit(lambda: self.release_lock())
+
     def set_case_state_type(self, state_name):
         self.case_state_type = state_name
-        self.save() 
+        self.save()
+
+    def save_workflow_state(self, wf):
+        if wf.last_task:
+            # update this workflow with the latest task data
+            self.data.update(wf.last_task.data)
+
+        completed = False
+
+        if wf.is_completed() and not self.completed:
+            completed = True
+            self.completed = True
+        # TODO: Fix serialize error
+        # state = self.serializer().serialize_json(workflow=wf)
+        # self.serialized_workflow_state = state
+        self.started = True
+        self.save()
+
+        #TODO:: Implement
+        # if completed:
+        #     data = copy.deepcopy(wf.last_task.data) if wf.last_task else {}
+        #     task_complete_worflow.delay(self.id, data)
+
+    def update_tasks(self, wf):
+        # TODO: Needs tasks first
+        # self.set_obsolete_tasks_to_completed(wf)
+        self.create_user_tasks(wf)
+
+    def create_user_tasks(self, wf):
+        ready_tasks = wf.get_tasks(state=TaskState.READY)
+        task_data = [
+            CaseUserTask(
+                task_id=task.id,
+                task_name=task.task_spec.name,
+                name=task.task_spec.bpmn_name,
+                # roles=[r.strip() for r in task.task_spec.lane.split(",")],
+                # form=parse_task_spec_form(task.task_spec.form),
+                due_date=datetime.datetime.today(),
+                case=self.case,
+                workflow=self,
+            )
+            for task in ready_tasks
+            if not CaseUserTask.objects.filter(
+                # task_id=task.id,
+                task_name=task.task_spec.name,
+                workflow=self,
+            )
+        ]
+        task_instances = CaseUserTask.objects.bulk_create(task_data)
+        return task_instances
+
+    def set_obsolete_tasks_to_completed(self, wf):
+        # some tasks are obsolete after wf.do_engine_steps or wf.refresh_waiting_tasks
+        ready_tasks_ids = [t.id for t in wf.get_tasks(state=TaskState.READY)]
+
+        # cleanup: sets dj tasks to completed
+        task_instances = self.tasks.all().exclude(
+            task_id__in=ready_tasks_ids,
+        )
+        updated = task_instances.update(completed=True)
+
+        return updated
 def get_initial_data_from_config(
     theme_name, workflow_type, workflow_version, message_name=None
 ):
@@ -226,7 +298,7 @@ def get_initial_data_from_config(
 
     return initial_data
 
-    
+
 def validate_workflow_spec(workflow_spec_config):
 
     serializer = WorkflowSpecConfigSerializer(data=workflow_spec_config)
@@ -278,6 +350,7 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
         return super().run_validation(data)
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
     visit = WorkflowSpecConfigThemeSerializer(required=False)
+    vve = WorkflowSpecConfigThemeSerializer(required=False)
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)
@@ -293,6 +366,7 @@ class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
 class WorkflowSpecConfigSerializer(serializers.Serializer):
     default = WorkflowSpecConfigThemeTypeSerializer()
     visit = WorkflowSpecConfigThemeSerializer(required=False)
+    vve = WorkflowSpecConfigThemeSerializer(required=False)
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)
@@ -301,3 +375,93 @@ class WorkflowSpecConfigSerializer(serializers.Serializer):
                 raise ValueError
 
         return super().run_validation(data)
+class CaseUserTask(models.Model):
+
+    completed = models.BooleanField(
+        default=False,
+    )
+    # connects spiff task with this db task
+    task_id = models.UUIDField(
+        unique=True,
+    )
+    # name of the task_spec in spiff, in bpmn modeler is this the id field
+    task_name = models.CharField(
+        max_length=255,
+    )
+    # description of the task_spec in spiff, in bpmn modeler is this the name field
+    name = models.CharField(
+        max_length=255,
+    )
+    form = models.JSONField(
+        default=list,
+        null=True,
+        blank=True,
+    )
+    roles = ArrayField(
+        base_field=models.CharField(max_length=255),
+        default=list,
+        null=True,
+        blank=True,
+    )
+    due_date = models.DateTimeField()
+    owner = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    case = models.ForeignKey(
+        to=Case,
+        related_name="tasks",
+        on_delete=models.CASCADE,
+    )
+    workflow = models.ForeignKey(
+        to=CaseWorkflow,
+        related_name="tasks",
+        on_delete=models.CASCADE,
+    )
+
+    objects = BulkCreateSignalsManager()
+
+    @property
+    def get_form_variables(self):
+        # TODO: Return corresponding spiff task data, currently used only to provide frontend with the current summon_id
+        return self.workflow.get_data()
+
+    def complete(self):
+        self.completed = True
+        self.save()
+#TODO:  Move
+def parse_task_spec_form(form):
+    trans_types = {
+        "enum": "select",
+        "boolean": "checkbox",
+        "string": "text",
+        "long": "number",
+    }
+    fields = [
+        {
+            "label": f.label,
+            "options": [
+                {
+                    "value": o.id,
+                    "label": o.name,
+                }
+                for o in f.__dict__.get("options", [])
+            ],
+            "name": f.id,
+            "type": "multiselect"
+            if bool([v.name for v in f.validation if v.name == "multiple"])
+            else trans_types.get(f.type, "text"),
+            "required": not bool(
+                [v.name for v in f.validation if v.name == "optional"]
+            ),
+            "tooltip": next(
+                iter([v.value for v in f.properties if v.id == "tooltip"]), None
+            ),
+        }
+        for f in form.fields
+    ]
+    return fields

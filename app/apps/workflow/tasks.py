@@ -34,7 +34,7 @@ class BaseTaskWithRetry(celery.Task):
     default_retry_delay = DEFAULT_RETRY_DELAY
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_update_workflows(self):
     from apps.workflow.models import CaseWorkflow
 
@@ -45,7 +45,7 @@ def task_update_workflows(self):
     return f"task_update_workflows complete: count '{workflow_instances.count()}'"
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_update_workflow(self, workflow_id):
     from apps.workflow.models import CaseWorkflow
 
@@ -59,7 +59,7 @@ def task_update_workflow(self, workflow_id):
     )
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_accept_message_for_workflow(self, workflow_id, message, extra_data):
     from apps.workflow.models import CaseWorkflow
 
@@ -74,7 +74,7 @@ def task_accept_message_for_workflow(self, workflow_id, message, extra_data):
     )
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_data={}):
     from apps.workflow.models import CaseWorkflow
 
@@ -92,7 +92,7 @@ def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_dat
     return f"task_start_subworkflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_create_main_worflow_for_case(self, case_id, data={}):
     from apps.workflow.models import CaseWorkflow
 
@@ -100,7 +100,7 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
     with transaction.atomic():
         workflow_instance = CaseWorkflow.objects.create(
             case=case,
-            workflow_type=settings.DEFAULT_WORKFLOW_TYPE,
+            workflow_type="vve",
             main_workflow=True,
             workflow_message_name="main_process",
             data=data,
@@ -109,20 +109,21 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
     return f"task_start_main_worflow_for_case: workflow id '{workflow_instance.id}', for case with id '{case_id}', created"
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_start_worflow(self, worklow_id):
     from apps.workflow.models import CaseWorkflow
 
     workflow_instance = CaseWorkflow.objects.get(id=worklow_id)
-    if workflow_instance.get_lock():
-        with transaction.atomic():
-            workflow_instance.start()
-            return f"task_start_worflow: workflow id '{worklow_id}', started"
+    workflow_instance.start()
+    # if workflow_instance.get_lock():
+    #     with transaction.atomic():
+    #         workflow_instance.start()
+    #         return f"task_start_worflow: workflow id '{worklow_id}', started"
 
-    raise Exception(f"task_start_worflow: workflow id '{worklow_id}', is busy")
+    # raise Exception(f"task_start_worflow: workflow id '{worklow_id}', is busy")
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_reset_subworkflow(self, worklow_id, subworkflow):
     from apps.workflow.models import CaseWorkflow
 
@@ -136,7 +137,7 @@ def task_reset_subworkflow(self, worklow_id, subworkflow):
     raise Exception(f"task_reset_subworkflow: workflow id '{worklow_id}', is busy")
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_wait_for_workflows_and_send_message(self, workflow_id, message, extra_data={}):
     from apps.workflow.models import CaseWorkflow
 
@@ -161,7 +162,7 @@ def task_wait_for_workflows_and_send_message(self, workflow_id, message, extra_d
     )
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_script_wait(self, workflow_id, message, extra_data={}):
     from apps.workflow.models import CaseWorkflow
 
@@ -178,7 +179,7 @@ def task_script_wait(self, workflow_id, message, extra_data={}):
     return f"task_script_wait: message '{message}' for workflow with id '{workflow_id}', completed"
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_complete_worflow(self, worklow_id, data):
     from apps.workflow.models import CaseWorkflow
 
@@ -199,7 +200,7 @@ def task_complete_worflow(self, worklow_id, data):
     raise Exception(f"task_complete_worflow: workflow id '{worklow_id}', is busy")
 
 
-@shared_task(bind=True, base=BaseTaskWithRetry)
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_complete_user_task_and_create_new_user_tasks(self, task_id, data={}):
     from apps.workflow.models import CaseUserTask
 

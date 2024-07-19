@@ -11,5 +11,6 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             "workflow_type",
             "workflow_version",  
             "workflow_theme_name",
-            "workflow_message_name"
+            "workflow_message_name",
+            "data"
         )

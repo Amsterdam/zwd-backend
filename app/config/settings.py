@@ -29,6 +29,9 @@ ENVIRONMENT = os.getenv("ENVIRONMENT")
 DEBUG = ENVIRONMENT == "local"
 
 ALLOWED_HOSTS = ["*"]
+DEFAULT_WORKFLOW_TYPE = os.getenv("DEFAULT_WORKFLOW_TYPE", "director")
+
+# Application definition
 
 INSTALLED_APPS = [
     'mozilla_django_oidc',
@@ -245,6 +248,16 @@ WORKFLOW_SPEC_CONFIG = {
             },
             "versions": {
                 "1.1.0": {},
+            },
+        },
+        "vve": {
+            "initial_data": {
+                "bepalen_processtap": {"value": "123"},
+                "status_name": "test123",
+                "authorization": {"value": "No"},
+            },
+            "versions": {
+                "1.0.0": {},
             },
         },
     },
