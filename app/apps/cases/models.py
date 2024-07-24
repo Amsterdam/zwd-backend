@@ -9,14 +9,13 @@ from .tasks import task_create_case
 #     postal_code = models.CharField(max_length=20)
 
 
-# class HousingAssociation(models.Model):
-#     name = models.CharField(max_length=100)
-#     registration_number = models.CharField(max_length=50)
-#     addresses = models.ManyToManyField(Address, related_name='cases')
+# class Vve(models.Model):
+#     vve_statutaire_naam = models.TextField()
+
 
 class Case(models.Model):
     description = models.TextField()
-    # housing_association = models.ForeignKey(HousingAssociation, on_delete=models.CASCADE, related_name='cases')
+
     def save(self, *args, **kwargs):
         task_create_case.delay(self.description)
         super().save(*args, **kwargs)
