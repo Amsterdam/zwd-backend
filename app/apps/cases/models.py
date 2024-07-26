@@ -26,7 +26,6 @@ class Case(models.Model):
         task_create_case.delay(self.description)
         super().save(*args, **kwargs)
 
-
 class CaseStateType(models.Model):
     name = models.CharField(max_length=255, unique=True)
 

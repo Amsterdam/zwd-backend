@@ -1,7 +1,9 @@
+
+
+
+import datetime
+import json
 from django.conf import settings
-
-from .serializers import WorkflowSpecConfigSerializer
-
 
 def map_variables_on_task_spec_form(variables, task_spec_form):
     # transforms form result data and adds labels for the frontend
@@ -46,9 +48,36 @@ def get_initial_data_from_config(
         raise Exception(
             f"Workflow type '{workflow_type}', does not exist in this workflow_spec config"
         )
+    initial_data = config.get("initial_data", {})
+
+    version = config.get("versions", {}).get(workflow_version)
+    if (
+        message_name
+        and version
+        and version.get("messages", {}).get(message_name, {}).get("initial_data", {})
+    ):
+        initial_data = (
+            version.get("messages", {}).get(message_name, {}).get("initial_data", {})
+        )
+    def pre_serialize_timedelta(value):
+        if isinstance(value, datetime.timedelta):
+            duration = settings.DEFAULT_WORKFLOW_TIMER_DURATIONS.get(
+                settings.ENVIRONMENT
+            )
+            if duration:
+                value = duration
+            return json.loads(json.dumps(value, default=str))
+        return value
+
+
+    initial_data = dict(
+        (k, pre_serialize_timedelta(v)) for k, v in initial_data.items()
+    )
+    return initial_data
 
 
 def validate_workflow_spec(workflow_spec_config):
+    from .serializers import WorkflowSpecConfigSerializer
     serializer = WorkflowSpecConfigSerializer(data=workflow_spec_config)
     if serializer.is_valid():
         pass

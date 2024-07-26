@@ -7,7 +7,6 @@ from django.dispatch import receiver
 @receiver(post_save, sender=Case, dispatch_uid="start_workflow_for_case")
 def start_workflow_for_case(sender, instance, created, **kwargs):
     from apps.workflow.tasks import task_create_main_worflow_for_case
-    print("123")
     if kwargs.get("raw"):
         return
     data = {}

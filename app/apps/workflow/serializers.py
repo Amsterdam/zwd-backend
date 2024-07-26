@@ -1,7 +1,6 @@
 import re
-
 from apps.cases.models import Case
-from apps.workflow.models import CaseWorkflow, GenericCompletedTask
+from .models import CaseWorkflow, GenericCompletedTask
 from rest_framework import serializers
 from rest_framework.fields import empty
 
@@ -81,7 +80,6 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
 
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
     process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
-
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)
@@ -98,11 +96,13 @@ class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
 
 class WorkflowSpecConfigSerializer(serializers.Serializer):
     default = WorkflowSpecConfigThemeTypeSerializer()
-    process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
-
+    # process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)
             if unknown:
                 errors = ["Unknown field: {}".format(f) for f in unknown]
                 raise ValueError
+
+        return super().run_validation(data)
+

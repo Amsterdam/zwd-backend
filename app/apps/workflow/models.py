@@ -14,7 +14,7 @@ from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser
 from SpiffWorkflow.camunda.serializer.config import CAMUNDA_CONFIG
 from SpiffWorkflow.camunda.specs.user_task import UserTask
 
-from app.apps.workflow.utils import get_initial_data_from_config, parse_task_spec_form
+from .utils import get_initial_data_from_config, parse_task_spec_form
 
 from .managers import BulkCreateSignalsManager
 from .tasks import (
@@ -67,6 +67,10 @@ class CaseWorkflow(models.Model):
     )
     serialized_workflow_state = models.JSONField(null=True)
     started = models.BooleanField(
+        default=False,
+    )
+    
+    completed = models.BooleanField(
         default=False,
     )
 

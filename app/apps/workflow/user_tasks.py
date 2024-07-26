@@ -104,10 +104,3 @@ class user_task:
 
     def instance_created(self):
         return
-
-
-# class task_vve_gezond(user_task):
-#     _task_name = "task_vve_gezond"
-
-# class task_duurzaam_mjop(user_task):
-#     _task_name = "task_duurzaam_mjop"
