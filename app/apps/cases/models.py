@@ -1,5 +1,5 @@
-from typing import Iterable
 from django.db import models
+
 from .tasks import task_create_case
 
 # class Address(models.Model):
@@ -13,6 +13,7 @@ from .tasks import task_create_case
 #     vve_statutaire_naam = models.TextField()
 
 
+
 class Case(models.Model):
 <<<<<<< HEAD
     description = models.TextField()
@@ -24,3 +25,13 @@ class Case(models.Model):
     def save(self, *args, **kwargs):
         task_create_case.delay(self.description)
         super().save(*args, **kwargs)
+
+
+class CaseStateType(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        ordering = ["name"]

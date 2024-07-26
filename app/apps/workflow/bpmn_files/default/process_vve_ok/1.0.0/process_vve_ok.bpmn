@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler" exporterVersion="b209cc3" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0" camunda:diagramRelationId="e2947b4a-697a-4929-bcda-eb63c2f2a7de">
+  <bpmn:process id="process_vve_ok" name="TEST" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_11pxq2b</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="task_vve_gezond" name="Check VVE gezond">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="form_vve_gezond" />
+        <zeebe:ioMapping>
+          <zeebe:input target="InputVariable_3g9rk43" />
+          <zeebe:input target="InputVariable_1bhbj53" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_11pxq2b</bpmn:incoming>
+      <bpmn:outgoing>Flow_1260mhu</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_11pxq2b" sourceRef="StartEvent_1" targetRef="task_vve_gezond" />
+    <bpmn:userTask id="task_duurzaam_mjop" name="Duurzaam mjop">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="form_duurzaam_mjop" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1260mhu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rvh0q5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1260mhu" sourceRef="task_vve_gezond" targetRef="task_duurzaam_mjop" />
+    <bpmn:endEvent id="Event_1k0rkv7" name="test_end">
+      <bpmn:incoming>Flow_1rvh0q5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1rvh0q5" sourceRef="task_duurzaam_mjop" targetRef="Event_1k0rkv7" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_vve_ok">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="150" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1syj0ix_di" bpmnElement="task_vve_gezond">
+        <dc:Bounds x="240" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1f73u3z_di" bpmnElement="task_duurzaam_mjop">
+        <dc:Bounds x="400" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1k0rkv7_di" bpmnElement="Event_1k0rkv7">
+        <dc:Bounds x="562" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_11pxq2b_di" bpmnElement="Flow_11pxq2b">
+        <di:waypoint x="186" y="118" />
+        <di:waypoint x="240" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1260mhu_di" bpmnElement="Flow_1260mhu">
+        <di:waypoint x="340" y="118" />
+        <di:waypoint x="400" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rvh0q5_di" bpmnElement="Flow_1rvh0q5">
+        <di:waypoint x="500" y="118" />
+        <di:waypoint x="562" y="118" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

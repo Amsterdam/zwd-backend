@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 
-#TODO: idk what this is
+
 class BulkCreateSignalsManager(models.Manager):
     def bulk_create(self, objs, **kwargs):
         for i in objs:

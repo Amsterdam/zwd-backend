@@ -3,9 +3,7 @@ from time import sleep
 
 import celery
 from apps.cases.models import Case
-from celery import shared_task
 from celery.utils.log import get_task_logger
-from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
@@ -100,7 +98,8 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
     with transaction.atomic():
         workflow_instance = CaseWorkflow.objects.create(
             case=case,
-            workflow_type="vve",
+            # TODO: Make dynamic
+            workflow_type="process_vve_ok",
             main_workflow=True,
             workflow_message_name="main_process",
             data=data,
@@ -206,10 +205,10 @@ def task_complete_user_task_and_create_new_user_tasks(self, task_id, data={}):
 
     task = CaseUserTask.objects.get(id=task_id, completed=False)
 
-    if task.workflow.get_lock():
-        task.workflow.complete_user_task_and_create_new_user_tasks(task.task_id, data)
-        return f"task_complete_user_task_and_create_new_user_tasks: complete task with name '{task.task_name}' for workflow with id '{task.workflow.id}', is completed"
+    # if task.workflow.get_lock():
+    task.workflow.complete_user_task_and_create_new_user_tasks(task.task_id, data)
+    return f"task_complete_user_task_and_create_new_user_tasks: complete task with name '{task.task_name}' for workflow with id '{task.workflow.id}', is completed"
 
-    raise Exception(
-        f"task_complete_user_task_and_create_new_user_tasks: complete task with name '{task.task_name}' for workflow with id '{task.workflow.id}', is busy"
-    )
+    # raise Exception(
+    #     f"task_complete_user_task_and_create_new_user_tasks: complete task with name '{task.task_name}' for workflow with id '{task.workflow.id}', is busy"
+    # )
