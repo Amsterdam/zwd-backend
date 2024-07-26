@@ -19,7 +19,6 @@ from app.apps.workflow.utils import get_initial_data_from_config, parse_task_spe
 from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
-    task_complete_worflow,
     task_script_wait,
     task_start_subworkflow,
     task_wait_for_workflows_and_send_message,
