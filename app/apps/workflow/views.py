@@ -1,7 +1,7 @@
 from apps.workflow.utils import map_variables_on_task_spec_form
 from django.http import HttpResponse, HttpResponseBadRequest
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 
 from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
@@ -19,6 +19,8 @@ class CaseWorkflowViewset(viewsets.ModelViewSet):
 
 class GenericCompletedTaskViewSet(
     viewsets.ModelViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin
 ):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()

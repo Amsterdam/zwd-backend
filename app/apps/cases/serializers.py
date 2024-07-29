@@ -12,3 +12,7 @@ class CaseSerializer(serializers.ModelSerializer):
             "description",
             "workflows"
         )
+class CaseCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Case
+        fields = ("description",)
