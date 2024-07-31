@@ -14,15 +14,15 @@ import os
 from os.path import join
 from pathlib import Path
 
+from config.logging import create_logging_config, setup_azure_monitor
+
 from .azure_settings import Azure
 
 azure = Azure()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-p9v7bvv$nx#qmrxu(yl08=@zygn6mcc-r*xa5+@9p5-+%hvis)"
+SECRET_KEY = os.getenv("SECRET_KEY", "insecure")
 
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 DEBUG = ENVIRONMENT == "local"
@@ -55,7 +55,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 SPAGHETTI_SAUCE = {
-    "apps": ["cases"],
+    "apps": ["cases", "workflow"],
     "show_fields": True,
 }
 
@@ -218,22 +218,15 @@ STATIC_ROOT = os.path.normpath(join(os.path.dirname(BASE_DIR), "static"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "WARNING",
-        },
-    },
-}
+LOGGING_LEVEL = os.getenv("LOGGING_LEVEL", "WARNING")
 
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"
+)
+HAS_AZURE_LOGGING = True if APPLICATIONINSIGHTS_CONNECTION_STRING else False
+LOGGING = create_logging_config()
+if HAS_AZURE_LOGGING:
+    setup_azure_monitor()
 
 WORKFLOW_SPEC_CONFIG = {
     "default": {
@@ -249,3 +242,4 @@ WORKFLOW_SPEC_CONFIG = {
         },
     },
 }
+

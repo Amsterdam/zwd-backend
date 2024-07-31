@@ -96,7 +96,6 @@ class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
 
 class WorkflowSpecConfigSerializer(serializers.Serializer):
     default = WorkflowSpecConfigThemeTypeSerializer()
-    # process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)

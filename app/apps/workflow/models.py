@@ -20,8 +20,7 @@ from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
     task_script_wait,
-    task_start_subworkflow,
-    task_wait_for_workflows_and_send_message,
+    task_start_subworkflow
 )
 
 
@@ -82,27 +81,9 @@ class CaseWorkflow(models.Model):
             self.workflow_version,
             self.workflow_message_name,
         )
-
-        success = False
-        # TODO: Figure this out
-        # jump_to = initial_data.pop("jump_to", None)
-        # if jump_to:
-        #     result = self.reset_subworkflow(jump_to, test=False)
-        #     success = result.get("success")
-
-        if not success:
-            workflow = self._initial_data(workflow, initial_data)
-
-            workflow = self._update_workflow(workflow)
-            # TODO: Figure this out, method is change/gone
-            # if self.workflow_message_name:
-            #     workflow.message(
-            #         self.workflow_message_name,
-            #         self.workflow_message_name,
-            #         "message_name",
-            #     )
-            #     workflow = self._update_workflow(workflow)
-            self._update_db(workflow)
+        workflow = self._initial_data(workflow, initial_data)
+        workflow = self._update_workflow(workflow)
+        self._update_db(workflow)
         return
 
     def complete_user_task_and_create_new_user_tasks(self, task_id=None, data=None):
@@ -148,11 +129,6 @@ class CaseWorkflow(models.Model):
         self.started = True
         self.save()
 
-        # TODO: Implement
-        # if completed:
-        #     data = copy.deepcopy(wf.last_task.data) if wf.last_task else {}
-        #     task_complete_worflow.delay(self.id, data)
-
     def _update_tasks(self, wf):
         self._set_obsolete_tasks_to_completed(wf)
         self._create_user_tasks(wf)
@@ -172,7 +148,6 @@ class CaseWorkflow(models.Model):
             )
             for task in ready_tasks
             if not CaseUserTask.objects.filter(
-                # task_id=task.id,
                 task_name=task.task_spec.name,
                 workflow=self,
             )
@@ -181,9 +156,7 @@ class CaseWorkflow(models.Model):
         return task_instances
 
     def _set_obsolete_tasks_to_completed(self, wf):
-        # some tasks are obsolete after wf.do_engine_steps or wf.refresh_waiting_tasks
         ready_tasks_ids = [t.id for t in wf.get_tasks(state=TaskState.READY)]
-        # cleanup: sets dj tasks to completed
         task_instances = self.tasks.all().exclude(
             task_id__in=ready_tasks_ids,
         )
@@ -206,11 +179,8 @@ class CaseWorkflow(models.Model):
         return wf
 
     def _update_db(self, wf):
-        # TODO: Locks not implemented yet, not sure if required
-        # with transaction.atomic():
         self._save_workflow_state(wf)
         self._update_tasks(wf)
-        # transaction.on_commit(lambda: self.release_lock())
 
     def _get_or_restore_workflow_state(self):
         # gets the unserialized workflow from this workflow instance, it has to use an workflow_spec, witch in this case will be load from filesystem.
@@ -249,11 +219,6 @@ class CaseWorkflow(models.Model):
         def set_status(input):
             workflow_instance._set_case_state_type(input)
 
-        def wait_for_workflows_and_send_message(message, data={}):
-            task_wait_for_workflows_and_send_message.delay(
-                workflow_instance.id, message
-            )
-
         def script_wait(message, data={}):
             task_script_wait.delay(workflow_instance.id, message, data)
 
@@ -267,7 +232,6 @@ class CaseWorkflow(models.Model):
             environment=TaskDataEnvironment(
                 environment_globals={
                     "set_status": set_status,
-                    "wait_for_workflows_and_send_message": wait_for_workflows_and_send_message,
                     "script_wait": script_wait,
                     "start_subworkflow": start_subworkflow,
                     "parse_duration": parse_duration_string,
