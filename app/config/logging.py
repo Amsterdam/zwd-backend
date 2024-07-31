@@ -9,6 +9,7 @@ from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry import trace
 
 
+
 def create_logging_config():
     return {
         'version': 1,
@@ -19,10 +20,6 @@ def create_logging_config():
             },
             "azure": {
                 "level": settings.LOGGING_LEVEL,
-
-                # Use and extend the following logging handler to make sure all datatypes are correctly logged
-                # Make sure to also enable warnings by setting a different logging level in this logger: opentelemetry.attributes
-                # "class": "daalder.logging.CustomOpenTelemetryHandler",
                 "class": "opentelemetry.sdk._logs.LoggingHandler",
             },
         },
@@ -61,7 +58,7 @@ def setup_azure_monitor():
             "urllib": {"enabled": True},
             "urllib3": {"enabled": True},
         },
-        resource=Resource.create({SERVICE_NAME: "Daalder"}),
+        resource=Resource.create({SERVICE_NAME: "ZWD-Backend"}),
         export_timeout_millis=5000
     )
 
