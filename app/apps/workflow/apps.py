@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class CasesConfig(AppConfig):
+class WorkflowConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.cases'
+    name = 'apps.workflow'
     def ready(self):
-        import apps.cases.signals  # noqa
+        import apps.workflow.signals  # noqa

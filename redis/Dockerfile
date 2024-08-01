@@ -1,5 +1,7 @@
 FROM redis:6.2.14-alpine3.18
 
+# Setup Certificates for ADP/Motiv
+# Add the certificate to the Redis folder before deployment.
 RUN apk update && \
     apk add --no-cache ca-certificates && \
     update-ca-certificates --fresh
