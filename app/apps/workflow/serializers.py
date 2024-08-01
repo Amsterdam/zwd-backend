@@ -1,11 +1,28 @@
 import re
 from apps.cases.models import Case
-from .models import CaseWorkflow, GenericCompletedTask
+from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 from rest_framework import serializers
 from rest_framework.fields import empty
 
+class CaseUserTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CaseUserTask
+        fields = (
+            "id",
+            "task_id",
+            "task_name",
+            "name",
+            "form",
+            "roles",
+            "due_date",
+            "owner",
+            "created",
+            "updated",
+            "completed"
+        )
 
 class CaseWorkflowSerializer(serializers.ModelSerializer):
+    tasks = serializers.SerializerMethodField()
     class Meta:
         model = CaseWorkflow
         fields = (
@@ -16,8 +33,19 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             "workflow_theme_name",
             "workflow_message_name",
             "data",
+            "tasks"
         )
 
+    def get_tasks(self, obj):
+        return CaseUserTaskSerializer(
+            CaseUserTask.objects.filter(
+                workflow=obj,
+                completed=False,
+            ).order_by("id"),
+            many=True,
+            context=self.context,
+        ).data
+    
 
 class GenericCompletedTaskSerializer(serializers.ModelSerializer):
     class Meta:
