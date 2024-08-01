@@ -10,7 +10,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r"cases", CaseViewSet, basename="cases")
 router.register(
-    r"genericcompletedtask",
+    r"generic-tasks",
     GenericCompletedTaskViewSet,
     basename="genericcompletedtask",
 )
