@@ -72,7 +72,7 @@ CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS").split(",")
 
 SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/v[0-9]/",
-    "TITLE": "Zaken Backend Gateway API",
+    "TITLE": "ZWD Backend Gateway API",
     "VERSION": "v1",
 }
 

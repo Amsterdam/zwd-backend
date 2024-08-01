@@ -11,16 +11,8 @@ from .serializers import (
     GenericCompletedTaskSerializer,
 )
 
-
-class CaseWorkflowViewset(viewsets.ModelViewSet):
-    queryset = CaseWorkflow.objects.all()
-    serializer_class = CaseWorkflowSerializer
-
-
 class GenericCompletedTaskViewSet(
-    viewsets.ModelViewSet,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin
+    viewsets.GenericViewSet
 ):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()

@@ -7,8 +7,8 @@ from .models import Case
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 
-class CaseViewSet(viewsets.ModelViewSet, mixins.CreateModelMixin,
-                  mixins.RetrieveModelMixin):
+class CaseViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin, mixins.ListModelMixin):
     queryset = Case.objects.all()
     serializer_class = CaseSerializer
     def get_serializer_class(self):
