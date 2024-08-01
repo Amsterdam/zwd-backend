@@ -26,6 +26,10 @@ docker-compose -f docker-compose.local.yml up
 
 Visit the Admin at http://localhost:8081/admin/
 
+## Swagger
+
+http://localhost:8081/api/schema/swagger/
+
 ## Django DB migrations
 
 For changes to the model you have to migrate the DB.
