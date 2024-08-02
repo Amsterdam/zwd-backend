@@ -24,3 +24,14 @@ jobs:
       run: docker-compose -f docker-compose.local.yml  up -d
     - name: Run Tests
       run: docker-compose exec -T zwd-backend python manage.py test /app/apps
+      ###################################################
+      # On failure
+      ###################################################
+
+      - if: ${{ failure() }}
+        name: "ON FAILURE: Which containers were running while failing?"
+        run: docker ps -a
+
+      - if: ${{ failure() }}
+        name: "ON FAILURE: Backend logs"
+        run: docker logs zwd-backend
