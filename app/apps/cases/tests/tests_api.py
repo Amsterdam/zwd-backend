@@ -1,9 +1,10 @@
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
+from django.contrib.auth import get_user_model
 from django.core import management
 from django.urls import reverse
-from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class CaseApiTest(APITestCase):
     def setUp(self):
@@ -15,7 +16,6 @@ class CaseApiTest(APITestCase):
         url = reverse("cases-list")
         client = get_unauthenticated_client()
         get_authenticated_client()
-        print(url)
         response = client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -34,26 +34,24 @@ class CaseApiTest(APITestCase):
     def test_retrieve_case(self):
         self._create_case()
         case_id = 1
-        url = reverse('cases-detail', args=[case_id])
-        print(url)
+        url = reverse("cases-detail", args=[case_id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-
     def _create_case(self):
-        url = reverse('cases-list')
-        data = {
-            'description': 'Test case description'
-        }
+        url = reverse("cases-list")
+        data = {"description": "Test case description"}
 
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
 
 def get_unauthenticated_client():
     """
     Returns an unauthenticated APIClient, for unit testing API requests
     """
     return APIClient()
+
 
 def get_authenticated_client():
     """
@@ -64,6 +62,8 @@ def get_authenticated_client():
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION="Bearer {}".format(access_token))
     return client
+
+
 def get_test_user():
     """
     Creates and returns a test user

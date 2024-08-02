@@ -14,8 +14,8 @@ jobs:
       uses: actions/setup-python@v3.1.2
       with:
         python-version: 3.9.16
-    # - name: Linting
-    #   run: bash bin/cleanup_pre_commit.sh
+    - name: Linting
+      run: bash bin/cleanup_pre_commit.sh
     - name: Build Docker image
       run: docker-compose build -f docker-compose.local.yml
     - name: Create Docker network

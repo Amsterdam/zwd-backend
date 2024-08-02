@@ -50,7 +50,6 @@ INSTALLED_APPS = [
 ]
 
 
-
 LOCAL_DEVELOPMENT_AUTHENTICATION = (
     os.getenv("LOCAL_DEVELOPMENT_AUTHENTICATION", "False") == "True"
 )
@@ -73,7 +72,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", ("http://default")).split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", ("http://default")).split(
+    ","
+)
 
 SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/v[0-9]/",
@@ -247,4 +248,3 @@ WORKFLOW_SPEC_CONFIG = {
         },
     },
 }
-

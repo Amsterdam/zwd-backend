@@ -1,8 +1,11 @@
 import re
+
 from apps.cases.models import Case
-from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 from rest_framework import serializers
 from rest_framework.fields import empty
+
+from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
+
 
 class CaseUserTaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,11 +21,13 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
             "owner",
             "created",
             "updated",
-            "completed"
+            "completed",
         )
+
 
 class CaseWorkflowSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField()
+
     class Meta:
         model = CaseWorkflow
         fields = (
@@ -33,7 +38,7 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             "workflow_theme_name",
             "workflow_message_name",
             "data",
-            "tasks"
+            "tasks",
         )
 
     def get_tasks(self, obj):
@@ -45,7 +50,7 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             many=True,
             context=self.context,
         ).data
-    
+
 
 class GenericCompletedTaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -108,6 +113,7 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
 
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
     process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
+
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)
@@ -124,6 +130,7 @@ class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
 
 class WorkflowSpecConfigSerializer(serializers.Serializer):
     default = WorkflowSpecConfigThemeTypeSerializer()
+
     def run_validation(self, data=empty):
         if data is not empty:
             unknown = set(data) - set(self.fields)
@@ -132,4 +139,3 @@ class WorkflowSpecConfigSerializer(serializers.Serializer):
                 raise ValueError
 
         return super().run_validation(data)
-
