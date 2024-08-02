@@ -32,4 +32,4 @@ jobs:
 
     - if: ${{ failure() }}
       name: "ON FAILURE: Backend logs"
-      run: docker logs zwd-backend
+      run: docker logs zwd-backend-zwd-backend-1
