@@ -1,0 +1,26 @@
+name: 'Install, lint, test & build'
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3.1.2
+      with:
+        python-version: 3.9.16
+    # - name: Linting
+    #   run: bash bin/cleanup_pre_commit.sh
+    - name: Build Docker image
+      run: docker-compose build -f docker-compose.local.yml
+    - name: Create Docker network
+      run: docker network create zwd_network
+    - name: Start images
+      run: docker-compose -f docker-compose.local.yml  up -d
+    - name: Run Tests
+      run: docker-compose exec -T zwd-backend python manage.py test

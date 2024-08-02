@@ -90,7 +90,7 @@ class CaseWorkflow(models.Model):
         workflow = self._get_or_restore_workflow_state()
         if not workflow:
             return
-
+        
         task = workflow.get_task_from_id(task_id)
         if task and isinstance(task.task_spec, UserTask):
             task.set_data(**data)

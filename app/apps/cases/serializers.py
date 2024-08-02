@@ -15,4 +15,4 @@ class CaseSerializer(serializers.ModelSerializer):
 class CaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
-        fields = ("description",)
+        fields = ("description", "id")

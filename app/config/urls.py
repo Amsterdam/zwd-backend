@@ -9,12 +9,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r"cases", CaseViewSet, basename="cases")
-router.register(
-    r"generic-tasks",
-    GenericCompletedTaskViewSet,
-    basename="genericcompletedtask",
-)
-
+router.register(r"generic-tasks", GenericCompletedTaskViewSet, basename="generictasks")
 
 def ok(request):
     return HttpResponse("OK", status=200)

@@ -21,3 +21,5 @@ mozilla-django-oidc==4.0.1
 spiffworkflow==3.0.0
 debugpy==1.8.2 
 azure-monitor-opentelemetry==1.6.1
+model-bakery==1.18.2
+djangorestframework-simplejwt==5.3.1

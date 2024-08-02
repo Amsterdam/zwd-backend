@@ -33,7 +33,6 @@ class GenericCompletedTaskViewSet(
         serializer = GenericCompletedTaskCreateSerializer(
             data=request.data, context=context
         )
-
         if serializer.is_valid():
             data = serializer.validated_data
 
@@ -66,5 +65,5 @@ class GenericCompletedTaskViewSet(
                 )
             except Exception as e:
                 raise e
-
+        print(serializer.errors)
         return HttpResponseBadRequest("Invalid request")
