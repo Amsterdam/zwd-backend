@@ -5,7 +5,19 @@ from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 
 @admin.register(CaseWorkflow)
 class CaseWorkflowAdmin(admin.ModelAdmin):
-    list_display = ("id", "case")
+    list_display = (
+        "id",
+        "case",
+        "main_workflow",
+        "workflow_type",
+        "workflow_version",
+        "case_state_type",
+        "completed",
+    )
+
+    search_fields = ("case__id",)
+
+    list_filter = ("main_workflow", "completed")
 
 
 @admin.register(CaseUserTask)
