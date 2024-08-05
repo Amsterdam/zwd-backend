@@ -50,3 +50,12 @@ You can add pre-commit hooks for checking and cleaning up your changes:
 ```bash
 bash bin/install_pre_commit.sh
 ```
+
+
+## Running tests
+
+Containers should be running to run tests via docker.
+
+```bash
+docker compose exec -T zwd-backend python manage.py test /app/apps
+```

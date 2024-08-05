@@ -137,7 +137,7 @@ class WorkflowSpecConfigSerializer(serializers.Serializer):
         if data is not empty:
             unknown = set(data) - set(self.fields)
             if unknown:
-                # errors = ["Unknown field: {}".format(f) for f in unknown]
+                errors = ["Unknown field: {}".format(f) for f in unknown]
                 raise ValueError
 
         return super().run_validation(data)
