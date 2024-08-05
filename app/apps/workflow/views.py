@@ -1,19 +1,17 @@
 from apps.workflow.utils import map_variables_on_task_spec_form
 from django.http import HttpResponse, HttpResponseBadRequest
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
 from rest_framework.decorators import action
 
-from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
+from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
-    CaseWorkflowSerializer,
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
 )
 
-class GenericCompletedTaskViewSet(
-    viewsets.GenericViewSet
-):
+
+class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()
 
@@ -33,7 +31,6 @@ class GenericCompletedTaskViewSet(
         serializer = GenericCompletedTaskCreateSerializer(
             data=request.data, context=context
         )
-
         if serializer.is_valid():
             data = serializer.validated_data
 
@@ -66,5 +63,4 @@ class GenericCompletedTaskViewSet(
                 )
             except Exception as e:
                 raise e
-
         return HttpResponseBadRequest("Invalid request")

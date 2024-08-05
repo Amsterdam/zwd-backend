@@ -14,14 +14,13 @@ from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser
 from SpiffWorkflow.camunda.serializer.config import CAMUNDA_CONFIG
 from SpiffWorkflow.camunda.specs.user_task import UserTask
 
-from .utils import get_initial_data_from_config, parse_task_spec_form
-
 from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
     task_script_wait,
-    task_start_subworkflow
+    task_start_subworkflow,
 )
+from .utils import get_initial_data_from_config, parse_task_spec_form
 
 
 class CaseWorkflow(models.Model):
@@ -68,7 +67,7 @@ class CaseWorkflow(models.Model):
     started = models.BooleanField(
         default=False,
     )
-    
+
     completed = models.BooleanField(
         default=False,
     )

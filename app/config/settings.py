@@ -49,6 +49,11 @@ INSTALLED_APPS = [
     "django_celery_results",
 ]
 
+
+LOCAL_DEVELOPMENT_AUTHENTICATION = (
+    os.getenv("LOCAL_DEVELOPMENT_AUTHENTICATION", "False") == "True"
+)
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "apps.users.auth.OIDCAuthenticationBackend",
@@ -62,13 +67,14 @@ SPAGHETTI_SAUCE = {
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "mozilla_django_oidc.contrib.drf.OIDCAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "apps.users.auth.AuthenticationClass",
     ],
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS").split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", ("http://default")).split(
+    ","
+)
 
 SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/v[0-9]/",
@@ -242,4 +248,3 @@ WORKFLOW_SPEC_CONFIG = {
         },
     },
 }
-

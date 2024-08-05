@@ -1,9 +1,8 @@
-
-
-
 import datetime
 import json
+
 from django.conf import settings
+
 
 def map_variables_on_task_spec_form(variables, task_spec_form):
     # transforms form result data and adds labels for the frontend
@@ -13,18 +12,27 @@ def map_variables_on_task_spec_form(variables, task_spec_form):
             k,
             {
                 "label": form.get(k, {}).get("label", v.get("value")),
-                "value": v.get("value")
-                if not form.get(k, {}).get("options")
-                else [
-                    dict((o.get("value"), o) for o in form.get(k, {}).get("options"))
-                    .get(vv, {})
-                    .get("label", vv)
-                    for vv in v.get("value")
-                ]
-                if isinstance(v.get("value"), list)
-                else dict((o.get("value"), o) for o in form.get(k, {}).get("options"))
-                .get(v.get("value"), {})
-                .get("label", v.get("value")),
+                "value": (
+                    v.get("value")
+                    if not form.get(k, {}).get("options")
+                    else (
+                        [
+                            dict(
+                                (o.get("value"), o)
+                                for o in form.get(k, {}).get("options")
+                            )
+                            .get(vv, {})
+                            .get("label", vv)
+                            for vv in v.get("value")
+                        ]
+                        if isinstance(v.get("value"), list)
+                        else dict(
+                            (o.get("value"), o) for o in form.get(k, {}).get("options")
+                        )
+                        .get(v.get("value"), {})
+                        .get("label", v.get("value"))
+                    )
+                ),
             },
         )
         for k, v in variables.items()
@@ -59,6 +67,7 @@ def get_initial_data_from_config(
         initial_data = (
             version.get("messages", {}).get(message_name, {}).get("initial_data", {})
         )
+
     def pre_serialize_timedelta(value):
         if isinstance(value, datetime.timedelta):
             duration = settings.DEFAULT_WORKFLOW_TIMER_DURATIONS.get(
@@ -69,7 +78,6 @@ def get_initial_data_from_config(
             return json.loads(json.dumps(value, default=str))
         return value
 
-
     initial_data = dict(
         (k, pre_serialize_timedelta(v)) for k, v in initial_data.items()
     )
@@ -78,6 +86,7 @@ def get_initial_data_from_config(
 
 def validate_workflow_spec(workflow_spec_config):
     from .serializers import WorkflowSpecConfigSerializer
+
     serializer = WorkflowSpecConfigSerializer(data=workflow_spec_config)
     if serializer.is_valid():
         pass
@@ -109,9 +118,11 @@ def parse_task_spec_form(form):
                 for o in f.__dict__.get("options", [])
             ],
             "name": f.id,
-            "type": "multiselect"
-            if bool([v.name for v in f.validation if v.name == "multiple"])
-            else trans_types.get(f.type, "text"),
+            "type": (
+                "multiselect"
+                if bool([v.name for v in f.validation if v.name == "multiple"])
+                else trans_types.get(f.type, "text")
+            ),
             "required": not bool(
                 [v.name for v in f.validation if v.name == "optional"]
             ),

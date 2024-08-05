@@ -58,6 +58,6 @@ services:
 networks:
   zwd_network:
     external: true
- 
+
 volumes:
   postgresql-data:

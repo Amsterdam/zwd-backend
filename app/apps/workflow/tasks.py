@@ -1,10 +1,8 @@
 import copy
-from time import sleep
 
 import celery
 from apps.cases.models import Case
 from celery.utils.log import get_task_logger
-from django.core.cache import cache
 from django.db import transaction
 
 logger = get_task_logger(__name__)
@@ -12,12 +10,11 @@ logger = get_task_logger(__name__)
 DEFAULT_RETRY_DELAY = 2
 MAX_RETRIES = 6
 
+
 class BaseTaskWithRetry(celery.Task):
     autoretry_for = (Exception,)
     max_retries = MAX_RETRIES
     default_retry_delay = DEFAULT_RETRY_DELAY
-
-
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
@@ -74,8 +71,10 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_start_worflow(self, worklow_id):
     from apps.workflow.models import CaseWorkflow
+
     workflow_instance = CaseWorkflow.objects.get(id=worklow_id)
     workflow_instance.start()
+
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_script_wait(self, workflow_id, message, extra_data={}):
@@ -94,10 +93,10 @@ def task_script_wait(self, workflow_id, message, extra_data={}):
     return f"task_script_wait: message '{message}' for workflow with id '{workflow_id}', completed"
 
 
-
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_complete_user_task_and_create_new_user_tasks(self, task_id, data={}):
     from apps.workflow.models import CaseUserTask
+
     task = CaseUserTask.objects.get(id=task_id, completed=False)
     task.workflow.complete_user_task_and_create_new_user_tasks(task.task_id, data)
     return f"task_complete_user_task_and_create_new_user_tasks: complete task with name '{task.task_name}' for workflow with id '{task.workflow.id}', is completed"

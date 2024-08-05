@@ -1,5 +1,5 @@
 from apps.cases.views import CaseViewSet
-from apps.workflow.views import  GenericCompletedTaskViewSet
+from apps.workflow.views import GenericCompletedTaskViewSet
 from django.conf.urls import include
 from django.contrib import admin
 from django.http import HttpResponse
@@ -9,11 +9,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r"cases", CaseViewSet, basename="cases")
-router.register(
-    r"generic-tasks",
-    GenericCompletedTaskViewSet,
-    basename="genericcompletedtask",
-)
+router.register(r"generic-tasks", GenericCompletedTaskViewSet, basename="generictasks")
 
 
 def ok(request):
