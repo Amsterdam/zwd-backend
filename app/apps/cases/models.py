@@ -2,6 +2,7 @@ from django.db import models
 
 from .tasks import task_create_case
 
+
 class Case(models.Model):
     description = models.TextField(null=True)
 
