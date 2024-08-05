@@ -42,3 +42,20 @@ python manage.py migrate
 
 name_of_apps is the model you would like to change like: cases, events, workflow or schedules.
 You can use the `---empty` flag to create a custom migration.
+
+## Adding pre-commit hooks
+
+You can add pre-commit hooks for checking and cleaning up your changes:
+
+```bash
+bash bin/install_pre_commit.sh
+```
+
+
+## Running tests
+
+Containers should be running to run tests via docker.
+
+```bash
+docker compose exec -T zwd-backend python manage.py test /app/apps
+```

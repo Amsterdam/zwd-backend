@@ -1,6 +1,7 @@
 import re
 
 from apps.cases.models import Case
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import empty
 
@@ -41,6 +42,7 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             "tasks",
         )
 
+    @extend_schema_field(CaseUserTaskSerializer(many=True))
     def get_tasks(self, obj):
         return CaseUserTaskSerializer(
             CaseUserTask.objects.filter(

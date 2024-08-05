@@ -72,6 +72,9 @@ class CaseWorkflow(models.Model):
         default=False,
     )
 
+    def __str__(self):
+        return f"W: {self.id}, C: {self.case.id}"
+
     def start(self):
         workflow = self._get_or_restore_workflow_state()
         initial_data = get_initial_data_from_config(
