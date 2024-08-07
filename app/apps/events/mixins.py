@@ -26,4 +26,7 @@ class CaseEventsMixin:
 
         except Exception as e:
             logger.error(f"Could not retrieve events for pk {pk}: {e}")
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Could not retrieve events"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
