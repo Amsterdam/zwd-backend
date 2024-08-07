@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "apps.cases",
     "apps.workflow",
+    "apps.events",
     "django_spaghetti",
     "drf_spectacular",
     "django_celery_results",
