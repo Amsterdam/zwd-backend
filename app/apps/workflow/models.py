@@ -1,6 +1,7 @@
 import datetime
 import os
 
+from apps.events.models import CaseEvent, TaskModelEventEmitter
 from apps.cases.models import Case
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -308,7 +309,8 @@ class CaseUserTask(models.Model):
         self.save()
 
 
-class GenericCompletedTask(models.Model):
+class GenericCompletedTask(TaskModelEventEmitter):
+    EVENT_TYPE = CaseEvent.TYPE_GENERIC_TASK
     case_user_task_id = models.CharField(max_length=255, default="-1")
 
     case = models.ForeignKey(

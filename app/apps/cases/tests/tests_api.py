@@ -1,9 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.core import management
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APIClient, APITestCase
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.test import APITestCase
+
+from utils.test_utils import get_authenticated_client, get_unauthenticated_client
 
 
 class CaseApiTest(APITestCase):
@@ -44,28 +44,3 @@ class CaseApiTest(APITestCase):
 
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-
-def get_unauthenticated_client():
-    """
-    Returns an unauthenticated APIClient, for unit testing API requests
-    """
-    return APIClient()
-
-
-def get_authenticated_client():
-    """
-    Returns an authenticated APIClient, for unit testing API requests
-    """
-    user = get_test_user()
-    access_token = RefreshToken.for_user(user).access_token
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION="Bearer {}".format(access_token))
-    return client
-
-
-def get_test_user():
-    """
-    Creates and returns a test user
-    """
-    return get_user_model().objects.get_or_create(email="admin@admin.com")[0]

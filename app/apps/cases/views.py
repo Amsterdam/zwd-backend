@@ -1,3 +1,4 @@
+from apps.events.mixins import CaseEventsMixin
 from apps.workflow.models import CaseWorkflow
 from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import mixins, viewsets
@@ -9,6 +10,7 @@ from .serializers import CaseCreateSerializer, CaseSerializer
 
 
 class CaseViewSet(
+    CaseEventsMixin,
     viewsets.GenericViewSet,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
