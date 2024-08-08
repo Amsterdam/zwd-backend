@@ -23,7 +23,7 @@ jobs:
     - name: Create Docker network
       run: docker network create zwd_network
     - name: Start images
-      run: docker compose -f docker-compose.local.yml  up -d
+      run: docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
     - name: Run Tests
       run: docker compose exec -T zwd-backend python manage.py test /app/apps
 

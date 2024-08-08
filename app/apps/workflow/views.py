@@ -3,12 +3,23 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework import mixins, viewsets
 
 from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
+    CaseUserTaskSerializer,
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
 )
+
+
+class CaseUserTaskViewSet(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    serializer_class = CaseUserTaskSerializer
+    queryset = CaseUserTask.objects.filter(completed=False)
 
 
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
