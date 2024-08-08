@@ -1,0 +1,6 @@
+version: '3.8'
+
+services:
+  zwd-backend:
+    environment:
+      - LOCAL_DEVELOPMENT_AUTHENTICATION=True
