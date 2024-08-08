@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
 
 
-class CaseApiTest(APITestCase):
+class CaseUserTaskApiTests(APITestCase):
     def setUp(self):
         management.call_command("flush", verbosity=0, interactive=False)
         super().setUp()
