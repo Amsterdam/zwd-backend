@@ -9,6 +9,8 @@ from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 
 
 class CaseUserTaskSerializer(serializers.ModelSerializer):
+    case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
+
     class Meta:
         model = CaseUserTask
         fields = (
@@ -23,6 +25,7 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
             "created",
             "updated",
             "completed",
+            "case",
         )
 
 
