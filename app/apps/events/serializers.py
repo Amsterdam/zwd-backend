@@ -3,8 +3,8 @@ from rest_framework import serializers
 
 
 class CaseEventSerializer(serializers.ModelSerializer):
-    event_values = serializers.JSONField()
-    event_variables = serializers.JSONField()
+    event_values = serializers.DictField()
+    event_variables = serializers.DictField()
 
     class Meta:
         model = CaseEvent
