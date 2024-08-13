@@ -1,3 +1,4 @@
+from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
 from apps.workflow.models import CaseWorkflow
 from apps.workflow.serializers import CaseWorkflowSerializer
@@ -22,6 +23,8 @@ class CaseViewSet(
     def get_serializer_class(self):
         if self.action == "create":
             return CaseCreateSerializer
+        elif self.action == "events":
+            return CaseEventSerializer
         return CaseSerializer
 
     @action(detail=True, methods=["get"], url_path="workflows")
