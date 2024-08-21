@@ -1,9 +1,16 @@
-from apps.workflow.utils import map_variables_on_task_spec_form
+from apps.workflow.utils import (
+    get_bpmn_file,
+    get_bpmn_files,
+    map_variables_on_task_spec_form,
+)
 from django.http import HttpResponse, HttpResponseBadRequest
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework import mixins, viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import action, permission_classes
+from rest_framework.permissions import AllowAny
 
 from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
@@ -25,6 +32,11 @@ class CaseUserTaskViewSet(
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()
+
+    def get_permissions(self):
+        if self.action == "get_bpmn_file":
+            return [AllowAny()]
+        return super().get_permissions()
 
     @extend_schema(
         description="Complete GenericCompletedTask",
@@ -75,3 +87,20 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
             except Exception as e:
                 raise e
         return HttpResponseBadRequest("Invalid request")
+
+    @action(detail=False, url_path="workflow_files", methods=["get"])
+    @permission_classes([AllowAny])
+    def get_workflow_files(self, request):
+        return Response(get_bpmn_files())
+
+    @action(
+        detail=False,
+        url_path="workflow_files/(?P<workflow_type>[^/]+)/(?P<version>[^/]+)/(?P<file_name>[^/]+)",
+        methods=["get"],
+    )
+    @permission_classes([AllowAny])
+    def get_bpmn_file(self, request, workflow_type, version, file_name):
+        print(f"Request received for {workflow_type}/{version}/{file_name}")
+        content = get_bpmn_file(workflow_type, version, file_name)
+        # Return the file content as an XML response
+        return HttpResponse(content, content_type="application/xml")

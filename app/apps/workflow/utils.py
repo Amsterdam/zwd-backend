@@ -1,7 +1,53 @@
 import datetime
+import glob
 import json
+import os
 
 from django.conf import settings
+
+
+def get_bpmn_files():
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bpmn_files")
+    files = glob.glob(os.path.join(path, "**", "*.bpmn"), recursive=True)
+    workflows = []
+
+    if files:
+        for file in files:
+            # Split the file path to extract workflow type, version, and file name
+            parts = file.split(os.sep)
+            workflow_type = parts[-3]  # The folder name before the version folder
+            version = parts[-2]  # The version folder name
+            file_name = parts[-1]  # The actual file name
+
+            # Append the JSON object to the list
+            workflows.append(
+                {
+                    "workflow_type": workflow_type,
+                    "version": version,
+                    "file_name": file_name,
+                }
+            )
+
+    return workflows
+
+
+def get_bpmn_file(workflow_type, version, file_name):
+    # Construct the file path based on the provided parameters
+    path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "bpmn_files",
+        "default",
+        workflow_type,
+        version,
+        file_name,
+    )
+
+    # Check if the file exists
+    if os.path.exists(path) and file_name.endswith(".bpmn"):
+        # Read the file content
+        with open(path, "r", encoding="utf-8") as file:
+            content = file.read()
+            return content
 
 
 def map_variables_on_task_spec_form(variables, task_spec_form):
