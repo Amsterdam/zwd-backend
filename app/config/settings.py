@@ -179,7 +179,6 @@ BROKER_URL = get_redis_url()
 CELERY_BROKER_URL = get_redis_url()
 BROKER_CONNECTION_MAX_RETRIES = None
 BROKER_CONNECTION_TIMEOUT = 120
-CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
@@ -245,6 +244,7 @@ WORKFLOW_SPEC_CONFIG = {
             },
             "versions": {
                 "1.0.0": {},
+                "1.1.0": {},
             },
         },
     },

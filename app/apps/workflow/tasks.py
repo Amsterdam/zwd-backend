@@ -1,6 +1,7 @@
 import copy
 
 import celery
+from apps.workflow.utils import get_latest_version_from_config
 from apps.cases.models import Case
 from celery.utils.log import get_task_logger
 from django.db import transaction
@@ -63,6 +64,9 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
             main_workflow=True,
             workflow_message_name="main_process",
             data=data,
+            workflow_version=get_latest_version_from_config(
+                "default", "process_vve_ok"
+            ),
         )
 
     return f"task_start_main_worflow_for_case: workflow id '{workflow_instance.id}', for case with id '{case_id}', created"

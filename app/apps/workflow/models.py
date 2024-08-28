@@ -188,7 +188,9 @@ class CaseWorkflow(models.Model):
     def _get_or_restore_workflow_state(self):
         # gets the unserialized workflow from this workflow instance, it has to use an workflow_spec, witch in this case will be load from filesystem.
         parser = CamundaParser()
-        path = self._get_workflow_path(self.workflow_type)
+        path = self._get_workflow_path(
+            self.workflow_type, workflow_version=self.workflow_version
+        )
         for f in self._get_workflow_spec_files(path):
             parser.add_bpmn_file(f)
         workflow_spec = parser.get_spec(self.workflow_type)
