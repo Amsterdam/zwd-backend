@@ -16,6 +16,7 @@ def get_bpmn_models():
     # Get all subdirectories in the specified path
     try:
         dirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+        dirs.sort()
         return dirs
     except Exception as e:
         # Handle exceptions (e.g., permission issues)
