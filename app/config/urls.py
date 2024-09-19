@@ -1,5 +1,9 @@
 from apps.cases.views import CaseViewSet
-from apps.workflow.views import CaseUserTaskViewSet, GenericCompletedTaskViewSet
+from apps.workflow.views import (
+    CaseUserTaskViewSet,
+    GenericCompletedTaskViewSet,
+    BpmnViewSet,
+)
 from django.conf.urls import include
 from django.contrib import admin
 from django.http import HttpResponse
@@ -11,6 +15,7 @@ router = DefaultRouter()
 router.register(r"cases", CaseViewSet, basename="cases")
 router.register(r"generic-tasks", GenericCompletedTaskViewSet, basename="generictasks")
 router.register(r"tasks", CaseUserTaskViewSet, basename="tasks")
+router.register(r"bpmn-models", BpmnViewSet, basename="bpmn-models")
 
 
 def ok(request):

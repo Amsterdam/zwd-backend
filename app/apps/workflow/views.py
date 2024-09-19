@@ -1,19 +1,19 @@
 from apps.workflow.utils import (
+    get_bpmn_models,
     get_bpmn_file,
-    get_bpmn_files,
+    get_bpmn_model_versions_and_files,
     map_variables_on_task_spec_form,
 )
 from django.http import HttpResponse, HttpResponseBadRequest
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import action, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
 
 from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
+    BpmnModelListSerializer,
+    BpmnModelSerializer,
     CaseUserTaskSerializer,
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
@@ -32,11 +32,6 @@ class CaseUserTaskViewSet(
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()
-
-    def get_permissions(self):
-        if self.action == "get_bpmn_file":
-            return [AllowAny()]
-        return super().get_permissions()
 
     @extend_schema(
         description="Complete GenericCompletedTask",
@@ -88,19 +83,43 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
                 raise e
         return HttpResponseBadRequest("Invalid request")
 
-    @action(detail=False, url_path="workflow_files", methods=["get"])
-    @permission_classes([AllowAny])
-    def get_workflow_files(self, request):
-        return Response(get_bpmn_files())
 
+class BpmnViewSet(viewsets.GenericViewSet):
+    @extend_schema(
+        description="Get all BPMN models",
+        responses={200: BpmnModelListSerializer},  # Array of strings
+    )
+    def list(self, request):
+        try:
+            models = get_bpmn_models()  # Returns a list of model names
+            return Response(models, status=200)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=500)
+
+    @extend_schema(
+        description="Get versions and filenames for a specific model",
+        responses={200: BpmnModelSerializer(many=True)},
+    )
+    @action(detail=False, url_path="(?P<model_name>[^/]+)", methods=["get"])
+    def get_model_versions(self, request, model_name):
+        try:
+            versions = get_bpmn_model_versions_and_files(model_name)
+            if isinstance(versions, dict) and "error" in versions:
+                return Response(versions, status=404)
+            return Response(versions, status=200)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=500)
+
+    @extend_schema(
+        description="Get a specific BPMN workflow file",
+        responses={200: None},
+    )
     @action(
         detail=False,
-        url_path="workflow_files/(?P<workflow_type>[^/]+)/(?P<version>[^/]+)/(?P<file_name>[^/]+)",
+        url_path="(?P<model_name>[^/]+)/file/(?P<version>[^/]+)",
         methods=["get"],
     )
-    @permission_classes([AllowAny])
-    def get_bpmn_file(self, request, workflow_type, version, file_name):
-        print(f"Request received for {workflow_type}/{version}/{file_name}")
-        content = get_bpmn_file(workflow_type, version, file_name)
+    def get_bpmn_file(self, request, model_name, version):
+        content = get_bpmn_file(model_name, version)
         # Return the file content as an XML response
         return HttpResponse(content, content_type="application/xml")

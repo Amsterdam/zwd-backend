@@ -144,3 +144,13 @@ class WorkflowSpecConfigSerializer(serializers.Serializer):
                 raise ValueError
 
         return super().run_validation(data)
+
+
+class BpmnModelListSerializer(serializers.ListSerializer):
+    child = serializers.CharField(max_length=100)
+
+
+class BpmnModelSerializer(serializers.Serializer):
+    version = serializers.CharField(max_length=100)
+    file_name = serializers.CharField(max_length=100)
+    model = serializers.CharField(max_length=100)
