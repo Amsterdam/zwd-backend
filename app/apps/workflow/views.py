@@ -1,3 +1,4 @@
+import logging
 from apps.workflow.utils import (
     get_bpmn_models,
     get_bpmn_file,
@@ -18,6 +19,8 @@ from .serializers import (
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class CaseUserTaskViewSet(
@@ -86,7 +89,7 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
 
 class BpmnViewSet(viewsets.GenericViewSet):
     @extend_schema(
-        description="Get all BPMN models",
+        description="Get all BPMN model names",
         responses={200: BpmnModelListSerializer},  # Array of strings
     )
     def list(self, request):
@@ -94,7 +97,11 @@ class BpmnViewSet(viewsets.GenericViewSet):
             models = get_bpmn_models()  # Returns a list of model names
             return Response(models, status=200)
         except Exception as e:
-            return Response({"detail": str(e)}, status=500)
+            logger.error(f"Failed to fetch BPMN model names: {e}")
+            return Response(
+                {"detail": "An error occurred while fetching BPMN model names"},
+                status=500,
+            )
 
     @extend_schema(
         description="Get versions and filenames for a specific model",
@@ -108,7 +115,10 @@ class BpmnViewSet(viewsets.GenericViewSet):
                 return Response(versions, status=404)
             return Response(versions, status=200)
         except Exception as e:
-            return Response({"detail": str(e)}, status=500)
+            logger.error(f"Failed to fetch BPMN models: {e}")
+            return Response(
+                {"detail": "An error occurred while fetching BPMN models."}, status=500
+            )
 
     @extend_schema(
         description="Get a specific BPMN workflow file",
