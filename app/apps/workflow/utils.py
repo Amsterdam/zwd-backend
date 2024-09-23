@@ -1,7 +1,79 @@
 import datetime
+import glob
 import json
-
+import os
 from django.conf import settings
+
+
+def get_bpmn_models():
+    path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "bpmn_files", "default"
+    )
+    # Ensure the path exists
+    if not os.path.isdir(path):
+        return []
+
+    # Get all subdirectories in the specified path
+    try:
+        dirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+        dirs.sort()
+        return dirs
+    except Exception as e:
+        # Handle exceptions (e.g., permission issues)
+        return {"error": str(e)}
+
+
+def get_bpmn_model_versions_and_files(model_name):
+    base_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "bpmn_files", "default", model_name
+    )
+
+    if not os.path.isdir(base_path):
+        return {"error": f"Model '{model_name}' not found"}, 404
+
+    versions = []
+
+    for version_dir in os.listdir(base_path):
+        version_path = os.path.join(base_path, version_dir)
+        if os.path.isdir(version_path):
+            # Assuming there's only one .bpmn file per version
+            bpmn_files = glob.glob(os.path.join(version_path, "*.bpmn"))
+            if bpmn_files:
+                version = version_dir
+                bpmn_file_name = os.path.basename(
+                    bpmn_files[0]
+                )  # Get the first .bpmn file
+                versions.append(
+                    {
+                        "version": version,
+                        "file_name": bpmn_file_name,
+                        "model": model_name,
+                    }
+                )
+
+    # Sort versions by the 'version' key. Assuming versions are semver or can be lexicographically sorted
+    versions.sort(key=lambda x: tuple(map(int, x["version"].split("."))))
+
+    return versions
+
+
+def get_bpmn_file(model_name, version):
+    # Construct the file path based on the provided parameters
+    path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "bpmn_files",
+        "default",
+        model_name,
+        version,
+        f"{model_name}.bpmn",
+    )
+
+    # Check if the file exists
+    if os.path.exists(path):
+        # Read the file content
+        with open(path, "r", encoding="utf-8") as file:
+            content = file.read()
+            return content
 
 
 def map_variables_on_task_spec_form(variables, task_spec_form):
