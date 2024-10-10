@@ -1,0 +1,42 @@
+import requests
+from django.conf import settings
+
+
+class DsoClient:
+    def __init__(self):
+        self.headers = {"Authorization": f"Bearer {self._get_access_token()}"}
+
+    def get_hoa_name_by_bag_id(self, bag_id):
+        url = f"{settings.DSO_API_URL}?brkVveIsEigendomVve=ja&votIdentificatie={bag_id}"
+        response = requests.get(url, headers=self.headers)
+        hoa = response.json()["_embedded"]["wonen_verblijfsobject"][0]
+        return hoa["brkVveStatutaireNaam"]
+
+    def get_hoa_by_name(self, hoa_name):
+        url = f"{settings.DSO_API_URL}?brkVveStatutaireNaam={hoa_name}&_pageSize=300"
+        hoa_json = self._get_paginated_response(url)
+        return hoa_json["_embedded"]["wonen_verblijfsobject"]
+
+    def _get_paginated_response(self, url):
+        response = requests.get(url, headers=self.headers)
+        response_json = response.json()
+        while "_links" in response_json and "next" in response_json["_links"]:
+            next_page = response_json["_links"]["next"]["href"]
+            paged_response = requests.get(next_page, headers=self.headers)
+            paged_json = paged_response.json()
+            response_json["_embedded"]["wonen_verblijfsobject"].extend(
+                paged_json["_embedded"]["wonen_verblijfsobject"]
+            )
+            response_json["_links"] = paged_json["_links"]
+        return response_json
+
+    def _get_access_token(self):
+        url = settings.DSO_AUTH_URL
+        payload = {
+            "client_id": settings.DSO_CLIENT_ID,
+            "grant_type": "client_credentials",
+            "client_secret": settings.DSO_CLIENT_SECRET,
+            "scope": "openid email",
+        }
+        response = requests.post(url, data=payload)
+        return response.json()["access_token"]

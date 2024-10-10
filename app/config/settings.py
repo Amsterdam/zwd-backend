@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "apps.cases",
     "apps.workflow",
     "apps.events",
+    "apps.homeownerassociation",
+    "apps.address",
     "django_spaghetti",
     "drf_spectacular",
     "django_celery_results",
@@ -249,3 +251,8 @@ WORKFLOW_SPEC_CONFIG = {
         },
     },
 }
+
+DSO_CLIENT_ID = os.getenv("DSO_CLIENT_ID", "default_client_id")
+DSO_CLIENT_SECRET = os.getenv("DSO_CLIENT_SECRET", "default_client_secret")
+DSO_AUTH_URL = os.getenv("DSO_AUTH_URL", "https://default.auth.url")
+DSO_API_URL = os.getenv("DSO_API_URL", "https://default.api.url")
