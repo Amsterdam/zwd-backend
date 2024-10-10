@@ -11,7 +11,9 @@ services:
     depends_on:
       - database
     env_file:
-      - .env
+      - path: .env
+      - path: .local.env
+        required: false
     command: bash -c "/app/deploy/docker-entrypoint.sh && exec python -m debugpy --listen 0.0.0.0:5678 ./manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./app:/app
