@@ -1,16 +1,64 @@
-from apps.homeownerassociation.models import HomeownerAssociation
-from django.core import management
 from django.test import TestCase
-from model_bakery import baker
+from unittest.mock import patch
+from apps.homeownerassociation.models import HomeownerAssociation
 
 
-class HomeownerAssociationTest(TestCase):
-    def setUp(self):
-        management.call_command("flush", verbosity=0, interactive=False)
-        super().setUp()
+class HomeownerAssociationModelTest(TestCase):
 
-    def test_can_create_hoa(self):
-        """A case can be created"""
-        self.assertEqual(HomeownerAssociation.objects.count(), 0)
-        baker.make(HomeownerAssociation)
-        self.assertEqual(HomeownerAssociation.objects.count(), 1)
+    @patch("apps.homeownerassociation.models.DsoClient")
+    def test_get_or_create_hoa_by_bag_id_existing_hoa(self, MockDsoClient):
+        # Mock the DsoClient and its methods
+        mock_client = MockDsoClient.return_value
+        mock_client.get_hoa_name_by_bag_id.return_value = "Test HOA"
+
+        # Create an existing HOA
+        existing_hoa = HomeownerAssociation.objects.create(
+            name="Test HOA", build_year=2000, number_of_appartments=10
+        )
+
+        # Call the method
+        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("some_bag_id")
+
+        # Assert the existing HOA is returned
+        self.assertEqual(result, existing_hoa)
+        mock_client.get_hoa_name_by_bag_id.assert_called_once_with("some_bag_id")
+
+    @patch("apps.homeownerassociation.models.DsoClient")
+    def test_get_or_create_hoa_by_bag_id_new_hoa(self, MockDsoClient):
+        # Mock the DsoClient and its methods
+        mock_client = MockDsoClient.return_value
+        mock_client.get_hoa_name_by_bag_id.return_value = "New HOA"
+        mock_client.get_hoa_by_name.return_value = [
+            {"pndOorspronkelijkBouwjaar": 2010},
+            {"pndOorspronkelijkBouwjaar": 2010},
+        ]
+
+        # Call the method
+        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("some_bag_id")
+
+        # Assert a new HOA is created
+        self.assertIsInstance(result, HomeownerAssociation)
+        self.assertEqual(result.name, "New HOA")
+        self.assertEqual(result.build_year, 2010)
+        self.assertEqual(result.number_of_appartments, 2)
+        mock_client.get_hoa_name_by_bag_id.assert_called_once_with("some_bag_id")
+        mock_client.get_hoa_by_name.assert_called_once_with("New HOA")
+
+    @patch("apps.homeownerassociation.models.DsoClient")
+    def test_get_or_create_hoa_by_bag_id_existing_hoa_no_new_hoa(self, MockDsoClient):
+        # Mock the DsoClient and its methods
+        mock_client = MockDsoClient.return_value
+        mock_client.get_hoa_name_by_bag_id.return_value = "Test HOA"
+
+        # Create an existing HOA
+        existing_hoa = HomeownerAssociation.objects.create(
+            name="Test HOA", build_year=2000, number_of_appartments=10
+        )
+
+        # Call the method
+        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("some_bag_id")
+
+        # Assert the existing HOA is returned
+        self.assertEqual(result, existing_hoa)
+        mock_client.get_hoa_name_by_bag_id.assert_called_once_with("some_bag_id")
+        mock_client.get_hoa_by_name.assert_not_called()

@@ -38,5 +38,5 @@ class DsoClient:
             "client_secret": settings.DSO_CLIENT_SECRET,
             "scope": "openid email",
         }
-        response = requests.post(url, data=payload)
-        return response.json()["access_token"]
+        response = requests.post(url, data=payload).json()
+        return response["access_token"]

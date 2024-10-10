@@ -26,6 +26,18 @@ docker-compose -f docker-compose.local.yml up
 
 Visit the Admin at http://localhost:8081/admin/
 
+
+If you want to make use of the DSO api the following vars need to be set in the .local.env file:
+
+```bash
+DSO_API_URL=<url>
+DSO_CLIENT_SECRET=<key>
+DSO_AUTH_URL=<key>
+DSO_API_URL=<key>
+```
+
+
+
 ## Swagger
 
 http://localhost:8081/api/schema/swagger/
@@ -55,17 +67,6 @@ bash bin/install_pre_commit.sh
 ## Running tests
 
 Containers should be running to run tests via docker.
-If you want to make use of the DSO api the following vars need to be set in the .local.env file:
-
-```bash
-DSO_API_URL=<url>
-DSO_CLIENT_SECRET=<key>
-DSO_AUTH_URL=<key>
-DSO_API_URL=<key>
-```
-
-
-
 ```bash
 docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
 docker compose exec -T zwd-backend python manage.py test /app/apps
