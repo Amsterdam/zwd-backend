@@ -6,6 +6,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeownerAssociation
         fields = [
+            "id",
             "name",
             "build_year",
             "number_of_appartments",
