@@ -4,7 +4,6 @@ from apps.homeownerassociation.models import HomeownerAssociation
 
 
 class HomeownerAssociationModelTest(TestCase):
-
     @patch("apps.homeownerassociation.models.DsoClient")
     def test_get_or_create_hoa_by_bag_id_existing_hoa(self, MockDsoClient):
         # Mock the DsoClient and its methods

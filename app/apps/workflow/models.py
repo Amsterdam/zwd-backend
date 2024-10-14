@@ -84,6 +84,7 @@ class CaseWorkflow(models.Model):
             self.workflow_version,
             self.workflow_message_name,
         )
+        initial_data.update(self.data)
         workflow = self._initial_data(workflow, initial_data)
         workflow = self._update_workflow(workflow)
         self._update_db(workflow)
