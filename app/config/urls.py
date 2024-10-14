@@ -1,3 +1,4 @@
+from apps.homeownerassociation.views import HomeOwnerAssociationView
 from apps.address.views import AddressViewset
 from apps.cases.views import CaseViewSet
 from apps.workflow.views import (
@@ -18,6 +19,9 @@ router.register(r"generic-tasks", GenericCompletedTaskViewSet, basename="generic
 router.register(r"tasks", CaseUserTaskViewSet, basename="tasks")
 router.register(r"bpmn-models", BpmnViewSet, basename="bpmn-models")
 router.register(r"address", AddressViewset, basename="address")
+router.register(
+    r"homeownerassociation", HomeOwnerAssociationView, basename="homeownerassociation"
+)
 
 
 def ok(request):

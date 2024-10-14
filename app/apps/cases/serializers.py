@@ -8,10 +8,16 @@ class CaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Case
-        fields = ("id", "description", "workflows")
+        fields = (
+            "id",
+            "description",
+            "workflows",
+            "advice_type",
+            "homeowner_association",
+        )
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
-        fields = ("id", "description")
+        fields = ("id", "description", "advice_type", "homeowner_association")
