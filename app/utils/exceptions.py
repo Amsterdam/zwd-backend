@@ -22,7 +22,7 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, NotFoundException):
         return Response(
             {"message": exc.message},
-            status=status.HTTP_404_NOT_FOUND,
+            status=status.HTTP_200_OK,
         )
 
     if response is not None:
