@@ -20,7 +20,7 @@ router.register(r"tasks", CaseUserTaskViewSet, basename="tasks")
 router.register(r"bpmn-models", BpmnViewSet, basename="bpmn-models")
 router.register(r"address", AddressViewset, basename="address")
 router.register(
-    r"homeownerassociation", HomeOwnerAssociationView, basename="homeownerassociation"
+    r"homeowner-association", HomeOwnerAssociationView, basename="homeownerassociation"
 )
 
 
