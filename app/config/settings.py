@@ -73,6 +73,7 @@ REST_FRAMEWORK = {
         "apps.users.auth.AuthenticationClass",
     ],
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "EXCEPTION_HANDLER": "utils.exceptions.custom_exception_handler",
 }
 
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", ("http://default")).split(

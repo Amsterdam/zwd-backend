@@ -12,6 +12,7 @@ class HomeownerAssociation(models.Model):
     def get_or_create_hoa_by_bag_id(bag_id):
         client = DsoClient()
         hoa_name = client.get_hoa_name_by_bag_id(bag_id)
+        # Check if the HomeownerAssociation already exists in the database
         existing_hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
         if existing_hoa:
             return existing_hoa
@@ -20,7 +21,6 @@ class HomeownerAssociation(models.Model):
         distinct_hoa_response = list(
             {hoa["votIdentificatie"]: hoa for hoa in hoa_response}.values()
         )
-        # print(distinct_hoa_response)
         model = HomeownerAssociation.objects.create(
             name=hoa_name,
             build_year=distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar"),

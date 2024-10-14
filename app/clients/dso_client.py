@@ -1,6 +1,8 @@
 import requests
 from django.conf import settings
 
+from utils.exceptions import NotFoundException
+
 
 class DsoClient:
     def __init__(self):
@@ -9,8 +11,14 @@ class DsoClient:
     def get_hoa_name_by_bag_id(self, bag_id):
         url = f"{settings.DSO_API_URL}?brkVveIsEigendomVve=ja&votIdentificatie={bag_id}"
         response = requests.get(url, headers=self.headers)
-        hoa = response.json()["_embedded"]["wonen_verblijfsobject"][0]
-        return hoa["brkVveStatutaireNaam"]
+        response_data = response.json()
+        wonen_verblijfsobject_list = response_data.get("_embedded", {}).get(
+            "wonen_verblijfsobject", []
+        )
+        if wonen_verblijfsobject_list:
+            hoa = wonen_verblijfsobject_list[0]
+            return hoa["brkVveStatutaireNaam"]
+        raise NotFoundException(f"HomeownerAssociation with bag ID {bag_id} not found.")
 
     def get_hoa_by_name(self, hoa_name):
         url = f"{settings.DSO_API_URL}?brkVveStatutaireNaam={hoa_name}&_pageSize=300"
