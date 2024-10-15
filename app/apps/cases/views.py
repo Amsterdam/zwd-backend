@@ -1,3 +1,4 @@
+from apps.homeownerassociation.models import Contact
 from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
 from apps.workflow.models import CaseWorkflow
@@ -33,3 +34,13 @@ class CaseViewSet(
         workflows = CaseWorkflow.objects.filter(case=case)
         serializer = CaseWorkflowSerializer(workflows, many=True)
         return Response(serializer.data)
+
+    def create(self, request):
+        serializer = CaseCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        # Prevents exception on case creation
+        contacts_data = validated_data.pop("contacts", [])
+        case = Case.objects.create(**validated_data)
+        Contact.process_contacts(case, contacts_data)
+        return Response(CaseSerializer(case).data, status=201)
