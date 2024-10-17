@@ -119,9 +119,7 @@
       <bpmn:outgoing>Flow_1sfcl8u</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_00876s7" sourceRef="Event_049hit6" targetRef="task_beoordelen_aanvraag" />
-    <bpmn:sequenceFlow id="Flow_1613a6p" sourceRef="task_beoordelen_aanvraag" targetRef="Gateway_1qgnlwa">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">print(dir())</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1613a6p" sourceRef="task_beoordelen_aanvraag" targetRef="Gateway_1qgnlwa" />
     <bpmn:sequenceFlow id="Flow_0xf6kx6" name="Geen vervolg, wat nu?" sourceRef="Gateway_1qgnlwa" targetRef="Event_0ztb6lf" />
     <bpmn:sequenceFlow id="Flow_170oaqz" name="form_beoordelen_aanvraag== yes" sourceRef="Gateway_1qgnlwa" targetRef="task_upload_aanvraag_formulier">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">form_beoordelen_aanvraag.get("value") == "yes"</bpmn:conditionExpression>
