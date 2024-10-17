@@ -11,6 +11,8 @@ class AdviceType(Enum):
 
     @classmethod
     def choices(cls):
+        options = [(key.value, key.name) for key in cls]
+        print(options)
         return [(key.value, key.name) for key in cls]
 
 
@@ -28,7 +30,7 @@ class Case(ModelEventEmitter):
         return f"Case: {self.id}"
 
     def __get_event_values__(self):
-        return {"description": self.description}
+        return {"description": self.description, "advice_type": self.advice_type}
 
     def __get_case__(self):
         return self
