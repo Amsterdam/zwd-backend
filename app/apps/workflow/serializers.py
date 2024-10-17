@@ -10,6 +10,14 @@ from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 
 class CaseUserTaskSerializer(serializers.ModelSerializer):
     case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
+    homeowner_association = serializers.SerializerMethodField()
+
+    def get_homeowner_association(self, obj):
+        return (
+            obj.case.homeowner_association.name
+            if obj.case.homeowner_association
+            else None
+        )
 
     class Meta:
         model = CaseUserTask
@@ -26,6 +34,7 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
             "updated",
             "completed",
             "case",
+            "homeowner_association",
         )
 
 

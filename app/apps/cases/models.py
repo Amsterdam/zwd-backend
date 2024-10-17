@@ -11,8 +11,7 @@ class AdviceType(Enum):
 
     @classmethod
     def choices(cls):
-        options = [(key.value, key.name) for key in cls]
-        print(options)
+        [(key.value, key.name) for key in cls]
         return [(key.value, key.name) for key in cls]
 
 

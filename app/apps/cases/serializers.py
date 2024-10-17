@@ -6,6 +6,10 @@ from rest_framework import serializers
 
 class CaseSerializer(serializers.ModelSerializer):
     workflows = CaseWorkflowSerializer(many=True)
+    homeowner_association = serializers.SerializerMethodField()
+
+    def get_homeowner_association(self, obj):
+        return obj.homeowner_association.name
 
     class Meta:
         model = Case
