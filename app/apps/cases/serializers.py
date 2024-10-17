@@ -9,6 +9,8 @@ class CaseSerializer(serializers.ModelSerializer):
     homeowner_association = serializers.SerializerMethodField()
 
     def get_homeowner_association(self, obj):
+        if not obj.homeowner_association:
+            return None
         return obj.homeowner_association.name
 
     class Meta:
