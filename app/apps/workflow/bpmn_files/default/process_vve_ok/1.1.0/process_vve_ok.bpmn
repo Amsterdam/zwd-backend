@@ -6,8 +6,6 @@
   <bpmn:process id="process_vve_ok" name="Cursus gevolgd?" isExecutable="true">
     <bpmn:laneSet id="LaneSet_1n6s6fa">
       <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
-        <bpmn:flowNodeRef>task_beoordelen_aanvraag</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gateway_1qgnlwa</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_upload_aanvraag_formulier</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1nvh8ra</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1ro12t1</bpmn:flowNodeRef>
@@ -33,25 +31,10 @@
         <bpmn:flowNodeRef>Gateway_0ujwu11</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_0ztb6lf</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_1tc1avn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_beoordelen_aanvraag</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1qgnlwa</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:userTask id="task_beoordelen_aanvraag" name="Beoordelen aanvraag">
-      <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="form_beoordelen_aanvraag" label="Voldoet de VVE aan de voorwaarden?" type="enum">
-            <camunda:value id="yes" name="Ja" />
-            <camunda:value id="no" name="Nee" />
-          </camunda:formField>
-        </camunda:formData>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_00876s7</bpmn:incoming>
-      <bpmn:outgoing>Flow_1613a6p</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_1qgnlwa" default="Flow_0xf6kx6">
-      <bpmn:incoming>Flow_1613a6p</bpmn:incoming>
-      <bpmn:outgoing>Flow_170oaqz</bpmn:outgoing>
-      <bpmn:outgoing>Flow_0xf6kx6</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
     <bpmn:userTask id="task_upload_aanvraag_formulier" name="Upload aanvraag formulier">
       <bpmn:incoming>Flow_170oaqz</bpmn:incoming>
       <bpmn:outgoing>Flow_1go9gmb</bpmn:outgoing>
@@ -136,7 +119,9 @@
       <bpmn:outgoing>Flow_1sfcl8u</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_00876s7" sourceRef="Event_049hit6" targetRef="task_beoordelen_aanvraag" />
-    <bpmn:sequenceFlow id="Flow_1613a6p" sourceRef="task_beoordelen_aanvraag" targetRef="Gateway_1qgnlwa" />
+    <bpmn:sequenceFlow id="Flow_1613a6p" sourceRef="task_beoordelen_aanvraag" targetRef="Gateway_1qgnlwa">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">print(dir())</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0xf6kx6" name="Geen vervolg, wat nu?" sourceRef="Gateway_1qgnlwa" targetRef="Event_0ztb6lf" />
     <bpmn:sequenceFlow id="Flow_170oaqz" name="form_beoordelen_aanvraag== yes" sourceRef="Gateway_1qgnlwa" targetRef="task_upload_aanvraag_formulier">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">form_beoordelen_aanvraag.get("value") == "yes"</bpmn:conditionExpression>
@@ -200,6 +185,23 @@
     <bpmn:endEvent id="Event_1tc1avn">
       <bpmn:incoming>Flow_1dga19z</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:userTask id="task_beoordelen_aanvraag" name="Beoordelen aanvraag">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_beoordelen_aanvraag" label="Voldoet de VVE aan de voorwaarden?" type="enum">
+            <camunda:value id="yes" name="Ja" />
+            <camunda:value id="no" name="Nee" />
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_00876s7</bpmn:incoming>
+      <bpmn:outgoing>Flow_1613a6p</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_1qgnlwa" default="Flow_0xf6kx6">
+      <bpmn:incoming>Flow_1613a6p</bpmn:incoming>
+      <bpmn:outgoing>Flow_170oaqz</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0xf6kx6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_04jcbe9">
@@ -210,13 +212,6 @@
       <bpmndi:BPMNShape id="Lane_196sonf_di" bpmnElement="Lane_Projectmedewerker" isHorizontal="true">
         <dc:Bounds x="182" y="80" width="2726" height="910" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0ujll2d_di" bpmnElement="task_beoordelen_aanvraag">
-        <dc:Bounds x="420" y="460" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_16qm6u5" bpmnElement="Gateway_1qgnlwa" isMarkerVisible="true">
-        <dc:Bounds x="565" y="475" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1yf8kha_di" bpmnElement="task_upload_aanvraag_formulier">
         <dc:Bounds x="680" y="460" width="100" height="80" />
@@ -304,27 +299,34 @@
       <bpmndi:BPMNShape id="Event_1tc1avn_di" bpmnElement="Event_1tc1avn">
         <dc:Bounds x="2732" y="792" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ujll2d_di" bpmnElement="task_beoordelen_aanvraag">
+        <dc:Bounds x="340" y="460" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_16qm6u5" bpmnElement="Gateway_1qgnlwa" isMarkerVisible="true">
+        <dc:Bounds x="525" y="475" width="50" height="50" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_00876s7_di" bpmnElement="Flow_00876s7">
         <di:waypoint x="278" y="500" />
-        <di:waypoint x="420" y="500" />
+        <di:waypoint x="340" y="500" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1613a6p_di" bpmnElement="Flow_1613a6p">
-        <di:waypoint x="520" y="500" />
-        <di:waypoint x="565" y="500" />
+        <di:waypoint x="440" y="500" />
+        <di:waypoint x="525" y="500" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0xf6kx6_di" bpmnElement="Flow_0xf6kx6">
-        <di:waypoint x="590" y="525" />
-        <di:waypoint x="590" y="620" />
+        <di:waypoint x="550" y="525" />
+        <di:waypoint x="550" y="620" />
         <di:waypoint x="692" y="620" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="596" y="569" width="89" height="27" />
+          <dc:Bounds x="576" y="569" width="89" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_170oaqz_di" bpmnElement="Flow_170oaqz">
-        <di:waypoint x="615" y="500" />
+        <di:waypoint x="575" y="500" />
         <di:waypoint x="680" y="500" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="307" y="466" width="85" height="27" />
+          <dc:Bounds x="587" y="466" width="85" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1go9gmb_di" bpmnElement="Flow_1go9gmb">

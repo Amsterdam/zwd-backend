@@ -24,6 +24,8 @@ class Case(ModelEventEmitter):
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, on_delete=models.CASCADE, related_name="cases", null=True
     )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Case: {self.id}"

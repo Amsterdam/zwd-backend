@@ -48,7 +48,4 @@ class CaseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Case
-        fields = (
-            "id",
-            "homeowner_association",
-        )
+        fields = ("id", "homeowner_association", "created")
