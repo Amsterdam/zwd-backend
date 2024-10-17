@@ -36,3 +36,19 @@ class CaseCreateSerializer(serializers.ModelSerializer):
             "homeowner_association",
             "contacts",
         )
+
+
+class CaseListSerializer(serializers.ModelSerializer):
+    homeowner_association = serializers.SerializerMethodField()
+
+    def get_homeowner_association(self, obj):
+        if not obj.homeowner_association:
+            return None
+        return obj.homeowner_association.name
+
+    class Meta:
+        model = Case
+        fields = (
+            "id",
+            "homeowner_association",
+        )

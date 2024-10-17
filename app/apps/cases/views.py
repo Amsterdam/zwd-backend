@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Case
-from .serializers import CaseCreateSerializer, CaseSerializer
+from .serializers import CaseCreateSerializer, CaseListSerializer, CaseSerializer
 
 
 class CaseViewSet(
@@ -24,6 +24,8 @@ class CaseViewSet(
     def get_serializer_class(self):
         if self.action == "create":
             return CaseCreateSerializer
+        elif self.action == "list":
+            return CaseListSerializer
         elif self.action == "events":
             return CaseEventSerializer
         return CaseSerializer

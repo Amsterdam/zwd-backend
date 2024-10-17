@@ -26,13 +26,8 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
             "task_id",
             "task_name",
             "name",
-            "form",
             "roles",
-            "due_date",
-            "owner",
             "created",
-            "updated",
-            "completed",
             "case",
             "homeowner_association",
         )
