@@ -84,6 +84,7 @@ class CaseWorkflow(models.Model):
             self.workflow_version,
             self.workflow_message_name,
         )
+        initial_data.update(self.data)
         workflow = self._initial_data(workflow, initial_data)
         workflow = self._update_workflow(workflow)
         self._update_db(workflow)
@@ -103,7 +104,7 @@ class CaseWorkflow(models.Model):
         self._update_db(workflow)
 
     def _get_workflow_path(
-        self, workflow_type, theme_name="default", workflow_version="1.0.0"
+        self, workflow_type, theme_name="default", workflow_version="1.1.0"
     ):
         path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
@@ -143,7 +144,7 @@ class CaseWorkflow(models.Model):
                 task_id=task.id,
                 task_name=task.task_spec.name,
                 name=task.task_spec.bpmn_name,
-                # roles=[r.strip() for r in task.task_spec.lane.split(",")],
+                roles=[r.strip() for r in task.task_spec.lane.split(",")],
                 form=parse_task_spec_form(task.task_spec.form),
                 due_date=datetime.datetime.today(),
                 case=self.case,

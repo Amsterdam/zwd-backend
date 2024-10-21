@@ -27,3 +27,34 @@ class HomeownerAssociation(models.Model):
             number_of_appartments=len(distinct_hoa_response),
         )
         return model
+
+
+class Contact(models.Model):
+    homeowner_associations = models.ManyToManyField(
+        HomeownerAssociation, related_name="contacts", default=None
+    )
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    fullname = models.CharField(max_length=255)
+    role = models.CharField(max_length=255)
+
+    def process_contacts(case, contacts):
+        for contact in contacts:
+            email = contact.get("email")
+            if not email:
+                continue
+            contact_data = {
+                "fullname": contact.get("fullname"),
+                "email": email,
+                "phone": contact.get("phone"),
+                "role": contact.get("role"),
+            }
+            existing_contact, created = Contact.objects.get_or_create(
+                email=email, defaults=contact_data
+            )
+            if not created:
+                for key, value in contact_data.items():
+                    setattr(existing_contact, key, value)
+                existing_contact.save()
+
+            existing_contact.homeowner_associations.add(case.homeowner_association)

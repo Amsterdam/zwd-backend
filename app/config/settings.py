@@ -241,13 +241,10 @@ if HAS_AZURE_LOGGING:
 WORKFLOW_SPEC_CONFIG = {
     "default": {
         "process_vve_ok": {
-            "initial_data": {
-                "bepalen_processtap": {"value": "123"},
-                "status_name": "test123",
-                "authorization": {"value": "No"},
-            },
+            "initial_data": {"advice_type": {"value": "Default"}},
             "versions": {
                 "1.0.0": {},
+                "1.1.0": {},
             },
         },
     },
