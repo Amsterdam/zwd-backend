@@ -23,3 +23,6 @@ debugpy==1.8.2
 azure-monitor-opentelemetry==1.6.1
 model-bakery==1.18.2
 djangorestframework-simplejwt==5.3.1
+django-storages==1.14.4
+azure-storage-blob==12.23.1
+python-magic==0.4.27

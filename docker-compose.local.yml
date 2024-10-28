@@ -57,6 +57,16 @@ services:
       - zwd_network
     restart: on-failure
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+    networks:
+      - zwd_network
+
 networks:
   zwd_network:
     external: true

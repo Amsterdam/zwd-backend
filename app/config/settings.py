@@ -14,9 +14,11 @@ import os
 from os.path import join
 from pathlib import Path
 
+
 from config.logging import create_logging_config, setup_azure_monitor
 
 from .azure_settings import Azure
+from azure.identity import WorkloadIdentityCredential
 
 azure = Azure()
 
@@ -254,3 +256,25 @@ DSO_CLIENT_ID = os.getenv("DSO_CLIENT_ID", "default_client_id")
 DSO_CLIENT_SECRET = os.getenv("DSO_CLIENT_SECRET", "default_client_secret")
 DSO_AUTH_URL = os.getenv("DSO_AUTH_URL", "https://default.auth.url")
 DSO_API_URL = os.getenv("DSO_API_URL", "https://default.api.url")
+
+
+DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
+AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
+AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
+
+if DEBUG == False:
+    AZURE_TOKEN_CREDENTIAL = WorkloadIdentityCredential()
+
+if DEBUG:
+    from azure.storage.blob import BlobServiceClient
+
+    blob_service_client = BlobServiceClient.from_connection_string(
+        AZURE_CONNECTION_STRING
+    )
+    container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
+    if container_client.exists():
+        print(f"Container '{AZURE_CONTAINER}' already exists, skipping creation.")
+    else:
+        blob_service_client.create_container(AZURE_CONTAINER)
+        print(f"Container '{AZURE_CONTAINER}' created successfully.")
