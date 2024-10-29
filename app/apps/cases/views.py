@@ -55,7 +55,9 @@ class CaseViewSet(
         Contact.process_contacts(case, contacts_data)
         return Response(CaseSerializer(case).data, status=201)
 
-    @action(detail=False, methods=["post"], url_path="documents")
+    @action(
+        detail=False, methods=["post"], url_path="documents", name="cases-documents"
+    )
     def create_document(self, request):
         serializer = CaseDocumentSerializer(data=request.data)
         if serializer.is_valid():
