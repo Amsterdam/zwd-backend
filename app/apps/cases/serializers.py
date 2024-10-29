@@ -1,7 +1,10 @@
 from apps.homeownerassociation.serializers import ContactSerializer
 from apps.cases.models import Case
+from apps.cases.models import Case, CaseDocument
 from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import serializers
+import magic
+import os
 
 
 class CaseSerializer(serializers.ModelSerializer):
@@ -49,3 +52,28 @@ class CaseListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = ("id", "homeowner_association", "created")
+
+
+class CaseDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CaseDocument
+        fields = ("id", "case", "document", "name")
+
+    def validate_document(self, value):
+        ext = os.path.splitext(value.name)[1].lower()
+        if ext not in [".pdf", ".docx", ".txt", ".png", ".jpg", ".jpeg"]:
+            raise serializers.ValidationError("File extension not allowed")
+
+        mime = magic.Magic(mime=True)
+        file_mime_type = mime.from_buffer(value.read(2048))
+        value.seek(0)
+        if file_mime_type not in [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain",
+            "image/png",
+            "image/jpeg",
+        ]:
+            raise serializers.ValidationError("File type not allowed")
+
+        return value

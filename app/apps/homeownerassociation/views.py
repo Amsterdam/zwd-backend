@@ -15,10 +15,14 @@ class HomeOwnerAssociationView(
     queryset = HomeownerAssociation.objects.all()
     serializer_class = HomeownerAssociationSerializer
 
+    def get_serializer_class(self):
+        if self.action == "cases":
+            return CaseListSerializer
+        return super().get_serializer_class()
+
     @action(detail=True, methods=["get"])
     def cases(self, request, pk=None):
         hoa = self.get_object()
         cases = Case.objects.filter(homeowner_association=hoa)
-        print(cases)
         serializer = CaseListSerializer(cases, many=True)
         return Response(serializer.data)

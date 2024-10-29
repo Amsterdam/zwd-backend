@@ -2,6 +2,9 @@ from django.db import models
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.events.models import CaseEvent, ModelEventEmitter
 from enum import Enum
+import os
+from apps.events.models import CaseEvent, ModelEventEmitter
+from django.core.files.storage import default_storage
 
 
 class AdviceType(Enum):
@@ -45,3 +48,21 @@ class CaseStateType(models.Model):
 
     class Meta:
         ordering = ["name"]
+
+
+def get_upload_path(instance, filename):
+    return os.path.join("uploads", "cases", "%s" % instance.case.id, filename)
+
+
+class CaseDocument(models.Model):
+    name = models.CharField(max_length=100)
+    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name="documents")
+    document = models.FileField(upload_to=get_upload_path)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Document: {self.id}"
+
+    def delete(self):
+        default_storage.delete(self.document.name)
+        return super().delete()
