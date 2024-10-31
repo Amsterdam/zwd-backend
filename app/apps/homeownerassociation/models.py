@@ -42,18 +42,17 @@ class HomeownerAssociation(models.Model):
     def get_or_create_hoa_by_bag_id(self, bag_id):
         client = DsoClient()
         hoa_name = client.get_hoa_name_by_bag_id(bag_id)
+        existing_hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
+        if existing_hoa:
+            return existing_hoa
+
         hoa_response = client.get_hoa_by_name(hoa_name)
-        distinct_hoa_response = list(
-            {hoa["votIdentificatie"]: hoa for hoa in hoa_response}.values()
+        distinct_hoa_response = self._get_distinct_hoa_response(hoa_response)
+        district, neighborhood = self._get_district_and_neighborhood(
+            distinct_hoa_response
         )
-        district, created = District.objects.get_or_create(
-            name=distinct_hoa_response[0].get("gbdSdlNaam", "Onbekend")
-        )
-        neighborhood, created = Neighborhood.objects.get_or_create(
-            name=distinct_hoa_response[0].get("gbdBrtNaam", "Onbekend"),
-            district=district,
-        )
-        model, created = HomeownerAssociation.objects.get_or_create(
+
+        model = HomeownerAssociation.objects.create(
             name=hoa_name,
             build_year=distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar"),
             number_of_appartments=len(distinct_hoa_response),
@@ -64,6 +63,36 @@ class HomeownerAssociation(models.Model):
 
         self._create_ownerships(distinct_hoa_response, model)
         return model
+
+    def update_hoa_admin(self, hoa_name):
+        client = DsoClient()
+        hoa_response = client.get_hoa_by_name(hoa_name)
+        distinct_hoa_response = self._get_distinct_hoa_response(hoa_response)
+        district, neighborhood = self._get_district_and_neighborhood(
+            distinct_hoa_response
+        )
+
+        self.build_year = distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar")
+        self.number_of_appartments = len(distinct_hoa_response)
+        self.zip_code = distinct_hoa_response[0].get("postcode")
+        self.district = district
+        self.neighborhood = neighborhood
+        self.save()
+
+        self._create_ownerships(distinct_hoa_response, self)
+
+    def _get_distinct_hoa_response(self, hoa_response):
+        return list({hoa["votIdentificatie"]: hoa for hoa in hoa_response}.values())
+
+    def _get_district_and_neighborhood(self, distinct_hoa_response):
+        district, created = District.objects.get_or_create(
+            name=distinct_hoa_response[0].get("gbdSdlNaam", "Onbekend")
+        )
+        neighborhood, created = Neighborhood.objects.get_or_create(
+            name=distinct_hoa_response[0].get("gbdBrtNaam", "Onbekend"),
+            district=district,
+        )
+        return district, neighborhood
 
     def _create_ownerships(self, hoa_response, hoa_obj):
         ownership_counts = Counter(

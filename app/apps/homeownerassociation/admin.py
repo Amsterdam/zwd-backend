@@ -9,6 +9,12 @@ from apps.homeownerassociation.models import (
 )
 
 
+@admin.action(description="Update HOA")
+def update_hoa(modeladmin, request, queryset):
+    for hoa in queryset:
+        hoa.update_hoa_admin(hoa.name)
+
+
 class ContactInline(admin.TabularInline):
     model = (
         Contact.homeowner_associations.through
@@ -32,6 +38,7 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
     )
     search_fields = ("id",)
     inlines = [ContactInline]
+    actions = [update_hoa]
 
 
 @admin.register(Contact)
