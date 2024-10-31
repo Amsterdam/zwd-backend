@@ -12,7 +12,7 @@ class CaseEventSerializer(serializers.ModelSerializer):
             "id",
             "event_values",
             "event_variables",
-            "date_created",
+            "created",
             "type",
             "emitter_id",
             "case",

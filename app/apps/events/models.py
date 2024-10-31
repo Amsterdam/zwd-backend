@@ -4,7 +4,6 @@ from django.db import models
 
 
 class CaseEvent(models.Model):
-
     TYPE_CASE = "CASE"
     TYPE_CASE_CLOSE = "CASE_CLOSE"
     TYPE_GENERIC_TASK = "GENERIC_TASK"
@@ -14,7 +13,7 @@ class CaseEvent(models.Model):
         (TYPE_GENERIC_TASK, TYPE_GENERIC_TASK),
     )
 
-    date_created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
     case = models.ForeignKey(
         to="cases.Case",
         on_delete=models.CASCADE,
@@ -51,10 +50,10 @@ class CaseEvent(models.Model):
         return variables_list
 
     def __str__(self):
-        return f"{self.case.id} Case - Event {self.id} - {self.date_created}"
+        return f"{self.case.id} Case - Event {self.id} - {self.created}"
 
     class Meta:
-        ordering = ["date_created"]
+        ordering = ["created"]
 
 
 class ModelEventEmitter(models.Model):

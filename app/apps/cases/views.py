@@ -14,6 +14,7 @@ from .models import Case, CaseDocument
 from .serializers import CaseCreateSerializer, CaseDocumentSerializer, CaseSerializer
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
+from django.http import FileResponse
 
 
 class CaseViewSet(
@@ -80,7 +81,7 @@ class CaseViewSet(
         case = self.get_object()
         case_document = get_object_or_404(CaseDocument, case=case, id=doc_id)
         with default_storage.open(case_document.document.name, "rb") as file:
-            response = Response(file.read(), content_type="application/octet-stream")
+            response = FileResponse(file, content_type="application/octet-stream")
             response["Content-Disposition"] = (
                 f'attachment; filename="{case_document.document.name}"'
             )
