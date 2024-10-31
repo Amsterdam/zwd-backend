@@ -57,7 +57,7 @@ class CaseListSerializer(serializers.ModelSerializer):
 class CaseDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseDocument
-        fields = ("id", "case", "document", "name")
+        fields = ("id", "case", "document", "name", "created")
 
     def validate_document(self, value):
         ext = os.path.splitext(value.name)[1].lower()
