@@ -4,44 +4,6 @@ from apps.homeownerassociation.models import HomeownerAssociation
 
 
 class HomeownerAssociationModelTest(TestCase):
-
-    @patch("apps.homeownerassociation.models.DsoClient")
-    def test_get_or_create_hoa_by_bag_id_existing_hoa(self, MockDsoClient):
-        # Mock the DsoClient and its methods
-        mock_client = MockDsoClient.return_value
-        mock_client.get_hoa_name_by_bag_id.return_value = "Test HOA"
-
-        # Create an existing HOA
-        existing_hoa = HomeownerAssociation.objects.create(
-            name="Test HOA", build_year=2000, number_of_appartments=10
-        )
-
-        # Call the method
-        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("some_bag_id")
-
-        # Assert the existing HOA is returned
-        self.assertEqual(result, existing_hoa)
-        mock_client.get_hoa_name_by_bag_id.assert_called_once_with("some_bag_id")
-
-    @patch("apps.homeownerassociation.models.DsoClient")
-    def test_get_or_create_hoa_by_bag_id_existing_hoa_no_new_hoa(self, MockDsoClient):
-        # Mock the DsoClient and its methods
-        mock_client = MockDsoClient.return_value
-        mock_client.get_hoa_name_by_bag_id.return_value = "Test HOA"
-
-        # Create an existing HOA
-        existing_hoa = HomeownerAssociation.objects.create(
-            name="Test HOA", build_year=2000, number_of_appartments=10
-        )
-
-        # Call the method
-        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("some_bag_id")
-
-        # Assert the existing HOA is returned
-        self.assertEqual(result, existing_hoa)
-        mock_client.get_hoa_name_by_bag_id.assert_called_once_with("some_bag_id")
-        mock_client.get_hoa_by_name.assert_not_called()
-
     @patch("apps.homeownerassociation.models.DsoClient")
     def test_get_or_create_hoa_by_bag_id_new_hoa(self, MockDsoClient):
         # Mock the DsoClient and its methods
@@ -53,7 +15,7 @@ class HomeownerAssociationModelTest(TestCase):
         ]
 
         # Call the method
-        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("some_bag_id")
+        result = HomeownerAssociation().get_or_create_hoa_by_bag_id("some_bag_id")
         # Assert a new HOA is created
         self.assertIsInstance(result, HomeownerAssociation)
         self.assertEqual(result.name, "New HOA")
@@ -74,8 +36,86 @@ class HomeownerAssociationModelTest(TestCase):
             {"pndOorspronkelijkBouwjaar": 2010, "votIdentificatie": "333"},
             {"pndOorspronkelijkBouwjaar": 2010, "votIdentificatie": "444"},
         ]
-        result = HomeownerAssociation.get_or_create_hoa_by_bag_id("unique_id")
+        result = HomeownerAssociation().get_or_create_hoa_by_bag_id("unique_id")
         self.assertIsInstance(result, HomeownerAssociation)
         self.assertEqual(result.name, "HOA")
         self.assertEqual(result.build_year, 2010)
         self.assertEqual(result.number_of_appartments, 2)
+
+    @patch("apps.homeownerassociation.models.DsoClient")
+    def test_get_or_create_hoa_by_bag_id_new_creates_owners(self, MockDsoClient):
+        mock_client = MockDsoClient.return_value
+        mock_client.get_hoa_name_by_bag_id.return_value = "HOA"
+        mock_client.get_hoa_by_name.return_value = [
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "333",
+                "eigCategorieEigenaar": "Corporatie",
+                "brkStatutaireNaam": "Corpo1",
+            },
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "444",
+                "eigCategorieEigenaar": "Particulier",
+                "brkStatutaireNaam": "John Doe",
+            },
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "555",
+                "eigCategorieEigenaar": "Corporatie",
+                "brkStatutaireNaam": "Corpo1",
+            },
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "666",
+                "eigCategorieEigenaar": "Particulier",
+                "brkStatutaireNaam": "Jane Smith",
+            },
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "777",
+                "eigCategorieEigenaar": "Corporatie",
+                "brkStatutaireNaam": "AnotherCorp",
+            },
+        ]
+        result = HomeownerAssociation().get_or_create_hoa_by_bag_id("unique_id")
+
+        owners = result.owners.all()
+        self.assertEqual(owners.count(), 4)
+
+        picobello = owners.filter(name="Corpo1").first()
+        self.assertEqual(picobello.type, "Corporatie")
+        self.assertEqual(picobello.number_of_appartments, 2)
+
+        john_doe = owners.filter(name="John Doe").first()
+        self.assertEqual(john_doe.type, "Particulier")
+        self.assertEqual(john_doe.number_of_appartments, 1)
+
+        jane_smith = owners.filter(name="Jane Smith").first()
+        self.assertEqual(jane_smith.type, "Particulier")
+        self.assertEqual(jane_smith.number_of_appartments, 1)
+
+        another_corp = owners.filter(name="AnotherCorp").first()
+        self.assertEqual(another_corp.type, "Corporatie")
+        self.assertEqual(another_corp.number_of_appartments, 1)
+
+    @patch("apps.homeownerassociation.models.DsoClient")
+    def test_get_or_create_hoa_by_bag_id_creates_district_and_neighbordhood(
+        self, MockDsoClient
+    ):
+        mock_client = MockDsoClient.return_value
+        mock_client.get_hoa_name_by_bag_id.return_value = "HOA"
+        mock_client.get_hoa_by_name.return_value = [
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "333",
+                "gbdSdlNaam": "District1",
+                "gbdBrtNaam": "Neighborhood1",
+            },
+        ]
+        result = HomeownerAssociation().get_or_create_hoa_by_bag_id("unique_id")
+        self.assertIsInstance(result, HomeownerAssociation)
+        self.assertEqual(result.district.name, "District1")
+        self.assertEqual(result.neighborhood.name, "Neighborhood1")
+        self.assertEqual(result.district.neighborhoods.count(), 1)
+        self.assertEqual(result.neighborhood.homeowner_associations.count(), 1)

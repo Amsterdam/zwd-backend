@@ -12,6 +12,7 @@ class HomeownerAssociationMixin:
         serializer_class=HomeownerAssociationSerializer,
     )
     def get_by_bag_id(self, request, pk=None):
-        model = HomeownerAssociation.get_or_create_hoa_by_bag_id(pk)
+        hoa_instance = HomeownerAssociation()
+        model = hoa_instance.get_or_create_hoa_by_bag_id(pk)
         serializer = HomeownerAssociationSerializer(model)
         return Response(serializer.data)

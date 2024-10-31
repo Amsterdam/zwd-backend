@@ -6,17 +6,17 @@ from apps.events.models import CaseEvent
 admin.site.register(
     CaseEvent,
     admin.ModelAdmin,
-    readonly_fields=("date_created", "event_values"),
+    readonly_fields=("created", "event_values"),
     list_display=(
         "id",
         "emitter",
         "emitter_id",
         "emitter_type",
         "type",
-        "date_created",
+        "created",
     ),
     list_filter=(
-        "date_created",
+        "created",
         "type",
     ),
     search_fields=("emitter_id",),

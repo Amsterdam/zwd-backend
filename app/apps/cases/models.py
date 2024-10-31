@@ -58,7 +58,7 @@ class CaseDocument(models.Model):
     name = models.CharField(max_length=100)
     case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name="documents")
     document = models.FileField(upload_to=get_upload_path)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Document: {self.id}"
