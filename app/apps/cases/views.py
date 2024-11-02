@@ -81,16 +81,14 @@ class CaseViewSet(
     def download_document(self, request, pk=None, doc_id=None):
         case = self.get_object()
         case_document = get_object_or_404(CaseDocument, case=case, id=doc_id)
-        file_path = case_document.document.name
+        file_name = case_document.document.name
         # Add the mime type so the frontend knows how to handle the file.
-        mime_type, _ = mimetypes.guess_type(file_path)
+        mime_type, _ = mimetypes.guess_type(file_name)
         content_type = mime_type or "application/octet-stream"
 
-        with default_storage.open(file_path, "rb") as file:
+        with default_storage.open(file_name, "rb") as file:
             response = FileResponse(file, content_type=content_type)
-            response["Content-Disposition"] = (
-                f'attachment; filename="{case_document.document.name}"'
-            )
+            response["Content-Disposition"] = f'attachment; filename="{file_name}"'
             return response
 
     @action(detail=True, methods=["delete"], url_path="documents/(?P<doc_id>[^/.]+)")
