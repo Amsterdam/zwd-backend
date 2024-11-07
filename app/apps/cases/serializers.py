@@ -1,5 +1,7 @@
-from apps.homeownerassociation.serializers import ContactSerializer
-from apps.cases.models import Case
+from apps.homeownerassociation.serializers import (
+    ContactSerializer,
+    CaseHomeownerAssociationSerializer,
+)
 from apps.cases.models import Case, CaseDocument
 from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import serializers
@@ -9,17 +11,13 @@ import os
 
 class CaseSerializer(serializers.ModelSerializer):
     workflows = CaseWorkflowSerializer(many=True)
-    homeowner_association = serializers.SerializerMethodField()
-
-    def get_homeowner_association(self, obj):
-        if not obj.homeowner_association:
-            return None
-        return obj.homeowner_association.name
+    homeowner_association = CaseHomeownerAssociationSerializer()
 
     class Meta:
         model = Case
         fields = (
             "id",
+            "created",
             "description",
             "workflows",
             "advice_type",
@@ -42,12 +40,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
 
 
 class CaseListSerializer(serializers.ModelSerializer):
-    homeowner_association = serializers.SerializerMethodField()
-
-    def get_homeowner_association(self, obj):
-        if not obj.homeowner_association:
-            return None
-        return obj.homeowner_association.name
+    homeowner_association = CaseHomeownerAssociationSerializer()
 
     class Meta:
         model = Case

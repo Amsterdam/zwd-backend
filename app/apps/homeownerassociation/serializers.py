@@ -52,6 +52,12 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class CaseHomeownerAssociationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomeownerAssociation
+        fields = ["id", "name"]
+
+
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
