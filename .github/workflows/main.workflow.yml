@@ -24,8 +24,6 @@ jobs:
       run: docker network create zwd_network
     - name: Start images
       run: docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
-    - name: Install setuptools in zwd-backend container
-      run: docker compose exec -T zwd-backend pip install setuptools
     - name: Run Tests
       run: docker compose exec -T zwd-backend python manage.py test /app/apps
 
