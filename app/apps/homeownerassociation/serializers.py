@@ -48,6 +48,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "district",
             "neighborhood",
             "zip_code",
+            "is_small",
         ]
         depth = 1
 

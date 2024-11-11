@@ -104,7 +104,11 @@ class CaseWorkflow(models.Model):
         self._update_db(workflow)
 
     def _get_workflow_path(
-        self, workflow_type, theme_name="default", workflow_version="1.1.0"
+        # TODO make dynamic
+        self,
+        workflow_type,
+        theme_name="default",
+        workflow_version="1.2.0",
     ):
         path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),

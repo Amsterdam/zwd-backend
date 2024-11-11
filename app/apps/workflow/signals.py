@@ -39,4 +39,10 @@ def complete_generic_user_task_and_create_new_user_tasks(
 @receiver(pre_save, sender=CaseWorkflow, dispatch_uid="case_workflow_pre_save")
 def case_workflow_pre_save(sender, instance, **kwargs):
     instance.data = instance.data if isinstance(instance.data, dict) else {}
-    instance.data.update({"advice_type": {"value": instance.case.advice_type}})
+    instance.data.update(
+        {
+            "advice_type": {"value": instance.case.advice_type},
+            "hoa_is_small": {"value": instance.case.homeowner_association.is_small},
+            "build_year": {"value": instance.case.homeowner_association.build_year},
+        }
+    )
