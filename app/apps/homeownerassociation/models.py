@@ -39,6 +39,10 @@ class HomeownerAssociation(models.Model):
     )
     zip_code = models.CharField(max_length=255, null=True)
 
+    @property
+    def is_small(self):
+        return self.number_of_appartments <= 12
+
     def get_or_create_hoa_by_bag_id(self, bag_id):
         client = DsoClient()
         hoa_name = client.get_hoa_name_by_bag_id(bag_id)
