@@ -108,7 +108,7 @@ class CaseWorkflow(models.Model):
         self,
         workflow_type,
         theme_name="default",
-        workflow_version="1.2.0",
+        workflow_version="1.3.0",
     ):
         path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
