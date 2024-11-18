@@ -1,75 +1,85 @@
-import logging
+import os
+from typing import Any
 
-from azure.monitor.opentelemetry import configure_azure_monitor
-from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
-from django.conf import settings
+from azure.monitor.opentelemetry.exporter import (
+    AzureMonitorLogExporter,
+    AzureMonitorTraceExporter,
+)
 from opentelemetry import trace
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 
-def create_logging_config():
-    return {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-            },
-            "azure": {
-                "level": settings.LOGGING_LEVEL,
-                "class": "opentelemetry.sdk._logs.LoggingHandler",
-            },
-        },
-        "loggers": {
-            "root": {
-                "handlers": ["console"],
-                "level": settings.LOGGING_LEVEL,
-            },
-            "azure.core.pipeline.policies.http_logging_policy": {
-                "handlers": ["console"],
-                "level": settings.LOGGING_LEVEL,
-            },
-            "azure.monitor.opentelemetry.exporter.export._base": {
-                "handlers": ["console"],
-                "level": settings.LOGGING_LEVEL,  # Set to INFO to log what is being logged by OpenTelemetry
-            },
-            "opentelemetry.attributes": {
-                "handlers": ["console"],
-                # This will suppress WARNING messages about invalid data types
-                # Such as: Invalid type Json in attribute 'params' value sequence. Expected one of ['bool', 'str', 'bytes', 'int', 'float'] or None
-                # Most of these invalid types will be inside the WHERE statements of DB operations, but despite the warnings are still being logged correctly.
-                "level": settings.LOGGING_LEVEL,
-                "propagate": False,
-            },
+def start_logging():
+    LOGGING_HANDLERS: dict[str, dict[str, Any]] = {
+        "console": {
+            "class": "logging.StreamHandler",
         },
     }
+    LOGGER_HANDLERS = [
+        "console",
+    ]
 
-
-def setup_azure_monitor():
-    configure_azure_monitor(
-        instrumentation_options={
-            "azure_sdk": {"enabled": False},
-            "django": {"enabled": True},
-            "psycopg2": {"enabled": True if settings.DATABASE_NAME else False},
-            "requests": {"enabled": True},
-            "urllib": {"enabled": True},
-            "urllib3": {"enabled": True},
-        },
-        resource=Resource.create({SERVICE_NAME: "ZWD-Backend"}),
-        export_timeout_millis=5000,
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
+        "APPLICATIONINSIGHTS_CONNECTION_STRING"
     )
 
-    tracer_provider = TracerProvider()
+    def response_hook(span, request, response):
+        if (
+            span
+            and span.is_recording()
+            and hasattr(request, "user")
+            and request.user is not None
+            and hasattr(request.user, "is_authenticated")
+            and request.user.is_authenticated is True
+        ):
+            span.set_attributes({"django.user.name": request.user.username})
+
+    MONITOR_SERVICE_NAME = "zwd-backend"
+    resource: Resource = Resource.create({"service.name": MONITOR_SERVICE_NAME})
+
+    tracer_provider: TracerProvider = TracerProvider(resource=resource)
     trace.set_tracer_provider(tracer_provider)
+    if APPLICATIONINSIGHTS_CONNECTION_STRING:
+        span_exporter: AzureMonitorTraceExporter = AzureMonitorTraceExporter(
+            connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING
+        )
+        tracer_provider.add_span_processor(
+            BatchSpanProcessor(span_exporter=span_exporter)
+        )
+        log_exporter: AzureMonitorLogExporter = AzureMonitorLogExporter(
+            connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING
+        )
+        logger_provider: LoggerProvider = LoggerProvider(resource=resource)
+        logger_provider.add_log_record_processor(
+            BatchLogRecordProcessor(log_exporter, schedule_delay_millis=3000)
+        )
 
-    exporter = AzureMonitorTraceExporter(
-        connection_string=settings.APPLICATIONINSIGHTS_CONNECTION_STRING
-    )
+        class AzureLoggingHandler(LoggingHandler):
+            def __init__(self):
+                super().__init__(logger_provider=logger_provider)
 
-    span_processor = BatchSpanProcessor(exporter)
-    tracer_provider.add_span_processor(span_processor)
+        LOGGING_HANDLERS.update(
+            {
+                "azure": {
+                    "()": AzureLoggingHandler,
+                    "formatter": "elaborate",
+                    "level": os.getenv("LOGGING_LEVEL", "WARNING"),
+                }
+            }
+        )
 
-    logger = logging.getLogger("root")
-    logger.info("Azure Monitoring enabled.")
+        LOGGER_HANDLERS.append("azure")
+        if os.getenv("LOGGING_LEVEL", "WARNING") == "DEBUG":
+            Psycopg2Instrumentor().instrument(
+                tracer_provider=tracer_provider, skip_dep_check=True
+            )
+        DjangoInstrumentor().instrument(
+            tracer_provider=tracer_provider, response_hook=response_hook
+        )

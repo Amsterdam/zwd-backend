@@ -13,10 +13,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from os.path import join
 from pathlib import Path
-
-
-from config.logging import create_logging_config, setup_azure_monitor
-
 from .azure_settings import Azure
 from azure.identity import WorkloadIdentityCredential
 
@@ -229,16 +225,6 @@ STATIC_ROOT = os.path.normpath(join(os.path.dirname(BASE_DIR), "static"))
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-LOGGING_LEVEL = os.getenv("LOGGING_LEVEL", "WARNING")
-
-APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"
-)
-HAS_AZURE_LOGGING = True if APPLICATIONINSIGHTS_CONNECTION_STRING else False
-LOGGING = create_logging_config()
-if HAS_AZURE_LOGGING:
-    setup_azure_monitor()
 
 WORKFLOW_SPEC_CONFIG = {
     "default": {
