@@ -1,3 +1,4 @@
+from apps.workflow.models import WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
@@ -70,3 +71,9 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("File type not allowed")
 
         return value
+
+
+class StartWorkflowSerializer(serializers.Serializer):
+    workflow_option_id = serializers.PrimaryKeyRelatedField(
+        queryset=WorkflowOption.objects.all()
+    )

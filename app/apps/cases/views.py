@@ -2,8 +2,8 @@ import mimetypes
 from apps.homeownerassociation.models import Contact
 from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
-from apps.workflow.models import CaseWorkflow
-from apps.workflow.serializers import CaseWorkflowSerializer
+from apps.workflow.models import CaseWorkflow, WorkflowOption
+from apps.workflow.serializers import CaseWorkflowSerializer, WorkflowOptionSerializer
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,6 +14,7 @@ from .serializers import (
     CaseDocumentSerializer,
     CaseSerializer,
     CaseListSerializer,
+    StartWorkflowSerializer,
 )
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
@@ -27,7 +28,7 @@ class CaseViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
 ):
-    queryset = Case.objects.all()
+    queryset = Case.objects.all().prefetch_related("homeowner_association")
     serializer_class = CaseSerializer
 
     def get_serializer_class(self):
@@ -45,7 +46,7 @@ class CaseViewSet(
     @action(detail=True, methods=["get"], url_path="workflows")
     def get_workflows(self, request, pk=None):
         case = self.get_object()
-        workflows = CaseWorkflow.objects.filter(case=case)
+        workflows = CaseWorkflow.objects.filter(case=case, completed=False)
         serializer = CaseWorkflowSerializer(workflows, many=True)
         return Response(serializer.data)
 
@@ -99,3 +100,47 @@ class CaseViewSet(
         case_document = get_object_or_404(CaseDocument, case=case, id=doc_id)
         case_document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        url_path="processes/start",
+        methods=["post"],
+        serializer_class=StartWorkflowSerializer,
+    )
+    def start_process(self, request, pk):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            case = self.get_object()
+            instance = data["workflow_option_id"]
+
+            workflow_type = "sub_workflow"
+            CaseWorkflow.objects.create(
+                case=case,
+                workflow_type=workflow_type,
+                workflow_message_name=instance.message_name,
+            )
+
+            return Response(
+                data=f"Workflow has started {str(instance)}",
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(
+            data="Workflow has not started. serializer not valid",
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    @action(
+        detail=False,
+        url_path="processes",
+        url_name="processes",
+        methods=["get"],
+        serializer_class=WorkflowOptionSerializer,
+    )
+    def get_workflow_options(self, request):
+        serializer = WorkflowOptionSerializer(
+            WorkflowOption.objects.all(),
+            many=True,
+        )
+        return Response(serializer.data)

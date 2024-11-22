@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import empty
 
-from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
+from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask, WorkflowOption
 
 
 class CaseUserTaskSerializer(serializers.ModelSerializer):
@@ -38,6 +38,27 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
         )
 
 
+class CaseUserTaskListSerializer(serializers.ModelSerializer):
+    case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
+    homeowner_association = serializers.SerializerMethodField()
+
+    def get_homeowner_association(self, obj):
+        return (
+            obj.case.homeowner_association.name
+            if obj.case.homeowner_association
+            else None
+        )
+
+    class Meta:
+        model = CaseUserTask
+        fields = (
+            "id",
+            "name",
+            "case",
+            "homeowner_association",
+        )
+
+
 class CaseWorkflowSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField()
 
@@ -52,6 +73,7 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             "workflow_message_name",
             "data",
             "tasks",
+            "completed",
         )
 
     @extend_schema_field(CaseUserTaskSerializer(many=True))
@@ -127,6 +149,7 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
 
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
     process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
+    sub_workflow = WorkflowSpecConfigThemeSerializer(required=False)
 
     def run_validation(self, data=empty):
         if data is not empty:
@@ -163,3 +186,9 @@ class BpmnModelSerializer(serializers.Serializer):
     version = serializers.CharField(max_length=100)
     file_name = serializers.CharField(max_length=100)
     model = serializers.CharField(max_length=100)
+
+
+class WorkflowOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkflowOption
+        fields = "id", "name", "message_name"

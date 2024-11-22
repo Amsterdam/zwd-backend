@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0q4k183" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:message id="Message_1honxk2" name="event_start_extra_information_process" />
+  <bpmn:message id="Message_1vtwc8d" name="event_start_extra_information_process-2" />
+  <bpmn:collaboration id="Collaboration_1mi3u0g">
+    <bpmn:participant id="Participant_1o1s41c" name="ZWD Sub taken" processRef="sub_workflow" />
+  </bpmn:collaboration>
+  <bpmn:process id="sub_workflow" name="ZWD Sub taken" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_1rr713p">
+      <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
+        <bpmn:flowNodeRef>Event_1kljwfy</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>start_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_verwerken_extra_informatie</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:endEvent id="Event_1kljwfy">
+      <bpmn:incoming>Flow_1diaqio</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="start_1">
+      <bpmn:outgoing>Flow_1rb6647</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_10bhnu0" messageRef="Message_1honxk2" />
+    </bpmn:startEvent>
+    <bpmn:userTask id="task_verwerken_extra_informatie" name="Verwerken extra informatie">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="extra_informatie" label="Toelichting" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1rb6647</bpmn:incoming>
+      <bpmn:outgoing>Flow_1diaqio</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1diaqio" sourceRef="task_verwerken_extra_informatie" targetRef="Event_1kljwfy" />
+    <bpmn:sequenceFlow id="Flow_1rb6647" sourceRef="start_1" targetRef="task_verwerken_extra_informatie" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1mi3u0g">
+      <bpmndi:BPMNShape id="Participant_1o1s41c_di" bpmnElement="Participant_1o1s41c" isHorizontal="true" isExpanded="true">
+        <dc:Bounds x="160" y="85" width="600" height="370" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1fvwbij_di" bpmnElement="Lane_Projectmedewerker" isHorizontal="true">
+        <dc:Bounds x="190" y="85" width="570" height="370" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1kljwfy_di" bpmnElement="Event_1kljwfy">
+        <dc:Bounds x="552" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1bzgjxg_di" bpmnElement="start_1">
+        <dc:Bounds x="319" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="171" y="175" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1k4bt0u_di" bpmnElement="task_verwerken_extra_informatie">
+        <dc:Bounds x="410" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1diaqio_di" bpmnElement="Flow_1diaqio">
+        <di:waypoint x="510" y="260" />
+        <di:waypoint x="552" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rb6647_di" bpmnElement="Flow_1rb6647">
+        <di:waypoint x="355" y="260" />
+        <di:waypoint x="410" y="260" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

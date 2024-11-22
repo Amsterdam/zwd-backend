@@ -205,3 +205,28 @@ def parse_task_spec_form(form):
         for f in form.fields
     ]
     return fields
+
+
+def get_latest_version_from_config(workflow_type):
+    validated_workflow_spec_config = validate_workflow_spec(
+        settings.WORKFLOW_SPEC_CONFIG
+    )
+    theme_name = "default"
+    config = validated_workflow_spec_config.get(theme_name, {})
+
+    config = config.get(workflow_type, {})
+    if not config:
+        raise Exception(
+            f"Workflow type '{workflow_type}', does not exist in this workflow_spec config"
+        )
+
+    def get_major(v):
+        return int(v.split(".")[0])
+
+    theme_versions = sorted([v for v, k in config.get("versions").items()])
+    if not theme_versions:
+        raise Exception(
+            f"Workflow version for theme name '{theme_name}', with type '{workflow_type}', does not exist in this workflow_spec config"
+        )
+    highest_sub_version = theme_versions[-1]
+    return highest_sub_version

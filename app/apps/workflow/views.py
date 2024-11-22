@@ -15,7 +15,7 @@ from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
     BpmnModelListSerializer,
     BpmnModelSerializer,
-    CaseUserTaskSerializer,
+    CaseUserTaskListSerializer,
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
 )
@@ -28,8 +28,8 @@ class CaseUserTaskViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
 ):
-    serializer_class = CaseUserTaskSerializer
-    queryset = CaseUserTask.objects.filter(completed=False)
+    serializer_class = CaseUserTaskListSerializer
+    queryset = CaseUserTask.objects.filter(completed=False).prefetch_related("case")
 
 
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
