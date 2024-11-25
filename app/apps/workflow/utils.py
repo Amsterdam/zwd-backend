@@ -220,13 +220,10 @@ def get_latest_version_from_config(workflow_type):
             f"Workflow type '{workflow_type}', does not exist in this workflow_spec config"
         )
 
-    def get_major(v):
-        return int(v.split(".")[0])
-
-    theme_versions = sorted([v for v, k in config.get("versions").items()])
-    if not theme_versions:
+    workflow_type_versions = sorted([v for v, k in config.get("versions").items()])
+    if not workflow_type_versions:
         raise Exception(
             f"Workflow version for theme name '{theme_name}', with type '{workflow_type}', does not exist in this workflow_spec config"
         )
-    highest_sub_version = theme_versions[-1]
+    highest_sub_version = workflow_type_versions[-1]
     return highest_sub_version
