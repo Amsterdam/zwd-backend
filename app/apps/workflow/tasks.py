@@ -61,7 +61,7 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
             # TODO: Make dynamic
             workflow_type="process_vve_ok",
             main_workflow=True,
-            workflow_message_name="main_process",
+            workflow_message_name=None,
             data=data,
         )
 
@@ -74,6 +74,7 @@ def task_start_worflow(self, worklow_id):
 
     workflow_instance = CaseWorkflow.objects.get(id=worklow_id)
     workflow_instance.start()
+    return f"task_start_worflow: workflow id '{worklow_id}', started"
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)

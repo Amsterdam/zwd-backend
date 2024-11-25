@@ -237,7 +237,15 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.3.0": {},
             },
         },
-    },
+        "sub_workflow": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {
+                    "start_extra_information": {},
+                },
+            },
+        },
+    }
 }
 
 DSO_CLIENT_ID = os.getenv("DSO_CLIENT_ID", "default_client_id")

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
+from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask, WorkflowOption
 
 
 @admin.register(CaseWorkflow)
@@ -57,4 +57,13 @@ class GenericCompletedTaskAdmin(admin.ModelAdmin):
         "date_added",
         "description",
         "task_name",
+    )
+
+
+@admin.register(WorkflowOption)
+class WorkflowOptionAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "message_name",
     )

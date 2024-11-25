@@ -14,6 +14,8 @@ from SpiffWorkflow.bpmn.workflow import BpmnWorkflow
 from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser
 from SpiffWorkflow.camunda.serializer.config import CAMUNDA_CONFIG
 from SpiffWorkflow.camunda.specs.user_task import UserTask
+from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
+from SpiffWorkflow.bpmn import BpmnEvent
 
 from .managers import BulkCreateSignalsManager
 from .tasks import (
@@ -86,6 +88,17 @@ class CaseWorkflow(models.Model):
         )
         initial_data.update(self.data)
         workflow = self._initial_data(workflow, initial_data)
+        if self.workflow_message_name:
+            workflow.refresh_waiting_tasks()
+            workflow.do_engine_steps()
+            # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
+            workflow.catch(
+                BpmnEvent(
+                    MessageEventDefinition(self.workflow_message_name),
+                    {"result_var": "result_var", "payload": "payload"},
+                )
+            )
+
         workflow = self._update_workflow(workflow)
         self._update_db(workflow)
         return
@@ -108,14 +121,13 @@ class CaseWorkflow(models.Model):
         self,
         workflow_type,
         theme_name="default",
-        workflow_version="1.3.0",
     ):
         path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "bpmn_files",
             theme_name.lower(),
             workflow_type.lower(),
-            workflow_version.lower(),
+            self.workflow_version.lower(),
         )
         return path
 
@@ -343,3 +355,14 @@ class GenericCompletedTask(TaskModelEventEmitter):
             "description": self.description,
             "variables": variables,
         }
+
+
+class WorkflowOption(models.Model):
+    name = models.CharField(max_length=255)
+    message_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.name} - {self.message_name}"
+
+    class Meta:
+        ordering = ["name"]
