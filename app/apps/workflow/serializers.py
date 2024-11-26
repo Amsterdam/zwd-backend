@@ -191,4 +191,4 @@ class BpmnModelSerializer(serializers.Serializer):
 class WorkflowOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkflowOption
-        fields = "id", "name", "message_name"
+        fields = ("id", "name", "message_name")
