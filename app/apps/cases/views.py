@@ -16,6 +16,7 @@ from .serializers import (
     CaseListSerializer,
     StartWorkflowSerializer,
 )
+from drf_spectacular.utils import extend_schema
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
@@ -101,11 +102,14 @@ class CaseViewSet(
         case_document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        responses=StartWorkflowSerializer,
+        description="Start subworkflow",
+    )
     @action(
         detail=True,
         url_path="processes/start",
         methods=["post"],
-        serializer_class=StartWorkflowSerializer,
     )
     def start_process(self, request, pk):
         serializer = self.serializer_class(data=request.data)
@@ -131,12 +135,15 @@ class CaseViewSet(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
+    @extend_schema(
+        responses=WorkflowOptionSerializer(many=True),
+        description="Retrieve workflow options",
+    )
     @action(
         detail=False,
         url_path="processes",
         url_name="processes",
         methods=["get"],
-        serializer_class=WorkflowOptionSerializer,
     )
     def get_workflow_options(self, request):
         serializer = WorkflowOptionSerializer(
