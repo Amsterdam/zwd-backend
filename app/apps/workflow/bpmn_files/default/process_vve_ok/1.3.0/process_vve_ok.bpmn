@@ -143,8 +143,8 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">hoa_is_small.get("value") == True</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0p9p84s" sourceRef="Gateway_1ke9dsy" targetRef="Gateway_0zq4w38" />
-    <bpmn:sequenceFlow id="Flow_05g4jsk" name="Bouwjaar &#60;= 1995 en HBO of Bouwjaar &#62;= 1995 en EA" sourceRef="Gateway_1ke9dsy" targetRef="task_controle_bouwjaar">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">(build_year.get("value") &lt;= 1995 and advice_type.get("value") == "Haalbaarheidsonderzoek") or (build_year.get("value") &gt;= 1995 and advice_type.get("value") == "Energieadvies")</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_05g4jsk" name="Bouwjaar &#62;= 1995 en HBO of Bouwjaar &#60; 1995 en EA" sourceRef="Gateway_1ke9dsy" targetRef="task_controle_bouwjaar">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">(build_year.get("value") &gt;= 1995 and advice_type.get("value") == "Haalbaarheidsonderzoek") or (build_year.get("value") &lt; 1995 and advice_type.get("value") == "Energieadvies")</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1paiaux" name="Doorgaan aanvraag" sourceRef="Gateway_1qlbwp9" targetRef="Gateway_0zq4w38" />
     <bpmn:sequenceFlow id="Flow_0uckmdm" sourceRef="Gateway_0zq4w38" targetRef="task_controle_gebouw" />
@@ -162,7 +162,7 @@
     <bpmn:userTask id="Activity_00ali2m" name="Aanvraag eerder ingediend">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_aanvraag_ingediend" label="Is er eerder (tot 2021) een aanvraag ingediend door de vve?" type="enum">
+          <camunda:formField id="form_aanvraag_ingediend" label="Is er door de vve na 2021 reeds een aanvraag ingediend?" type="enum">
             <camunda:value id="yes" name="Ja" />
             <camunda:value id="no" name="Nee" />
           </camunda:formField>
