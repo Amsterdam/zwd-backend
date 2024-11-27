@@ -110,6 +110,7 @@ class CaseViewSet(
         detail=True,
         url_path="processes/start",
         methods=["post"],
+        serializer_class=StartWorkflowSerializer,
     )
     def start_process(self, request, pk):
         serializer = self.serializer_class(data=request.data)
@@ -144,6 +145,7 @@ class CaseViewSet(
         url_path="processes",
         url_name="processes",
         methods=["get"],
+        serializer_class=WorkflowOptionSerializer,
     )
     def get_workflow_options(self, request):
         serializer = WorkflowOptionSerializer(
