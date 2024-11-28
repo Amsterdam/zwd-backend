@@ -43,6 +43,16 @@ class HomeownerAssociation(models.Model):
     def is_small(self):
         return self.number_of_appartments <= 12
 
+    @property
+    def has_major_shareholder(self):
+        for owner in self.owners.all():
+            if (
+                owner.number_of_appartments / self.number_of_appartments >= 0.25
+                and owner.type != "Natuurlijk persoon"
+            ):
+                return True
+        return False
+
     def get_or_create_hoa_by_bag_id(self, bag_id):
         client = DsoClient()
         hoa_name = client.get_hoa_name_by_bag_id(bag_id)
