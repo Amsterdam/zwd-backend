@@ -23,6 +23,7 @@ class HomeOwnerAssociationView(
     @action(detail=True, methods=["get"])
     def cases(self, request, pk=None):
         hoa = self.get_object()
+        print(hoa.has_major_shareholder)
         cases = Case.objects.filter(homeowner_association=hoa)
         serializer = CaseListSerializer(cases, many=True)
         return Response(serializer.data)

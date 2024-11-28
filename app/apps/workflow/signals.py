@@ -35,6 +35,9 @@ def case_workflow_pre_save(sender, instance, **kwargs):
                 "advice_type": {"value": instance.case.advice_type},
                 "hoa_is_small": {"value": instance.case.homeowner_association.is_small},
                 "build_year": {"value": instance.case.homeowner_association.build_year},
+                "has_major_shareholder": {
+                    "value": instance.case.homeowner_association.has_major_shareholder
+                },
             }
         )
         instance.workflow_version = get_latest_version_from_config(

@@ -1,6 +1,9 @@
 from django.test import TestCase
 from unittest.mock import patch
-from apps.homeownerassociation.models import HomeownerAssociation
+
+
+from apps.homeownerassociation.models import HomeownerAssociation, Owner
+from model_bakery import baker
 
 
 class HomeownerAssociationModelTest(TestCase):
@@ -119,3 +122,33 @@ class HomeownerAssociationModelTest(TestCase):
         self.assertEqual(result.neighborhood.name, "Neighborhood1")
         self.assertEqual(result.district.neighborhoods.count(), 1)
         self.assertEqual(result.neighborhood.homeowner_associations.count(), 1)
+
+    def test_is_small(
+        self,
+    ):
+        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        self.assertTrue(hoa.is_small)
+        hoa = baker.make(HomeownerAssociation, number_of_appartments=13)
+        self.assertFalse(hoa.is_small)
+
+    def test_has_major_shareholder(self):
+        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        baker.make(
+            Owner, homeowner_association=hoa, number_of_appartments=3, type="Corporatie"
+        )
+        self.assertTrue(hoa.has_major_shareholder)
+
+        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        baker.make(
+            Owner, homeowner_association=hoa, number_of_appartments=2, type="Corporatie"
+        )
+        self.assertFalse(hoa.has_major_shareholder)
+
+        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        baker.make(
+            Owner,
+            homeowner_association=hoa,
+            number_of_appartments=8,
+            type="Natuurlijk persoon",
+        )
+        self.assertFalse(hoa.has_major_shareholder)
