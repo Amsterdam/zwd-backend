@@ -23,7 +23,7 @@ from .tasks import (
     task_script_wait,
     task_start_subworkflow,
 )
-from .utils import get_initial_data_from_config, parse_task_spec_form
+from .utils import get_initial_data_from_config
 
 
 class CaseWorkflow(models.Model):
@@ -161,7 +161,7 @@ class CaseWorkflow(models.Model):
                 task_name=task.task_spec.name,
                 name=task.task_spec.bpmn_name,
                 roles=[r.strip() for r in task.task_spec.lane.split(",")],
-                form=parse_task_spec_form(task.task_spec.form),
+                form=self._parse_task_spec_form(task.task_spec.form),
                 due_date=datetime.datetime.today(),
                 case=self.case,
                 workflow=self,
@@ -174,6 +174,45 @@ class CaseWorkflow(models.Model):
         ]
         task_instances = CaseUserTask.objects.bulk_create(task_data)
         return task_instances
+
+    def _evaluate_form_field_label(self, label):
+        expression = label.replace("{{", "{").replace("}}", "}")
+        return expression.format(workflow=self)
+
+    def _parse_task_spec_form(self, form):
+        trans_types = {
+            "enum": "select",
+            "boolean": "checkbox",
+            "string": "text",
+            "long": "number",
+            "expression": "expression",
+        }
+        fields = [
+            {
+                "label": self._evaluate_form_field_label(f.label),
+                "options": [
+                    {
+                        "value": o.id,
+                        "label": o.name,
+                    }
+                    for o in f.__dict__.get("options", [])
+                ],
+                "name": f.id,
+                "type": (
+                    "multiselect"
+                    if bool([v.name for v in f.validation if v.name == "multiple"])
+                    else trans_types.get(f.type, "text")
+                ),
+                "required": not bool(
+                    [v.name for v in f.validation if v.name == "optional"]
+                ),
+                "tooltip": next(
+                    iter([v.value for v in f.properties if v.id == "tooltip"]), None
+                ),
+            }
+            for f in form.fields
+        ]
+        return fields
 
     def _set_obsolete_tasks_to_completed(self, wf):
         ready_tasks_ids = [t.id for t in wf.get_tasks(state=TaskState.READY)]

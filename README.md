@@ -71,3 +71,14 @@ Containers should be running to run tests via docker.
 docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
 docker compose exec -T zwd-backend python manage.py test /app/apps
 ```
+
+## Dynamic values in BPMN field labels
+The embedded form in the camunda task does not support dynamic values by default.
+In the workflow model is a "method _evaluate_form_field_label" that will parse a form label with the following structure {{workflow.prop}}
+``
+<camunda:formData>
+    <camunda:formField id="form_controle_bouwjaar" label="This is a sentence for case {{workflow.case.id}}" type="enum">
+</camunda:formField>
+``
+The above label will be parsed to "This is a sentence for case 123"
+Currently all properties and related objects of the workflow model are supported

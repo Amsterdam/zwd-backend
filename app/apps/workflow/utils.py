@@ -172,41 +172,6 @@ def validate_workflow_spec(workflow_spec_config):
     return serializer.data
 
 
-def parse_task_spec_form(form):
-    trans_types = {
-        "enum": "select",
-        "boolean": "checkbox",
-        "string": "text",
-        "long": "number",
-    }
-    fields = [
-        {
-            "label": f.label,
-            "options": [
-                {
-                    "value": o.id,
-                    "label": o.name,
-                }
-                for o in f.__dict__.get("options", [])
-            ],
-            "name": f.id,
-            "type": (
-                "multiselect"
-                if bool([v.name for v in f.validation if v.name == "multiple"])
-                else trans_types.get(f.type, "text")
-            ),
-            "required": not bool(
-                [v.name for v in f.validation if v.name == "optional"]
-            ),
-            "tooltip": next(
-                iter([v.value for v in f.properties if v.id == "tooltip"]), None
-            ),
-        }
-        for f in form.fields
-    ]
-    return fields
-
-
 def get_latest_version_from_config(workflow_type):
     validated_workflow_spec_config = validate_workflow_spec(
         settings.WORKFLOW_SPEC_CONFIG
