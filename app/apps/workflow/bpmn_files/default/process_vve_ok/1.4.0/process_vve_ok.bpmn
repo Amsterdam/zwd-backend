@@ -354,7 +354,7 @@
     <bpmn:userTask id="task_controle_bouwjaar" name="Controle bouwjaar">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_controle_bouwjaar" label="Het bouwjaar en het type advies voldoen niet aan de vereisten. Wil je doorgaan met de aanvraag?" type="enum">
+          <camunda:formField id="form_controle_bouwjaar" label="Het bouwjaar {{workflow.case.homeowner_association.build_year}} en de aanvraag voor een {{workflow.case.advice_type} voldoen niet aan de vereisten. Wil je doorgaan met de aanvraag?" type="enum">
             <camunda:value id="yes" name="Ja" />
             <camunda:value id="no" name="Nee" />
           </camunda:formField>

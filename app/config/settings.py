@@ -116,7 +116,6 @@ OIDC_OP_JWKS_ENDPOINT = os.getenv(
     "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804/discovery/v2.0/keys",
 )
 OIDC_RP_CLIENT_SECRET = os.environ.get("OIDC_RP_CLIENT_SECRET", None)
-
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
