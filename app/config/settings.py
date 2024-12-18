@@ -96,7 +96,7 @@ MIDDLEWARE = [
     "mozilla_django_oidc.middleware.SessionRefresh",
 ]
 
-
+OIDC_USE_NONCE = False
 OIDC_RP_CLIENT_ID = os.environ.get(
     "OIDC_RP_CLIENT_ID", "c622ea17-3c29-4b8f-ae84-56dda14419e7"
 )
@@ -116,6 +116,15 @@ OIDC_OP_JWKS_ENDPOINT = os.getenv(
     "https://login.microsoftonline.com/72fca1b1-2c2e-4376-a445-294d80196804/discovery/v2.0/keys",
 )
 OIDC_RP_CLIENT_SECRET = os.environ.get("OIDC_RP_CLIENT_SECRET", None)
+
+OIDC_OP_ISSUER = os.getenv(
+    "OIDC_OP_ISSUER",
+    "https://sts.windows.net/72fca1b1-2c2e-4376-a445-294d80196804/",
+)
+
+OIDC_TRUSTED_AUDIENCES = f"api://{OIDC_RP_CLIENT_ID}"
+OIDC_RP_SIGN_ALGO = "RS256"
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [

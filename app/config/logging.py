@@ -19,6 +19,7 @@ def start_logging():
     LOGGING_HANDLERS: dict[str, dict[str, Any]] = {
         "console": {
             "class": "logging.StreamHandler",
+            "level": "INFO",
         },
     }
     LOGGER_HANDLERS = [
