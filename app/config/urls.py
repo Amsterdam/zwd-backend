@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from apps.homeownerassociation.views import HomeOwnerAssociationView
 from apps.address.views import AddressViewset
 from apps.cases.views import CaseViewSet
@@ -39,5 +40,9 @@ urlpatterns = [
         "api/schema/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
+    ),
+    path(
+        ".well-known/security.txt",
+        lambda: redirect("https://www.amsterdam.nl/security.txt"),
     ),
 ]
