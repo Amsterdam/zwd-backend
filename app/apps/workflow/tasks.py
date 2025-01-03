@@ -18,6 +18,33 @@ class BaseTaskWithRetry(celery.Task):
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
+def task_update_workflows_with_timer(self):
+    from apps.workflow.models import CaseWorkflow
+
+    workflows = CaseWorkflow.objects.filter(completed=False)
+    for workflow in workflows:
+        if workflow.has_a_timer_event_fired():
+            from apps.workflow.tasks import task_update_workflow
+
+            task_update_workflow.delay(workflow.id)
+    return f"task_update_workflows_with_timer: complete"
+
+
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
+def task_update_workflow(self, workflow_id):
+    from apps.workflow.models import CaseWorkflow
+
+    workflow_instance = CaseWorkflow.objects.get(id=workflow_id)
+    with transaction.atomic():
+        workflow_instance._update_workflow(
+            workflow_instance._get_or_restore_workflow_state()
+        )
+    return (
+        f"task_update_workflow: update for workflow with id '{workflow_id}', complete"
+    )
+
+
+@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_accept_message_for_workflow(self, workflow_id, message, extra_data):
     from apps.workflow.models import CaseWorkflow
 

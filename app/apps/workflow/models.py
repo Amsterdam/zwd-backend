@@ -1,12 +1,12 @@
 import datetime
 import os
 
+
 from apps.events.models import CaseEvent, TaskModelEventEmitter
 from apps.cases.models import Case
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.utils.dateparse import parse_duration
 from SpiffWorkflow import TaskState
 from SpiffWorkflow.bpmn.script_engine import PythonScriptEngine, TaskDataEnvironment
 from SpiffWorkflow.bpmn.serializer import BpmnWorkflowSerializer
@@ -15,8 +15,9 @@ from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser
 from SpiffWorkflow.camunda.serializer.config import CAMUNDA_CONFIG
 from SpiffWorkflow.camunda.specs.user_task import UserTask
 from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
+from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
 from SpiffWorkflow.bpmn import BpmnEvent
-
+from SpiffWorkflow.bpmn.specs.event_definitions.timer import TimerEventDefinition
 from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
@@ -27,6 +28,9 @@ from .utils import get_initial_data_from_config
 
 
 class CaseWorkflow(models.Model):
+
+    WORKFLOW_TYPE_SUB = "sub_workflow"
+
     case = models.ForeignKey(
         to=Case,
         related_name="workflows",
@@ -91,6 +95,8 @@ class CaseWorkflow(models.Model):
         if self.workflow_message_name:
             workflow.refresh_waiting_tasks()
             workflow.do_engine_steps()
+            workflow.refresh_waiting_tasks()
+            workflow.do_engine_steps()
             # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
             workflow.catch(
                 BpmnEvent(
@@ -115,6 +121,24 @@ class CaseWorkflow(models.Model):
 
         workflow = self._update_workflow(workflow)
         self._update_db(workflow)
+
+    def has_a_timer_event_fired(self):
+        wf = self._get_or_restore_workflow_state()
+        if not wf:
+            return False
+        waiting_tasks = wf.get_tasks(state=TaskState.WAITING)
+        for task in waiting_tasks:
+            if hasattr(task.task_spec, "event_definition") and isinstance(
+                task.task_spec.event_definition, TimerEventDefinition
+            ):
+                event_definition = task.task_spec.event_definition
+                has_fired = event_definition.has_fired(task)
+                if has_fired:
+                    print(
+                        f"TimerEventDefinition for task '{task.task_spec.name}' has expired. Workflow with id '{self.id}', needs an update"
+                    )
+                    return True
+        return False
 
     def _get_workflow_path(
         # TODO make dynamic
@@ -152,6 +176,16 @@ class CaseWorkflow(models.Model):
     def _update_tasks(self, wf):
         self._set_obsolete_tasks_to_completed(wf)
         self._create_user_tasks(wf)
+        self._complete_sub_workflow(wf)
+
+    # The sub_workflow.bpmn has multiple flows inside, so spiff does not know when the workflow is completed.
+    def _complete_sub_workflow(self, wf):
+        if (
+            self.workflow_type == self.WORKFLOW_TYPE_SUB
+            and len(wf.get_tasks(state=TaskState.READY)) == 0
+        ):
+            self.completed = True
+            self.save()
 
     def _create_user_tasks(self, wf):
         ready_tasks = wf.get_tasks(state=TaskState.READY)
@@ -235,6 +269,8 @@ class CaseWorkflow(models.Model):
     def _update_workflow(self, wf):
         wf.refresh_waiting_tasks()
         wf.do_engine_steps()
+        # TODO: make sure update db is not called multiple times
+        self._update_db(wf)
         return wf
 
     def _update_db(self, wf):
@@ -285,7 +321,11 @@ class CaseWorkflow(models.Model):
             task_start_subworkflow.delay(subworkflow_name, workflow_instance.id, data)
 
         def parse_duration_string(str_duration):
-            return parse_duration(str_duration)
+            # If the environment is not production, the duration is set to 2 minutes for testing purposes
+            if settings.ENVIRONMENT != "production":
+                two_minutes_iso_8601 = "T120S"
+                return two_minutes_iso_8601
+            return str_duration
 
         wf.script_engine = PythonScriptEngine(
             environment=TaskDataEnvironment(

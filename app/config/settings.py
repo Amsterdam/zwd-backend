@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "apps.address",
     "django_spaghetti",
     "drf_spectacular",
+    "django_celery_beat",
     "django_celery_results",
 ]
 
@@ -244,6 +245,7 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.2.0": {},
                 "1.3.0": {},
                 "1.4.0": {},
+                "1.5.0": {},
             },
         },
         "sub_workflow": {
