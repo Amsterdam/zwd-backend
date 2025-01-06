@@ -103,8 +103,7 @@ class CaseWorkflow(models.Model):
                 )
             )
 
-        workflow = self._update_workflow(workflow)
-        self._update_db(workflow)
+        workflow = self.update_workflow(workflow)
         return
 
     def complete_user_task_and_create_new_user_tasks(self, task_id=None, data=None):
@@ -117,7 +116,7 @@ class CaseWorkflow(models.Model):
             task.set_data(**data)
             task.complete()
 
-        workflow = self._update_workflow(workflow)
+        workflow = self.update_workflow(workflow)
         self._update_db(workflow)
 
     def has_a_timer_event_fired(self):
@@ -264,9 +263,10 @@ class CaseWorkflow(models.Model):
         first_task.data.update(data)
         return wf
 
-    def _update_workflow(self, wf):
+    def update_workflow(self, wf):
         wf.refresh_waiting_tasks()
         wf.do_engine_steps()
+        self._update_db(wf)
         return wf
 
     def _update_db(self, wf):

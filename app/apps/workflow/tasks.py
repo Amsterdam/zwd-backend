@@ -36,7 +36,7 @@ def task_update_workflow(self, workflow_id):
 
     workflow_instance = CaseWorkflow.objects.get(id=workflow_id)
     with transaction.atomic():
-        workflow_instance._update_workflow(
+        workflow_instance.update_workflow(
             workflow_instance._get_or_restore_workflow_state()
         )
     return (
