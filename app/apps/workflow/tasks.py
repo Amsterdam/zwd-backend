@@ -27,7 +27,7 @@ def task_update_workflows_with_timer(self):
             from apps.workflow.tasks import task_update_workflow
 
             task_update_workflow.delay(workflow.id)
-    return f"task_update_workflows_with_timer: complete"
+    return f"task_update_workflows_with_timer: completed"
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)

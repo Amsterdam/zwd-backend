@@ -95,8 +95,6 @@ class CaseWorkflow(models.Model):
         if self.workflow_message_name:
             workflow.refresh_waiting_tasks()
             workflow.do_engine_steps()
-            workflow.refresh_waiting_tasks()
-            workflow.do_engine_steps()
             # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
             workflow.catch(
                 BpmnEvent(
@@ -269,8 +267,6 @@ class CaseWorkflow(models.Model):
     def _update_workflow(self, wf):
         wf.refresh_waiting_tasks()
         wf.do_engine_steps()
-        # TODO: make sure update db is not called multiple times
-        self._update_db(wf)
         return wf
 
     def _update_db(self, wf):
