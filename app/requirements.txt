@@ -15,6 +15,8 @@ uritemplate==4.1.1
 
 celery==5.4.0
 django_celery_results==2.5.1
+django-celery-beat==2.7.0
+
 redis==5.0.7
 azure-identity==1.16.1
 mozilla-django-oidc==4.0.1
@@ -26,3 +28,4 @@ djangorestframework-simplejwt==5.3.1
 django-storages==1.14.4
 azure-storage-blob==12.23.1
 python-magic==0.4.27
+watchdog==6.0.0

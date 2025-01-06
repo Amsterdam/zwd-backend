@@ -56,6 +56,7 @@ class CaseUserTaskListSerializer(serializers.ModelSerializer):
             "name",
             "case",
             "homeowner_association",
+            "created",
         )
 
 
