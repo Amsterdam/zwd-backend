@@ -14,9 +14,6 @@ class CaseApiTest(APITestCase):
         self.client = get_authenticated_client()
         self.case = self._create_case()
 
-    def teardown(self):
-        self.celery_worker.__exit__(None, None, None)
-
     def test_unauthenticated_get(self):
         url = reverse("cases-list")
         client = get_unauthenticated_client()
