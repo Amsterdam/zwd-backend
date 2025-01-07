@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.core import management
 from django.urls import reverse
 from rest_framework import status
@@ -12,6 +13,9 @@ class CaseApiTest(APITestCase):
         super().setUp()
         self.client = get_authenticated_client()
         self.case = self._create_case()
+
+    def teardown(self):
+        self.celery_worker.__exit__(None, None, None)
 
     def test_unauthenticated_get(self):
         url = reverse("cases-list")
@@ -126,7 +130,10 @@ class CaseApiTest(APITestCase):
         response = self.client.post(url, data=document_data, format="multipart")
         return response.data
 
-    def _create_case(self):
+    # Django test create a test db, celery is unaware of that db so mock celery methods
+    @patch("apps.cases.views.CaseViewSet.start_workflow")
+    def _create_case(self, mock_start_workflow):
+        mock_start_workflow.return_value = "task_start_worflow: completed"
         url = reverse("cases-list")
         data = {"description": "Test case description"}
 

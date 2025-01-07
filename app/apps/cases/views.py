@@ -61,13 +61,16 @@ class CaseViewSet(
         contacts_data = validated_data.pop("contacts", [])
         case = Case.objects.create(**validated_data)
         Contact.process_contacts(case, contacts_data)
+        self.start_workflow(case)
+        return Response(CaseSerializer(case).data, status=201)
+
+    def start_workflow(self, case):
         task = task_create_main_worflow_for_case.delay(case_id=case.id)
         task.wait(timeout=None, interval=0.5)
         start_workflow_task = task_start_worflow.delay(
             CaseWorkflow.objects.get(case=case).id
         )
         start_workflow_task.wait(timeout=None, interval=0.5)
-        return Response(CaseSerializer(case).data, status=201)
 
     @action(
         detail=False, methods=["post"], url_path="documents", name="cases-documents"
