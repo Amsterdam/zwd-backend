@@ -20,6 +20,8 @@ from drf_spectacular.utils import extend_schema
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
+from apps.workflow.tasks import task_create_main_worflow_for_case
+from apps.workflow.tasks import task_start_worflow
 
 
 class CaseViewSet(
@@ -59,7 +61,16 @@ class CaseViewSet(
         contacts_data = validated_data.pop("contacts", [])
         case = Case.objects.create(**validated_data)
         Contact.process_contacts(case, contacts_data)
+        self.start_workflow(case)
         return Response(CaseSerializer(case).data, status=201)
+
+    def start_workflow(self, case):
+        task = task_create_main_worflow_for_case.delay(case_id=case.id)
+        task.wait(timeout=None, interval=0.5)
+        start_workflow_task = task_start_worflow.delay(
+            CaseWorkflow.objects.get(case=case).id
+        )
+        start_workflow_task.wait(timeout=None, interval=0.5)
 
     @action(
         detail=False, methods=["post"], url_path="documents", name="cases-documents"
@@ -120,12 +131,13 @@ class CaseViewSet(
             instance = data["workflow_option_id"]
 
             workflow_type = "sub_workflow"
-            CaseWorkflow.objects.create(
+            case_workflow = CaseWorkflow.objects.create(
                 case=case,
                 workflow_type=workflow_type,
                 workflow_message_name=instance.message_name,
             )
-
+            task = task_start_worflow.delay(case_workflow.id)
+            task.wait(timeout=None, interval=0.5)
             return Response(
                 data=f"Workflow has started {str(instance)}",
                 status=status.HTTP_200_OK,

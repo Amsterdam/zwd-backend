@@ -91,7 +91,6 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
             workflow_message_name=None,
             data=data,
         )
-
     return f"task_start_main_worflow_for_case: workflow id '{workflow_instance.id}', for case with id '{case_id}', created"
 
 

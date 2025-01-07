@@ -25,6 +25,7 @@ from .tasks import (
     task_start_subworkflow,
 )
 from .utils import get_initial_data_from_config
+from django.utils.timezone import make_aware
 
 
 class CaseWorkflow(models.Model):
@@ -193,7 +194,7 @@ class CaseWorkflow(models.Model):
                 name=task.task_spec.bpmn_name,
                 roles=[r.strip() for r in task.task_spec.lane.split(",")],
                 form=self._parse_task_spec_form(task.task_spec.form),
-                due_date=datetime.datetime.today(),
+                due_date=make_aware(datetime.datetime.today()),
                 case=self.case,
                 workflow=self,
             )

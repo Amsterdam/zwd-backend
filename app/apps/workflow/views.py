@@ -1,4 +1,8 @@
 import logging
+
+from apps.workflow.task_completion import (
+    complete_generic_user_task_and_create_new_user_tasks,
+)
 from apps.workflow.utils import (
     get_bpmn_models,
     get_bpmn_file,
@@ -78,7 +82,8 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
             )
 
             try:
-                GenericCompletedTask.objects.create(**data)
+                case_user_task = GenericCompletedTask.objects.create(**data)
+                complete_generic_user_task_and_create_new_user_tasks(case_user_task)
                 return HttpResponse(
                     f"CaseUserTask {data['case_user_task_id']} has been completed"
                 )
