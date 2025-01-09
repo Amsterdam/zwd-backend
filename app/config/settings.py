@@ -55,7 +55,7 @@ INSTALLED_APPS = [
 LOCAL_DEVELOPMENT_AUTHENTICATION = (
     os.getenv("LOCAL_DEVELOPMENT_AUTHENTICATION", "False") == "True"
 )
-# LOCAL_DEVELOPMENT_AUTHENTICATION = True
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "apps.users.auth.OIDCAuthenticationBackend",
