@@ -35,67 +35,25 @@ class CaseUserTaskApiTests(APITestCase):
         self.assertEqual(data, [])
 
     @patch("apps.workflow.views.complete_generic_user_task_and_create_new_user_tasks")
-    def test_complete_task(self, complete_generic_user_task_and_create_new_user_tasks):
-        complete_generic_user_task_and_create_new_user_tasks.return_value = (
-            "task completed"
-        )
-        case_id = self._create_case()
-        case = Case.objects.get(id=case_id)
-        case_wf = CaseWorkflow.objects.create(
-            case=case, completed=False, workflow_type="process_vve_ok"
-        )
-        case_user_task = CaseUserTask.objects.create(
-            task_name="task1",
-            completed=False,
-            case=case,
-            task_id=uuid.uuid4(),
-            due_date="2021-01-01",
-            workflow_id=case_wf.id,
-        )
-        url = reverse("generictasks-complete-task")
-        data = {
-            "case_user_task_id": case_user_task.id,
-            "case": case_id,
-            "variables": {"test": "test"},
-        }
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(
-            GenericCompletedTask.objects.filter(
-                case_user_task_id=case_user_task.id
-            ).exists()
-        )
-
-    @patch("apps.workflow.views.complete_generic_user_task_and_create_new_user_tasks")
     def test_complete_file_task(
         self, complete_generic_user_task_and_create_new_user_tasks
     ):
         complete_generic_user_task_and_create_new_user_tasks.return_value = (
             "task completed"
         )
-        case_id = self._create_case()
-        case = Case.objects.get(id=case_id)
-        case_wf = CaseWorkflow.objects.create(
-            case=case, completed=False, workflow_type="process_vve_ok"
-        )
-        case_user_task = CaseUserTask.objects.create(
-            task_name="task1",
-            completed=False,
-            case=case,
-            task_id=uuid.uuid4(),
-            due_date="2021-01-01",
-            workflow_id=case_wf.id,
-        )
+        case, case_user_task = self._create_case_and_task()
+
         url = reverse("generictasks-complete-file-task")
         data = {
             "case_user_task_id": case_user_task.id,
-            "case": case_id,
+            "case": case.id,
             "name": "test_document",
             "document": SimpleUploadedFile(
                 "test_document.pdf", b"file_content", content_type="application/pdf"
             ),
         }
         response = self.client.post(url, data=data, format="multipart")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(
             GenericCompletedTask.objects.filter(
@@ -103,6 +61,44 @@ class CaseUserTaskApiTests(APITestCase):
             ).exists()
         )
         self.assertTrue(CaseDocument.objects.filter(name="test_document").exists())
+
+    @patch("apps.workflow.views.complete_generic_user_task_and_create_new_user_tasks")
+    def test_complete_task(self, complete_generic_user_task_and_create_new_user_tasks):
+        complete_generic_user_task_and_create_new_user_tasks.return_value = (
+            "task completed"
+        )
+        case, case_user_task = self._create_case_and_task()
+
+        url = reverse("generictasks-complete-task")
+        data = {
+            "case_user_task_id": case_user_task.id,
+            "case": case.id,
+            "variables": {"test": "test"},
+        }
+        response = self.client.post(url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            GenericCompletedTask.objects.filter(
+                case_user_task_id=case_user_task.id
+            ).exists()
+        )
+
+    def _create_case_and_task(self):
+        case_id = self._create_case()
+        case = Case.objects.get(id=case_id)
+        case_wf = CaseWorkflow.objects.create(
+            case=case, completed=False, workflow_type="process_vve_ok"
+        )
+        case_user_task = CaseUserTask.objects.create(
+            task_name="task1",
+            completed=False,
+            case=case,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            workflow_id=case_wf.id,
+        )
+        return case, case_user_task
 
     @patch("apps.cases.views.CaseViewSet.start_workflow")
     def _create_case(self, mock_start_workflow):
