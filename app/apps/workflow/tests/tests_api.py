@@ -84,6 +84,41 @@ class CaseUserTaskApiTests(APITestCase):
             ).exists()
         )
 
+    def test_get_case_user_tasks(self):
+        case, case_user_task = self._create_case_and_task()
+        url = reverse("tasks-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.json()), 1)
+
+    def test_get_case_user_task_detail(self):
+        _, case_user_task = self._create_case_and_task()
+        url = reverse("tasks-detail", kwargs={"pk": case_user_task.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["id"], case_user_task.id)
+
+    def test_complete_task_invalid_id(self):
+        url = reverse("generictasks-complete-task")
+        data = {
+            "case_user_task_id": uuid.uuid4(),
+            "case": uuid.uuid4(),
+            "variables": {"test": "test"},
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_complete_file_task_missing_file(self):
+        case, case_user_task = self._create_case_and_task()
+        url = reverse("generictasks-complete-file-task")
+        data = {
+            "case_user_task_id": case_user_task.id,
+            "case": case.id,
+            "name": "test_document",
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def _create_case_and_task(self):
         case_id = self._create_case()
         case = Case.objects.get(id=case_id)
