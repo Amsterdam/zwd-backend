@@ -15,7 +15,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-
+from django.db import transaction
 from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
     BpmnModelListSerializer,
@@ -67,16 +67,17 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
             data=request.data, context={"request": request}
         )
         if serializer.is_valid():
-            return self._complete_task_common(serializer)
+            return self._complete_task_common(serializer, save_document=True)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def _complete_task_common(self, serializer):
+    @transaction.atomic
+    def _complete_task_common(self, serializer, save_document=False):
+
         data = serializer.validated_data
 
-        case_user_task_id = data.get("case_user_task_id")
-        author = data.get("author")
+        case_user_task_id = data.pop("case_user_task_id")
+        author = data.pop("author")
         variables = data.get("variables", {})
-
         task = CaseUserTask.objects.get(id=case_user_task_id, completed=False)
         from apps.workflow.user_tasks import get_task_by_name
 
@@ -89,6 +90,14 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
             variables["mapped_form_data"] = map_variables_on_task_spec_form(
                 variables, task.form
             )
+
+        # Only save the document if it is a file task so the file gets uploaded
+        if save_document:
+            variables["mapped_form_data"]["document_name"] = {
+                "label": "Document",
+                "value": serializer.validated_data.get("name"),
+            }
+            serializer.save()
 
         task_data = {
             "case_user_task_id": case_user_task_id,

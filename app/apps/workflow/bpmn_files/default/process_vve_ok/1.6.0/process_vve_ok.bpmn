@@ -296,6 +296,11 @@
       <bpmn:outgoing>Flow_0isu3fo</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="task_upload_grootaandeelhouder_formulier" name="Upload instemmingsformulier grootaandeelhouder">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_upload_grootaandeelhouder" label="Upload het formulier van de grootaandeelhouder" type="file" />
+        </camunda:formData>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_02yy2x9</bpmn:incoming>
       <bpmn:outgoing>Flow_1rveqob</bpmn:outgoing>
     </bpmn:userTask>
