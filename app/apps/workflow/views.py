@@ -1,5 +1,6 @@
 import logging
-
+from rest_framework import status
+from apps.cases.serializers import CaseDocumentWithTaskSerializer
 from apps.workflow.task_completion import (
     complete_generic_user_task_and_create_new_user_tasks,
 )
@@ -9,12 +10,12 @@ from apps.workflow.utils import (
     get_bpmn_model_versions_and_files,
     map_variables_on_task_spec_form,
 )
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-
+from django.db import transaction
 from .models import CaseUserTask, GenericCompletedTask
 from .serializers import (
     BpmnModelListSerializer,
@@ -40,10 +41,7 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()
 
-    @extend_schema(
-        description="Complete GenericCompletedTask",
-        responses={200: None},
-    )
+    @extend_schema(description="Complete GenericCompletedTask", responses={200: None})
     @action(
         detail=False,
         url_path="complete",
@@ -51,45 +49,72 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
         serializer_class=GenericCompletedTaskCreateSerializer,
     )
     def complete_task(self, request):
-        context = {"request": self.request}
-
         serializer = GenericCompletedTaskCreateSerializer(
-            data=request.data, context=context
+            data=request.data, context={"request": request}
         )
         if serializer.is_valid():
-            data = serializer.validated_data
+            return self._complete_task_common(serializer)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            variables = data.get("variables", {})
-            task = CaseUserTask.objects.get(
-                id=data["case_user_task_id"], completed=False
+    @action(
+        detail=False,
+        url_path="complete-file-task",
+        methods=["post"],
+        serializer_class=CaseDocumentWithTaskSerializer,
+    )
+    def complete_file_task(self, request):
+        serializer = CaseDocumentWithTaskSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid():
+            return self._complete_task_common(serializer, save_document=True)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @transaction.atomic
+    def _complete_task_common(self, serializer, save_document=False):
+
+        data = serializer.validated_data
+
+        case_user_task_id = data.pop("case_user_task_id")
+        author = data.pop("author")
+        variables = data.get("variables", {})
+        task = CaseUserTask.objects.get(id=case_user_task_id, completed=False)
+        from apps.workflow.user_tasks import get_task_by_name
+
+        user_task_type = get_task_by_name(task.task_name)
+        user_task = user_task_type(task)
+
+        if user_task and user_task.mapped_form_data(variables):
+            variables["mapped_form_data"] = user_task.mapped_form_data(variables)
+        else:
+            variables["mapped_form_data"] = map_variables_on_task_spec_form(
+                variables, task.form
             )
-            from .user_tasks import get_task_by_name
 
-            user_task_type = get_task_by_name(task.task_name)
-            user_task = user_task_type(task)
-            if user_task and user_task.mapped_form_data(variables):
-                variables["mapped_form_data"] = user_task.mapped_form_data(variables)
-            else:
-                variables["mapped_form_data"] = map_variables_on_task_spec_form(
-                    variables, task.form
-                )
-            data.update(
-                {
-                    "description": task.name,
-                    "task_name": task.task_name,
-                    "variables": variables,
-                }
-            )
+        # Only save the document if it is a file task so the file gets uploaded
+        if save_document:
+            variables["mapped_form_data"]["document_name"] = {
+                "label": "Document",
+                "value": serializer.validated_data.get("name"),
+            }
+            serializer.save()
 
-            try:
-                case_user_task = GenericCompletedTask.objects.create(**data)
-                complete_generic_user_task_and_create_new_user_tasks(case_user_task)
-                return HttpResponse(
-                    f"CaseUserTask {data['case_user_task_id']} has been completed"
-                )
-            except Exception as e:
-                raise e
-        return HttpResponseBadRequest("Invalid request")
+        task_data = {
+            "case_user_task_id": case_user_task_id,
+            "description": task.name,
+            "task_name": task.task_name,
+            "variables": variables,
+            "case": task.case,
+            "author": author,
+        }
+
+        case_user_task = GenericCompletedTask.objects.create(**task_data)
+        complete_generic_user_task_and_create_new_user_tasks(case_user_task)
+
+        return Response(
+            {"message": f"CaseUserTask {case_user_task_id} has been completed"},
+            status=status.HTTP_200_OK,
+        )
 
 
 class BpmnViewSet(viewsets.GenericViewSet):
@@ -136,5 +161,4 @@ class BpmnViewSet(viewsets.GenericViewSet):
     )
     def get_bpmn_file(self, request, model_name, version):
         content = get_bpmn_file(model_name, version)
-        # Return the file content as an XML response
         return HttpResponse(content, content_type="application/xml")

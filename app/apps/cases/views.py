@@ -86,8 +86,7 @@ class CaseViewSet(
     @action(detail=True, methods=["get"], url_path="documents")
     def get_documents(self, request, pk=None):
         case = self.get_object()
-        documents = CaseDocument.objects.filter(case=case)
-        serializer = CaseDocumentSerializer(documents, many=True)
+        serializer = CaseDocumentSerializer(case.documents, many=True)
         return Response(serializer.data)
 
     @action(

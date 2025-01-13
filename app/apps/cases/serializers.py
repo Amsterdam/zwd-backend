@@ -73,6 +73,19 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
         return value
 
 
+class CaseDocumentWithTaskSerializer(CaseDocumentSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    case_user_task_id = serializers.CharField(
+        required=False, allow_null=True, write_only=True
+    )
+
+    class Meta(CaseDocumentSerializer.Meta):
+        fields = CaseDocumentSerializer.Meta.fields + (
+            "case_user_task_id",
+            "author",
+        )
+
+
 class StartWorkflowSerializer(serializers.Serializer):
     workflow_option_id = serializers.PrimaryKeyRelatedField(
         queryset=WorkflowOption.objects.all()

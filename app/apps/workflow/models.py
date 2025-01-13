@@ -218,6 +218,7 @@ class CaseWorkflow(models.Model):
             "string": "text",
             "long": "number",
             "expression": "expression",
+            "file": "file",
         }
         fields = [
             {
