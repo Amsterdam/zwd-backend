@@ -1,3 +1,4 @@
+import copy
 import logging
 from rest_framework import status
 from apps.cases.serializers import CaseDocumentWithTaskSerializer
@@ -16,14 +17,16 @@ from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
-from .models import CaseUserTask, GenericCompletedTask
+from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 from .serializers import (
     BpmnModelListSerializer,
     BpmnModelSerializer,
     CaseUserTaskListSerializer,
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
+    UndoSerializer,
 )
+from SpiffWorkflow import TaskState
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +43,38 @@ class CaseUserTaskViewSet(
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
     serializer_class = GenericCompletedTaskSerializer
     queryset = GenericCompletedTask.objects.all()
+
+    @action(
+        detail=False,
+        url_path="undo",
+        methods=["post"],
+        serializer_class=UndoSerializer,
+    )
+    def undo_task(self, request):
+        serializer = UndoSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            case_workflow = CaseWorkflow.objects.get(
+                id=serializer.validated_data.get("workflow_id")
+            )
+            case_workflow.serialized_workflow_state = copy.deepcopy(
+                case_workflow.previous_serialized_workflow_state
+            )
+            case_workflow.data = copy.deepcopy(case_workflow.previous_data)
+            case_workflow.completed = False
+            case_workflow.save()
+            wf = case_workflow._get_or_restore_workflow_state()
+            case_user_tasks = CaseUserTask.objects.filter(
+                workflow=case_workflow, completed=False
+            )
+            case_user_tasks.delete()
+            ready_tasks = wf.get_tasks(state=TaskState.READY)
+            for ready_task in ready_tasks:
+                case_user_task = CaseUserTask.objects.filter(task_id=ready_task.id)
+                if case_user_task:
+                    case_user_task.delete()
+            case_workflow._create_user_tasks(wf)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(description="Complete GenericCompletedTask", responses={200: None})
     @action(

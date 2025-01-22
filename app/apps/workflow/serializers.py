@@ -8,6 +8,14 @@ from rest_framework.fields import empty
 from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask, WorkflowOption
 
 
+class UndoSerializer(serializers.ModelSerializer):
+    workflow_id = serializers.CharField()
+
+    class Meta:
+        model = CaseWorkflow
+        fields = ("workflow_id",)
+
+
 class CaseUserTaskSerializer(serializers.ModelSerializer):
     case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
     homeowner_association = serializers.SerializerMethodField()

@@ -1,5 +1,6 @@
 import datetime
 import os
+import copy
 
 
 from apps.events.models import CaseEvent, TaskModelEventEmitter
@@ -58,6 +59,7 @@ class CaseWorkflow(models.Model):
         blank=True,
     )
     data = models.JSONField(null=True)
+    previous_data = models.JSONField(null=True)
     serializer = BpmnWorkflowSerializer
 
     case_state_type = models.ForeignKey(
@@ -72,6 +74,7 @@ class CaseWorkflow(models.Model):
         default=False,
     )
     serialized_workflow_state = models.JSONField(null=True)
+    previous_serialized_workflow_state = models.JSONField(null=True)
     started = models.BooleanField(
         default=False,
     )
@@ -118,7 +121,8 @@ class CaseWorkflow(models.Model):
             task.complete()
 
         workflow = self.update_workflow(workflow)
-        self._update_db(workflow)
+        # TODO TEST IF THIS CAN BE REMOVED
+        # self._update_db(workflow)
 
     def has_a_timer_event_fired(self):
         wf = self._get_or_restore_workflow_state()
@@ -159,7 +163,11 @@ class CaseWorkflow(models.Model):
 
     def _save_workflow_state(self, wf):
         if wf.last_task:
-            # update this workflow with the latest task data
+            # update this workflow with the latest task data)
+            print(
+                f"Updating workflow with task data old: {self.previous_data}, new {self.data}"
+            )
+            self.previous_data = copy.deepcopy(self.data)
             self.data.update(wf.last_task.data)
 
         if wf.is_completed() and not self.completed:
@@ -167,6 +175,10 @@ class CaseWorkflow(models.Model):
         reg = self.serializer().configure(CAMUNDA_CONFIG)
         serializer = BpmnWorkflowSerializer(registry=reg)
         state = serializer.serialize_json(wf)
+        if self.serialized_workflow_state:
+            self.previous_serialized_workflow_state = copy.deepcopy(
+                self.serialized_workflow_state
+            )
         self.serialized_workflow_state = state
         self.started = True
         self.save()
