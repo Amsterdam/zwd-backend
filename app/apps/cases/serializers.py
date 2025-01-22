@@ -27,6 +27,7 @@ class CaseSerializer(serializers.ModelSerializer):
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     contacts = ContactSerializer(many=True, required=False)
 
     class Meta:
@@ -37,6 +38,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
             "advice_type",
             "homeowner_association",
             "contacts",
+            "author",
         )
 
 

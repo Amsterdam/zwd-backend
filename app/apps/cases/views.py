@@ -54,7 +54,9 @@ class CaseViewSet(
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = CaseCreateSerializer(data=request.data)
+        serializer = CaseCreateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         # Prevents exception on case creation

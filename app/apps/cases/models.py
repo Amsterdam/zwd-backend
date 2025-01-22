@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.events.models import CaseEvent, ModelEventEmitter
@@ -27,6 +28,12 @@ class Case(ModelEventEmitter):
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, on_delete=models.CASCADE, related_name="cases", null=True
     )
+    author = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        related_name="case_author",
+        on_delete=models.PROTECT,
+        null=True,
+    )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -34,7 +41,12 @@ class Case(ModelEventEmitter):
         return f"Case: {self.id}"
 
     def __get_event_values__(self):
-        return {"description": self.description, "advice_type": self.advice_type}
+        return {
+            "description": self.description,
+            "advice_type": self.advice_type,
+            "author": self.author.__str__(),
+            "date_added": self.created,
+        }
 
     def __get_case__(self):
         return self
