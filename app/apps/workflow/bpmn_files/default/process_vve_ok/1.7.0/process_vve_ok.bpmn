@@ -40,7 +40,6 @@
         <bpmn:flowNodeRef>Gateway_0du1x64</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_informeer_aanvrager</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_01ko21h</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_049hit6</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_upload_aanvraag_formulier</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_194que8</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_upload_grootaandeelhouder_formulier</bpmn:flowNodeRef>
@@ -55,6 +54,8 @@
         <bpmn:flowNodeRef>task_monitoren_extra_informatie</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_extra_info</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_mail_gebruiker_controle_informatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_049hit6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1so3vlp</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:exclusiveGateway id="Gateway_16fvnma" default="Flow_0js6nja">
@@ -278,9 +279,6 @@
     <bpmn:endEvent id="Event_01ko21h">
       <bpmn:incoming>Flow_0rcrplq</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:startEvent id="Event_049hit6">
-      <bpmn:outgoing>Flow_00876s7</bpmn:outgoing>
-    </bpmn:startEvent>
     <bpmn:userTask id="task_upload_aanvraag_formulier" name="Upload aanvraagformulier">
       <bpmn:extensionElements>
         <camunda:formData>
@@ -453,6 +451,15 @@
       <bpmn:incoming>Flow_0u8z0vo</bpmn:incoming>
       <bpmn:outgoing>Flow_12a7080</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:startEvent id="Event_049hit6">
+      <bpmn:outgoing>Flow_00876s7</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1etqrm3</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1etqrm3" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
+    <bpmn:scriptTask id="Activity_1so3vlp" name="Status update: &#34;Aanvraag invoeren&#34;">
+      <bpmn:incoming>Flow_1etqrm3</bpmn:incoming>
+      <bpmn:script>set_status("Volledigheid")</bpmn:script>
+    </bpmn:scriptTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -580,9 +587,6 @@
       <bpmndi:BPMNShape id="Event_01ko21h_di" bpmnElement="Event_01ko21h">
         <dc:Bounds x="2761" y="422" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0d85rgj" bpmnElement="Event_049hit6">
-        <dc:Bounds x="211" y="742" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_05u0fmk" bpmnElement="task_upload_aanvraag_formulier">
         <dc:Bounds x="289" y="720" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -625,6 +629,13 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1yryqre_di" bpmnElement="task_mail_gebruiker_controle_informatie">
         <dc:Bounds x="699" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0d85rgj" bpmnElement="Event_049hit6">
+        <dc:Bounds x="182" y="742" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1so3vlp_di" bpmnElement="Activity_1so3vlp">
+        <dc:Bounds x="240" y="590" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0yawjbc_di" bpmnElement="timer_extra_info">
@@ -859,7 +870,7 @@
         <di:waypoint x="2761" y="440" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00876s7_di" bpmnElement="Flow_00876s7">
-        <di:waypoint x="247" y="760" />
+        <di:waypoint x="218" y="760" />
         <di:waypoint x="289" y="760" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ajxfee_di" bpmnElement="Flow_0ajxfee">
@@ -917,6 +928,11 @@
       <bpmndi:BPMNEdge id="Flow_0dk0tas_di" bpmnElement="Flow_0dk0tas">
         <di:waypoint x="1127" y="320" />
         <di:waypoint x="1594" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1etqrm3_di" bpmnElement="Flow_1etqrm3">
+        <di:waypoint x="200" y="742" />
+        <di:waypoint x="200" y="630" />
+        <di:waypoint x="240" y="630" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

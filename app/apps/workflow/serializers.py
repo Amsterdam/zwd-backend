@@ -1,6 +1,6 @@
 import re
 
-from apps.cases.models import Case
+from apps.cases.models import Case, CaseStateType
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -60,8 +60,15 @@ class CaseUserTaskListSerializer(serializers.ModelSerializer):
         )
 
 
+class CaseStateTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CaseStateType
+        fields = ("name",)
+
+
 class CaseWorkflowSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
 
     class Meta:
         model = CaseWorkflow
@@ -75,6 +82,7 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             "data",
             "tasks",
             "completed",
+            "state",
         )
 
     @extend_schema_field(CaseUserTaskSerializer(many=True))
@@ -87,6 +95,10 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
             many=True,
             context=self.context,
         ).data
+
+    @extend_schema_field(CaseStateTypeSerializer)
+    def get_state(self, obj):
+        return CaseStateTypeSerializer(obj.case_state_type).data
 
 
 class GenericCompletedTaskSerializer(serializers.ModelSerializer):
