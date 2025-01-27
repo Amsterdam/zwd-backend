@@ -60,6 +60,7 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
                 case_workflow.previous_serialized_workflow_state
             )
             case_workflow.data = copy.deepcopy(case_workflow.previous_data)
+            # Reverting should probably not be possible when wf is completed
             case_workflow.completed = False
             case_workflow.save()
             wf = case_workflow._get_or_restore_workflow_state()
@@ -69,10 +70,16 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
             case_user_tasks.delete()
             ready_tasks = wf.get_tasks(state=TaskState.READY)
             for ready_task in ready_tasks:
-                case_user_task = CaseUserTask.objects.filter(task_id=ready_task.id)
+                case_user_task = CaseUserTask.objects.filter(
+                    task_id=ready_task.id, workflow=case_workflow
+                ).first()
                 if case_user_task:
                     case_user_task.delete()
             case_workflow._create_user_tasks(wf)
+            return Response(
+                {"message": f"Workflow {case_workflow.id} has been undone"},
+                status=status.HTTP_200_OK,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
