@@ -75,11 +75,6 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "case",
-            # "workflow_type",
-            # "workflow_version",
-            # "workflow_theme_name",
-            # "workflow_message_name",
-            # "data",
             "tasks",
             "completed",
             "state",
