@@ -15,12 +15,20 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="caseusertask",
-            name="requires_review",
+            name="initiated_by",
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="case_user_tasks",
                 to=settings.AUTH_USER_MODEL,
+            ),
+        ),
+        migrations.AddField(
+            model_name="caseusertask",
+            name="requires_review",
+            field=models.BooleanField(
+                default=False,
+                help_text="Indicates whether this task requires review by another user.",
             ),
         ),
     ]
