@@ -72,9 +72,7 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
 
     @transaction.atomic
     def _complete_task_common(self, serializer, save_document=False):
-
         data = serializer.validated_data
-
         case_user_task_id = data.pop("case_user_task_id")
         author = data.pop("author")
         variables = data.get("variables", {})

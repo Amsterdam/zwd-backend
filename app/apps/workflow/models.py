@@ -3,7 +3,7 @@ import os
 
 
 from apps.events.models import CaseEvent, TaskModelEventEmitter
-from apps.cases.models import Case
+from apps.cases.models import Case, CaseStateType
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -154,7 +154,9 @@ class CaseWorkflow(models.Model):
         return path
 
     def _set_case_state_type(self, state_name):
-        self.case_state_type = state_name
+        self.case_state_type, _ = CaseStateType.objects.get_or_create(
+            name=state_name,
+        )
         self.save()
 
     def _save_workflow_state(self, wf):
