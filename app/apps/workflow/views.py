@@ -96,7 +96,7 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
                 "value": serializer.validated_data.get("name"),
             }
             serializer.save()
-        variables["author"] = author.id
+        variables["initiated_by"] = author.id
         task_data = {
             "case_user_task_id": case_user_task_id,
             "description": task.name,
