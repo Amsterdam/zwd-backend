@@ -260,11 +260,11 @@
     <bpmn:userTask id="task_eerder_ingediend" name="Aanvraag eerder ingediend">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_aanvraag_ingediend" label="Is er door de vve na 2021 reeds een aanvraag ingediend?" type="enum">
+          <camunda:formField id="form_aanvraag_ingediend" label="Heeft de vve na 2021 al een aanvraag ingediend?" type="enum">
             <camunda:value id="yes" name="Ja" />
             <camunda:value id="no" name="Nee" />
           </camunda:formField>
-          <camunda:formField id="form_aanvraag_ingediend_dossier" label="Dossiernummer (optioneel)">
+          <camunda:formField id="form_aanvraag_ingediend_dossier" label="Dossiernummer">
             <camunda:validation>
               <camunda:constraint name="optional" config="true" />
             </camunda:validation>
