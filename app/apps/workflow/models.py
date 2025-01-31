@@ -201,8 +201,8 @@ class CaseWorkflow(models.Model):
                 case=self.case,
                 workflow=self,
                 initiated_by=(
-                    auth.get_user_model().objects.get(id=self.data.get("author"))
-                    if self.data.get("author")
+                    auth.get_user_model().objects.get(id=self.data.get("initiated_by"))
+                    if self.data.get("initiated_by")
                     else None
                 ),
                 requires_review=task.task_spec.extensions.get("requires_review", False)
