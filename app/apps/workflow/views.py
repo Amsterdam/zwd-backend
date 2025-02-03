@@ -77,6 +77,13 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
         author = data.pop("author")
         variables = data.get("variables", {})
         task = CaseUserTask.objects.get(id=case_user_task_id, completed=False)
+
+        if task.requires_review and author.id == task.initiated_by.id:
+            return Response(
+                {"detail": "You are not authorized to complete this task"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         from apps.workflow.user_tasks import get_task_by_name
 
         user_task_type = get_task_by_name(task.task_name)
@@ -96,7 +103,7 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
                 "value": serializer.validated_data.get("name"),
             }
             serializer.save()
-
+        variables["initiated_by"] = author.id
         task_data = {
             "case_user_task_id": case_user_task_id,
             "description": task.name,

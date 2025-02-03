@@ -2,6 +2,7 @@ import datetime
 import os
 
 
+from apps.users import auth
 from apps.events.models import CaseEvent, TaskModelEventEmitter
 from apps.cases.models import Case, CaseStateType
 from django.conf import settings
@@ -199,6 +200,13 @@ class CaseWorkflow(models.Model):
                 due_date=make_aware(datetime.datetime.today()),
                 case=self.case,
                 workflow=self,
+                initiated_by=(
+                    auth.get_user_model().objects.get(id=self.data.get("initiated_by"))
+                    if self.data.get("initiated_by")
+                    else None
+                ),
+                requires_review=task.task_spec.extensions.get("requires_review", False)
+                or False,
             )
             for task in ready_tasks
             if not CaseUserTask.objects.filter(
@@ -392,8 +400,17 @@ class CaseUserTask(models.Model):
         related_name="tasks",
         on_delete=models.CASCADE,
     )
-
+    initiated_by = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        related_name="case_user_tasks",
+        on_delete=models.PROTECT,
+        null=True,
+    )
     objects = BulkCreateSignalsManager()
+    requires_review = models.BooleanField(
+        default=False,
+        help_text="Indicates whether this task requires review by another user.",
+    )
 
     @property
     def get_form_variables(self):

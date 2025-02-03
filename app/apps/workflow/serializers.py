@@ -11,6 +11,10 @@ from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask, WorkflowOp
 class CaseUserTaskSerializer(serializers.ModelSerializer):
     case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
     homeowner_association = serializers.SerializerMethodField()
+    initiated_by = serializers.SerializerMethodField()
+
+    def get_initiated_by(self, obj):
+        return obj.initiated_by.email if obj.initiated_by else None
 
     def get_homeowner_association(self, obj):
         return (
@@ -35,6 +39,8 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
             "completed",
             "case",
             "homeowner_association",
+            "initiated_by",
+            "requires_review",
         )
 
 
