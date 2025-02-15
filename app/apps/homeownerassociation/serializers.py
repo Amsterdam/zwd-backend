@@ -25,16 +25,22 @@ class DistrictSerializer(serializers.ModelSerializer):
 class HomeownerAssociationSerializer(serializers.ModelSerializer):
     district = serializers.SerializerMethodField()
     neighborhood = serializers.SerializerMethodField()
+    wijk = serializers.SerializerMethodField()
+
+    def get_district(self, obj):
+        if not obj.district:
+            return None
+        return obj.district.name
 
     def get_neighborhood(self, obj):
         if not obj.neighborhood:
             return None
         return obj.neighborhood.name
 
-    def get_district(self, obj):
-        if not obj.district:
+    def get_wijk(self, obj):
+        if not obj.wijk:
             return None
-        return obj.district.name
+        return obj.wijk.name
 
     class Meta:
         model = HomeownerAssociation
@@ -47,8 +53,12 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "owners",
             "district",
             "neighborhood",
+            "wijk",
             "zip_code",
             "is_small",
+            "monument_status",
+            "ligt_in_beschermd_gebied",
+            "beschermd_stadsdorpsgezicht",
         ]
         depth = 1
 
