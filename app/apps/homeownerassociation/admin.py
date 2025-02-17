@@ -6,6 +6,7 @@ from apps.homeownerassociation.models import (
     Neighborhood,
     Owner,
     District,
+    Wijk,
 )
 
 
@@ -78,3 +79,9 @@ class DistrictAdmin(admin.ModelAdmin):
 class NeighborhoodAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "district")
     search_fields = ("id", "name", "district__name")
+
+
+@admin.register(Wijk)
+class WijkAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "neighborhood")
+    search_fields = ("id", "name", "neighborhood__name")

@@ -8,6 +8,9 @@ class District(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Neighborhood(models.Model):
     name = models.CharField(max_length=255)
@@ -15,8 +18,25 @@ class Neighborhood(models.Model):
         District, related_name="neighborhoods", on_delete=models.DO_NOTHING
     )
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         unique_together = ("name", "district")
+
+
+class Wijk(models.Model):
+    name = models.CharField(max_length=255)
+    neighborhood = models.ForeignKey(
+        Neighborhood, related_name="wijken", on_delete=models.DO_NOTHING
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Wijk"
+        verbose_name_plural = "Wijken"
 
 
 class HomeownerAssociation(models.Model):
@@ -25,6 +45,7 @@ class HomeownerAssociation(models.Model):
     number_of_appartments = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    zip_code = models.CharField(max_length=255, null=True)
     district = models.ForeignKey(
         District,
         related_name="homeowner_associations",
@@ -37,7 +58,15 @@ class HomeownerAssociation(models.Model):
         on_delete=models.DO_NOTHING,
         null=True,
     )
-    zip_code = models.CharField(max_length=255, null=True)
+    wijk = models.ForeignKey(
+        Wijk,
+        related_name="homeowner_associations",
+        on_delete=models.DO_NOTHING,
+        null=True,
+    )
+    monument_status = models.CharField(max_length=255, null=True)
+    ligt_in_beschermd_gebied = models.CharField(max_length=255, null=True)
+    beschermd_stadsdorpsgezicht = models.CharField(max_length=255, null=True)
 
     @property
     def is_small(self):
@@ -53,6 +82,9 @@ class HomeownerAssociation(models.Model):
                 return True
         return False
 
+    def __str__(self):
+        return self.name
+
     def get_or_create_hoa_by_bag_id(self, bag_id):
         client = DsoClient()
         hoa_name = client.get_hoa_name_by_bag_id(bag_id)
@@ -62,7 +94,7 @@ class HomeownerAssociation(models.Model):
 
         hoa_response = client.get_hoa_by_name(hoa_name)
         distinct_hoa_response = self._get_distinct_hoa_response(hoa_response)
-        district, neighborhood = self._get_district_and_neighborhood(
+        district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
 
@@ -72,7 +104,15 @@ class HomeownerAssociation(models.Model):
             number_of_appartments=len(distinct_hoa_response),
             district=district,
             neighborhood=neighborhood,
+            wijk=wijk,
             zip_code=distinct_hoa_response[0].get("postcode"),
+            monument_status=distinct_hoa_response[0].get("mntMonumentstatus"),
+            ligt_in_beschermd_gebied=distinct_hoa_response[0].get(
+                "bsdLigtInBeschermdGebied"
+            ),
+            beschermd_stadsdorpsgezicht=distinct_hoa_response[0].get(
+                "bsdBeschermdStadsdorpsgezicht"
+            ),
         )
 
         self._create_ownerships(distinct_hoa_response, model)
@@ -82,15 +122,24 @@ class HomeownerAssociation(models.Model):
         client = DsoClient()
         hoa_response = client.get_hoa_by_name(hoa_name)
         distinct_hoa_response = self._get_distinct_hoa_response(hoa_response)
-        district, neighborhood = self._get_district_and_neighborhood(
+        district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
 
         self.build_year = distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar")
-        self.number_of_appartments = len(distinct_hoa_response)
         self.zip_code = distinct_hoa_response[0].get("postcode")
+        self.monument_status = distinct_hoa_response[0].get("mntMonumentstatus")
+        self.ligt_in_beschermd_gebied = distinct_hoa_response[0].get(
+            "bsdLigtInBeschermdGebied"
+        )
+        self.beschermd_stadsdorpsgezicht = distinct_hoa_response[0].get(
+            "bsdBeschermdStadsdorpsgezicht"
+        )
+        self.number_of_appartments = len(distinct_hoa_response)
         self.district = district
         self.neighborhood = neighborhood
+        self.wijk = wijk
+
         self.save()
 
         self._create_ownerships(distinct_hoa_response, self)
@@ -98,7 +147,7 @@ class HomeownerAssociation(models.Model):
     def _get_distinct_hoa_response(self, hoa_response):
         return list({hoa["votIdentificatie"]: hoa for hoa in hoa_response}.values())
 
-    def _get_district_and_neighborhood(self, distinct_hoa_response):
+    def _get_district_and_neighborhood_and_wijk(self, distinct_hoa_response):
         district, created = District.objects.get_or_create(
             name=distinct_hoa_response[0].get("gbdSdlNaam", "Onbekend")
         )
@@ -106,7 +155,11 @@ class HomeownerAssociation(models.Model):
             name=distinct_hoa_response[0].get("gbdBrtNaam", "Onbekend"),
             district=district,
         )
-        return district, neighborhood
+        wijk, created = Wijk.objects.get_or_create(
+            name=distinct_hoa_response[0].get("gbdWijkNaam", "Onbekend"),
+            neighborhood=neighborhood,
+        )
+        return district, neighborhood, wijk
 
     def _create_ownerships(self, hoa_response, hoa_obj):
         ownership_counts = Counter(
@@ -136,6 +189,9 @@ class Contact(models.Model):
     phone = models.CharField(max_length=20)
     fullname = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.email
 
     def process_contacts(case, contacts):
         for contact in contacts:
