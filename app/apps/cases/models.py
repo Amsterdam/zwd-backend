@@ -4,7 +4,6 @@ from apps.homeownerassociation.models import HomeownerAssociation
 from apps.events.models import CaseEvent, ModelEventEmitter
 from enum import Enum
 import os
-from apps.events.models import CaseEvent, ModelEventEmitter
 from django.core.files.storage import default_storage
 
 
@@ -20,7 +19,7 @@ class AdviceType(Enum):
 
 
 class Case(ModelEventEmitter):
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     advice_type = models.CharField(
         choices=AdviceType.choices(), default=AdviceType.COURSE.value
     )
