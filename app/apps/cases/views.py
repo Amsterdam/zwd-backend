@@ -80,7 +80,9 @@ class CaseViewSet(
         detail=False, methods=["post"], url_path="documents", name="cases-documents"
     )
     def create_document(self, request):
-        serializer = CaseDocumentSerializer(data=request.data)
+        serializer = CaseDocumentSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -90,7 +92,9 @@ class CaseViewSet(
     @action(detail=True, methods=["get"], url_path="documents")
     def get_documents(self, request, pk=None):
         case = self.get_object()
-        serializer = CaseDocumentSerializer(case.documents, many=True)
+        serializer = CaseDocumentSerializer(
+            case.documents.filter(deleted=False), many=True
+        )
         return Response(serializer.data)
 
     @action(

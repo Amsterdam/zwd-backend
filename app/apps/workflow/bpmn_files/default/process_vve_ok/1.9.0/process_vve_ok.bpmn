@@ -42,7 +42,6 @@
         <bpmn:flowNodeRef>Event_1tc1avn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_klanttevredenheidsonderzoek</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_17bw8ea</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_16jdr6g</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0p6zwwq</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0du1x64</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_controle_gebouw</bpmn:flowNodeRef>
@@ -61,6 +60,7 @@
         <bpmn:flowNodeRef>task_controle_afwijzing</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_extra_info</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_bestuur</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_16jdr6g</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:exclusiveGateway id="Gateway_1tmui51" default="Flow_08urjmx">
@@ -173,7 +173,7 @@
       <bpmn:incoming>Flow_086fr37</bpmn:incoming>
       <bpmn:outgoing>Flow_0ee0ab2</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="task_versturen_adviseur" name="Versturen naar adviseur">
+    <bpmn:userTask id="task_versturen_adviseur" name="Toekennen aan adviseur ">
       <bpmn:incoming>Flow_12r31n3</bpmn:incoming>
       <bpmn:outgoing>Flow_11ing8x</bpmn:outgoing>
     </bpmn:userTask>
@@ -309,11 +309,6 @@
       <bpmn:incoming>Flow_0sjd48h</bpmn:incoming>
       <bpmn:outgoing>Flow_1dga19z</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:scriptTask id="Activity_16jdr6g" name="Status update: &#34;Evaluatie&#34;">
-      <bpmn:incoming>Flow_11ing8x</bpmn:incoming>
-      <bpmn:outgoing>Flow_0g1fd8z</bpmn:outgoing>
-      <bpmn:script>set_status("Evaluatie ")</bpmn:script>
-    </bpmn:scriptTask>
     <bpmn:exclusiveGateway id="Gateway_0p6zwwq" default="Flow_10pzthf">
       <bpmn:incoming>Flow_1cr0yoe</bpmn:incoming>
       <bpmn:outgoing>Flow_0ul0oq9</bpmn:outgoing>
@@ -348,6 +343,11 @@
           <camunda:formField id="form_controle_bouwjaar" label="Het bouwjaar {{workflow.case.homeowner_association.build_year}} en de aanvraag voor een {{workflow.case.advice_type} voldoen niet aan de vereisten. Wil je doorgaan met de aanvraag?" type="enum">
             <camunda:value id="yes" name="Ja" />
             <camunda:value id="no" name="Nee" />
+          </camunda:formField>
+          <camunda:formField id="form_controle_bouwjaar_toelichting" label="Toelichting" type="string">
+            <camunda:validation>
+              <camunda:constraint name="optional" config="true" />
+            </camunda:validation>
           </camunda:formField>
         </camunda:formData>
       </bpmn:extensionElements>
@@ -509,6 +509,11 @@
     <bpmn:sequenceFlow id="Flow_1etqrm3" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
     <bpmn:sequenceFlow id="Flow_1p1i2ve" sourceRef="task_afwijzing_sturen" targetRef="Event_09lu92e" />
     <bpmn:sequenceFlow id="Flow_01qyetz" sourceRef="task_controle_afwijzing" targetRef="task_afwijzing_sturen" />
+    <bpmn:scriptTask id="Activity_16jdr6g" name="Status update: &#34;Evaluatie&#34;">
+      <bpmn:incoming>Flow_11ing8x</bpmn:incoming>
+      <bpmn:outgoing>Flow_0g1fd8z</bpmn:outgoing>
+      <bpmn:script>set_status("Evaluatie ")</bpmn:script>
+    </bpmn:scriptTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -707,16 +712,16 @@
         <dc:Bounds x="1799" y="380" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0yawjbc_di" bpmnElement="timer_extra_info">
-        <dc:Bounds x="1282" y="552" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1357" y="553" width="46" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1emvbwn_di" bpmnElement="timer_bestuur">
         <dc:Bounds x="3297" y="552" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="3232" y="553" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0yawjbc_di" bpmnElement="timer_extra_info">
+        <dc:Bounds x="1282" y="552" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1357" y="553" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0tsiwpv_di" bpmnElement="Flow_0tsiwpv">
@@ -933,14 +938,6 @@
         <di:waypoint x="1420" y="1010" />
         <di:waypoint x="1440" y="1010" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1p1i2ve_di" bpmnElement="Flow_1p1i2ve">
-        <di:waypoint x="1849" y="230" />
-        <di:waypoint x="1849" y="188" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0sp23oy_di" bpmnElement="Flow_0sp23oy">
-        <di:waypoint x="1849" y="545" />
-        <di:waypoint x="1849" y="460" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1i8l9e8_di" bpmnElement="Flow_1i8l9e8">
         <di:waypoint x="4090" y="1010" />
         <di:waypoint x="4120" y="1010" />
@@ -1016,9 +1013,17 @@
         <di:waypoint x="1318" y="570" />
         <di:waypoint x="1824" y="570" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sp23oy_di" bpmnElement="Flow_0sp23oy">
+        <di:waypoint x="1849" y="545" />
+        <di:waypoint x="1849" y="460" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1etqrm3_di" bpmnElement="Flow_1etqrm3">
         <di:waypoint x="268" y="1010" />
         <di:waypoint x="340" y="1010" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1p1i2ve_di" bpmnElement="Flow_1p1i2ve">
+        <di:waypoint x="1849" y="230" />
+        <di:waypoint x="1849" y="188" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_01qyetz_di" bpmnElement="Flow_01qyetz">
         <di:waypoint x="1849" y="380" />

@@ -14,7 +14,6 @@ import os
 from os.path import join
 from pathlib import Path
 from .azure_settings import Azure
-from azure.identity import WorkloadIdentityCredential
 
 azure = Azure()
 

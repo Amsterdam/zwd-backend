@@ -66,15 +66,33 @@ def get_upload_path(instance, filename):
     return os.path.join("uploads", "cases", "%s" % instance.case.id, filename)
 
 
-class CaseDocument(models.Model):
+class CaseDocument(ModelEventEmitter):
     name = models.CharField(max_length=100)
     case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name="documents")
     document = models.FileField(upload_to=get_upload_path)
     created = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        related_name="case_document_author",
+        on_delete=models.PROTECT,
+        null=True,
+    )
+    deleted = models.BooleanField(default=False)
+
+    EVENT_TYPE = CaseEvent.TYPE_CASE_DOCUMENT
 
     def __str__(self):
         return f"Document: {self.id}"
 
     def delete(self):
         default_storage.delete(self.document.name)
-        return super().delete()
+        self.deleted = True
+        self.EVENT_TYPE = CaseEvent.TYPE_CASE_DOCUMENT_DELETED
+        self.save()
+
+    def __get_event_values__(self):
+        return {
+            "author": self.author.__str__(),
+            "date_added": self.created,
+            "variables": {"document_name": {"label": "Document", "value": self.name}},
+        }

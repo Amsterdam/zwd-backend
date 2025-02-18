@@ -51,9 +51,11 @@ class CaseListSerializer(serializers.ModelSerializer):
 
 
 class CaseDocumentSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = CaseDocument
-        fields = ("id", "case", "document", "name", "created")
+        fields = ("id", "case", "document", "name", "created", "author")
 
     def validate_document(self, value):
         ext = os.path.splitext(value.name)[1].lower()
