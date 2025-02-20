@@ -2,8 +2,8 @@
     "model": "workflow.workflowoption",
     "pk": 1,
     "fields": {
-      "name": "Extra informatie",
-      "message_name": "event_start_extra_information_process"
+      "name": "Notitie toevoegen",
+      "message_name": "event_start_add_note_process"
     }
   }
 ]
