@@ -1,4 +1,5 @@
 import mimetypes
+from apps.advisor.serializers import UpdateCaseAdvisorSerializer
 from apps.homeownerassociation.models import Contact
 from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
@@ -18,6 +19,7 @@ from .serializers import (
     StartWorkflowSerializer,
 )
 from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
@@ -173,6 +175,11 @@ class CaseViewSet(
         )
         return Response(serializer.data)
 
+    @extend_schema(
+        request=UpdateCaseAdvisorSerializer,
+        responses={200: OpenApiTypes.STR},
+        description="Update the advisor for a case",
+    )
     @action(detail=True, methods=["patch"], url_path="advisor")
     def update_advisor(self, request, pk=None):
         case = self.get_object()

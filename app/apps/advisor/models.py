@@ -9,3 +9,6 @@ class Advisor(models.Model):
     advice_type_energieadvies = models.BooleanField(default=False)
     advice_type_hbo = models.BooleanField(default=False)
     small_hoa = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name

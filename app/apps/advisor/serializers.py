@@ -7,3 +7,7 @@ class CaseAdvisorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advisor
         fields = ("id", "name")
+
+
+class UpdateCaseAdvisorSerializer(serializers.Serializer):
+    advisor = serializers.IntegerField()

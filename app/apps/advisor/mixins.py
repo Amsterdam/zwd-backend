@@ -4,11 +4,15 @@ from rest_framework.decorators import action
 from apps.cases.models import AdviceType, Case
 from rest_framework import status
 from rest_framework.response import Response
-
+from drf_spectacular.utils import extend_schema
 from django.db.models import Q
 
 
 class CaseAdvisorMixin:
+    @extend_schema(
+        responses=CaseAdvisorSerializer(many=True),
+        description="Update the advisor for a case",
+    )
     @action(detail=True, methods=["get"], serializer_class=CaseAdvisorSerializer)
     def advisors(self, _, pk):
         try:
