@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from apps.advisor.models import Advisor
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.events.models import CaseEvent, ModelEventEmitter
 from enum import Enum
@@ -35,6 +36,12 @@ class Case(ModelEventEmitter):
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    advisor = models.ForeignKey(
+        to=Advisor,
+        related_name="case_advisor",
+        on_delete=models.PROTECT,
+        null=True,
+    )
 
     def __str__(self):
         return f"Case: {self.id}"
