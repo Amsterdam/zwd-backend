@@ -258,6 +258,9 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.0.0": {
                     "start_extra_information": {},
                 },
+                "1.1.0": {
+                    "start_add_note_process": {},
+                },
             },
         },
     }
