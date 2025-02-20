@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("advisor", "0003_remove_advisor_advice_types_and_more"),
+        ("advisor", "0001_initial"),
         ("cases", "0008_update_description_field_cases_to_blank"),
     ]
 
