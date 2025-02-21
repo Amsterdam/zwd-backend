@@ -200,7 +200,6 @@
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_12r31n3</bpmn:incoming>
-      <bpmn:incoming>Flow_1hwx2q0</bpmn:incoming>
       <bpmn:outgoing>Flow_10509z8</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_0lck87v">
@@ -392,9 +391,10 @@
       <bpmn:outgoing>Flow_1xurlff</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:startEvent id="Event_049hit6">
-      <bpmn:outgoing>Flow_1hwx2q0</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1pwnwe1</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:scriptTask id="Activity_1so3vlp" name="Status update: &#34;Aanvraag invoeren&#34;">
+      <bpmn:incoming>Flow_1pwnwe1</bpmn:incoming>
       <bpmn:outgoing>Flow_00876s7</bpmn:outgoing>
       <bpmn:script>set_status("Aanvraag invoeren")</bpmn:script>
     </bpmn:scriptTask>
@@ -716,7 +716,7 @@
     <bpmn:sequenceFlow id="Flow_1dga19z" sourceRef="Gateway_17bw8ea" targetRef="Event_1tc1avn" />
     <bpmn:sequenceFlow id="Flow_0sjd48h" sourceRef="task_klanttevredenheidsonderzoek" targetRef="Gateway_17bw8ea" />
     <bpmn:sequenceFlow id="Flow_0mcs4a3" sourceRef="task_prestatieverklaring" targetRef="Gateway_17bw8ea" />
-    <bpmn:sequenceFlow id="Flow_1hwx2q0" sourceRef="Event_049hit6" targetRef="task_versturen_adviseur" />
+    <bpmn:sequenceFlow id="Flow_1pwnwe1" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -1407,11 +1407,9 @@
         <di:waypoint x="7470" y="1090" />
         <di:waypoint x="7470" y="1045" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1hwx2q0_di" bpmnElement="Flow_1hwx2q0">
+      <bpmndi:BPMNEdge id="Flow_1pwnwe1_di" bpmnElement="Flow_1pwnwe1">
         <di:waypoint x="268" y="1010" />
-        <di:waypoint x="2339" y="1010" />
-        <di:waypoint x="2339" y="980" />
-        <di:waypoint x="4410" y="980" />
+        <di:waypoint x="340" y="1010" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
