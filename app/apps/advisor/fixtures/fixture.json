@@ -1,0 +1,68 @@
+[
+  {
+    "model": "advisor.advisor",
+    "pk": 1,
+    "fields": {
+      "name": "Groenoverleven.nu",
+      "enabled": true,
+      "advice_type_energieadvies": false,
+      "advice_type_hbo": true,
+      "small_hoa": false
+    }
+  },
+  {
+    "model": "advisor.advisor",
+    "pk": 2,
+    "fields": {
+      "name": "Steeds Advies B.V.",
+      "enabled": true,
+      "advice_type_energieadvies": true,
+      "advice_type_hbo": true,
+      "small_hoa": false
+    }
+  },
+  {
+    "model": "advisor.advisor",
+    "pk": 3,
+    "fields": {
+      "name": "Steenvlinder",
+      "enabled": true,
+      "advice_type_energieadvies": false,
+      "advice_type_hbo": true,
+      "small_hoa": false
+    }
+  },
+  {
+    "model": "advisor.advisor",
+    "pk": 4,
+    "fields": {
+      "name": "Synopel",
+      "enabled": true,
+      "advice_type_energieadvies": false,
+      "advice_type_hbo": true,
+      "small_hoa": false
+    }
+  },
+  {
+    "model": "advisor.advisor",
+    "pk": 5,
+    "fields": {
+      "name": "Tan Milieuconsultant/Studio Transit",
+      "enabled": true,
+      "advice_type_energieadvies": true,
+      "advice_type_hbo": false,
+      "small_hoa": false
+    }
+  },
+  {
+    "model": "advisor.advisor",
+    "pk": 6,
+    "fields": {
+      "name": "KBnG",
+      "enabled": true,
+      "advice_type_energieadvies": true,
+      "advice_type_hbo": false,
+      "small_hoa": true
+    }
+  }
+]
