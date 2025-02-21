@@ -1,7 +1,9 @@
 import mimetypes
+from apps.advisor.serializers import UpdateCaseAdvisorSerializer
 from apps.homeownerassociation.models import Contact
 from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
+from apps.advisor.mixins import CaseAdvisorMixin
 from apps.workflow.models import CaseWorkflow, WorkflowOption
 from apps.workflow.serializers import CaseWorkflowSerializer, WorkflowOptionSerializer
 from rest_framework import mixins, viewsets
@@ -17,15 +19,18 @@ from .serializers import (
     StartWorkflowSerializer,
 )
 from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
 from apps.workflow.tasks import task_create_main_worflow_for_case
 from apps.workflow.tasks import task_start_worflow
+from apps.advisor.models import Advisor
 
 
 class CaseViewSet(
     CaseEventsMixin,
+    CaseAdvisorMixin,
     viewsets.GenericViewSet,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -169,3 +174,18 @@ class CaseViewSet(
             many=True,
         )
         return Response(serializer.data)
+
+    @extend_schema(
+        request=UpdateCaseAdvisorSerializer,
+        responses={200: OpenApiTypes.STR},
+        description="Update the advisor for a case",
+    )
+    @action(detail=True, methods=["patch"], url_path="advisor")
+    def update_advisor(self, request, pk=None):
+        case = self.get_object()
+        # TODO: Make an UpdateCaseAdvisorSerializer for this
+        advisor_id = request.data.get("advisor")
+        advisor = get_object_or_404(Advisor, pk=advisor_id)
+        case.advisor = advisor
+        case.save()
+        return Response("Case updated", status=status.HTTP_200_OK)

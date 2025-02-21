@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.events",
     "apps.homeownerassociation",
     "apps.address",
+    "apps.advisor",
     "django_spaghetti",
     "drf_spectacular",
     "django_celery_beat",
@@ -251,6 +252,7 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.8.0": {},
                 "1.9.0": {},
                 "2.0.0": {},
+                "2.1.0": {},
             },
         },
         "sub_workflow": {
