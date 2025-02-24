@@ -15,7 +15,6 @@ class AdviceType(Enum):
 
     @classmethod
     def choices(cls):
-        [(key.value, key.name) for key in cls]
         return [(key.value, key.name) for key in cls]
 
 
@@ -48,14 +47,22 @@ class Case(ModelEventEmitter):
 
     def __get_event_values__(self):
         return {
-            "description": self.description,
             "advice_type": self.advice_type,
+            "description": self.description,
             "author": self.author.__str__(),
             "date_added": self.created,
         }
 
     def __get_case__(self):
         return self
+
+    def set_advice_type(self, advice_type):
+        """Update advice_type."""
+        if advice_type not in {item.value for item in AdviceType}:
+            raise ValueError(f"Invalid advice_type: {advice_type}")
+
+        self.advice_type = advice_type
+        self.save()
 
 
 class CaseStateType(models.Model):

@@ -16,7 +16,6 @@ from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser
 from SpiffWorkflow.camunda.serializer.config import CAMUNDA_CONFIG
 from SpiffWorkflow.camunda.specs.user_task import UserTask
 from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
-from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
 from SpiffWorkflow.bpmn import BpmnEvent
 from SpiffWorkflow.bpmn.specs.event_definitions.timer import TimerEventDefinition
 from .managers import BulkCreateSignalsManager
@@ -322,6 +321,19 @@ class CaseWorkflow(models.Model):
 
         def set_status(input):
             workflow_instance._set_case_state_type(input)
+            workflow_instance.case.save()
+
+        def set_case_advice_type(advice_type):
+            print(f"--------------------Setting advice type to {advice_type}")
+            workflow_instance.case.set_advice_type(advice_type)
+            # Update the advice type in the workflow data. TODO: is this necessary?
+            # It's not working!
+            workflow_instance.data["advice_type"] = {"value": advice_type}
+            print(
+                f"--------------------workflow_instance.data {workflow_instance.data}"
+            )
+            workflow_instance.save()
+            # TEST KLEINE VVE MET ENERGIEADVIES
 
         def script_wait(message, data={}):
             task_script_wait.delay(workflow_instance.id, message, data)
@@ -339,10 +351,11 @@ class CaseWorkflow(models.Model):
         wf.script_engine = PythonScriptEngine(
             environment=TaskDataEnvironment(
                 environment_globals={
-                    "set_status": set_status,
-                    "script_wait": script_wait,
-                    "start_subworkflow": start_subworkflow,
                     "parse_duration": parse_duration_string,
+                    "script_wait": script_wait,
+                    "set_case_advice_type": set_case_advice_type,
+                    "set_status": set_status,
+                    "start_subworkflow": start_subworkflow,
                 }
             )
         )
