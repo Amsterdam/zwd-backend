@@ -4,7 +4,11 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from apps.advisor.models import Advisor
+from apps.cases.models import AdviceType, Case
+from apps.homeownerassociation.models import HomeownerAssociation
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
+from model_bakery import baker
 
 
 class CaseApiTest(APITestCase):
@@ -113,6 +117,114 @@ class CaseApiTest(APITestCase):
         non_existent_doc_id = 999
         url = reverse("cases-delete-document", args=[self.case, non_existent_doc_id])
         response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_advisor_success(self):
+        url = reverse("cases-update-advisor", args=[self.case])
+        advisor = baker.make("Advisor")
+        data = {"advisor": advisor.id}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_advisor_not_found(self):
+        url = reverse("cases-update-advisor", args=[self.case])
+        data = {"advisor": 999}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_advisor_bad_request(self):
+        url = reverse("cases-update-advisor", args=[self.case])
+        data = {"adv": 999}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_advisors_hbo_success(self):
+        advisor_name = "Advisor_hbo"
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=13
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.HBO.value,
+        )
+        baker.make(Advisor, advice_type_hbo=True, enabled=True, name=advisor_name)
+        url = reverse("cases-advisors", args=[case.id])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["name"], advisor_name)
+
+    def test_get_advisors_ea_success(self):
+        advisor_name = "Advisor_ea"
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=13
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        baker.make(
+            Advisor, advice_type_energieadvies=True, enabled=True, name=advisor_name
+        )
+        url = reverse("cases-advisors", args=[case.id])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["name"], advisor_name)
+
+    def test_get_advisors_small_hoa_ea_success(self):
+        advisor_name = "Advisor_small"
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=11
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        baker.make(Advisor, small_hoa=True, enabled=True, name=advisor_name)
+        baker.make(Advisor, advice_type_energieadvies=True, enabled=True, name="random")
+        url = reverse("cases-advisors", args=[case.id])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["name"], advisor_name)
+
+    def test_get_advisors_small_hoa_hbo_success(self):
+        advisor_name = "Advisor_small"
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=11
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.HBO.value,
+        )
+        baker.make(Advisor, small_hoa=True, enabled=True, name=advisor_name)
+        baker.make(Advisor, advice_type_hbo=True, enabled=True, name="random")
+        url = reverse("cases-advisors", args=[case.id])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["name"], advisor_name)
+
+    def test_get_advisors_not_found(self):
+        url = reverse("cases-advisors", args=[999])
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def _create_sample_document(self):
