@@ -180,12 +180,19 @@ class CaseViewSet(
         responses={200: OpenApiTypes.STR},
         description="Update the advisor for a case",
     )
-    @action(detail=True, methods=["patch"], url_path="advisor")
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="advisor",
+        serializer_class=UpdateCaseAdvisorSerializer,
+    )
     def update_advisor(self, request, pk=None):
         case = self.get_object()
-        # TODO: Make an UpdateCaseAdvisorSerializer for this
-        advisor_id = request.data.get("advisor")
-        advisor = get_object_or_404(Advisor, pk=advisor_id)
-        case.advisor = advisor
-        case.save()
-        return Response("Case updated", status=status.HTTP_200_OK)
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            advisor_id = request.data.get("advisor")
+            advisor = get_object_or_404(Advisor, pk=advisor_id)
+            case.advisor = advisor
+            case.save()
+            return Response("Case updated", status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

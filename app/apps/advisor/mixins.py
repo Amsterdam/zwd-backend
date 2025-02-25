@@ -21,7 +21,6 @@ class CaseAdvisorMixin:
             return Response(
                 {"error": "Case not found"}, status=status.HTTP_404_NOT_FOUND
             )
-
         query = Q()
         if case.advice_type == AdviceType.HBO.value:
             query = Q(advice_type_hbo=True, enabled=True)
@@ -29,7 +28,6 @@ class CaseAdvisorMixin:
             query = Q(advice_type_energieadvies=True, enabled=True)
         if case.homeowner_association.is_small:
             query = Q(small_hoa=True, enabled=True)
-
         advisors = Advisor.objects.filter(query).distinct().order_by("name")
 
         serialized_advisors = CaseAdvisorSerializer(advisors, many=True)
