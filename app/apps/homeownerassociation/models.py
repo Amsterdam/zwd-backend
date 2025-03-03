@@ -40,7 +40,7 @@ class Wijk(models.Model):
 
 
 class PriorityZipCode(models.Model):
-    zip_code = models.CharField(max_length=7, unique=True)
+    zip_code = models.CharField(max_length=6, unique=True)
 
 
 class HomeownerAssociation(models.Model):
