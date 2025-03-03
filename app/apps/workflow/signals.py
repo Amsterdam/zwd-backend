@@ -16,6 +16,9 @@ def case_workflow_pre_save(sender, instance, **kwargs):
                 "has_major_shareholder": {
                     "value": instance.case.homeowner_association.has_major_shareholder
                 },
+                "is_priority_neighborhood": {
+                    "value": instance.case.homeowner_association.is_priority_neighborhood
+                },
             }
         )
         instance.workflow_version = get_latest_version_from_config(

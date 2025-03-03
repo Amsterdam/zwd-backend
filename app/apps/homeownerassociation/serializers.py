@@ -27,6 +27,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     neighborhood = serializers.SerializerMethodField()
     wijk = serializers.SerializerMethodField()
     is_small = serializers.BooleanField()
+    is_priority_neighborhood = serializers.SerializerMethodField()
 
     def get_district(self, obj):
         if not obj.district:
@@ -42,6 +43,11 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
         if not obj.wijk:
             return None
         return obj.wijk.name
+
+    def get_is_priority_neighborhood(self, obj):
+        if obj.is_priority_neighborhood:
+            return "Ja"
+        return "Nee"
 
     class Meta:
         model = HomeownerAssociation
@@ -60,6 +66,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "monument_status",
             "ligt_in_beschermd_gebied",
             "beschermd_stadsdorpsgezicht",
+            "is_priority_neighborhood",
         ]
         depth = 1
 

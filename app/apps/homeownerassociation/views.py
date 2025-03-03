@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from apps.cases.models import Case
 from apps.cases.serializers import CaseListSerializer
+from rest_framework import status
+from apps.homeownerassociation.models import PriorityZipCode
 
 
 class HomeOwnerAssociationView(
@@ -26,3 +28,21 @@ class HomeOwnerAssociationView(
         cases = Case.objects.filter(homeowner_association=hoa)
         serializer = CaseListSerializer(cases, many=True)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        url_path="priority-zipcode",
+        methods=["post"],
+    )
+    def create_priority_zip_code(self, request):
+        request_data = request.data
+        zip_code = request_data.get("zip_code")
+        if not zip_code:
+            return Response(
+                {"detail": "Zip code is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        PriorityZipCode.objects.get_or_create(zip_code=zip_code)
+        return Response(
+            {"message": f"Zip code {zip_code} has been added to priority zip codes"},
+            status=status.HTTP_201_CREATED,
+        )
