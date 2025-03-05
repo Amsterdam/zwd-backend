@@ -105,7 +105,6 @@
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1gby6d6</bpmn:incoming>
-      <bpmn:incoming>Flow_1pwnwe1</bpmn:incoming>
       <bpmn:outgoing>Flow_0tsiwpv</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_1ym227t" default="Flow_1w5rash">
@@ -382,9 +381,10 @@
       <bpmn:outgoing>Flow_1xurlff</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:startEvent id="Event_049hit6">
-      <bpmn:outgoing>Flow_1pwnwe1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_13yhard</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:scriptTask id="Activity_1so3vlp" name="Status update: &#34;Aanvraag invoeren&#34;">
+      <bpmn:incoming>Flow_13yhard</bpmn:incoming>
       <bpmn:outgoing>Flow_00876s7</bpmn:outgoing>
       <bpmn:script>set_status("Aanvraag invoeren")</bpmn:script>
     </bpmn:scriptTask>
@@ -704,7 +704,6 @@
     <bpmn:sequenceFlow id="Flow_1dga19z" sourceRef="Gateway_17bw8ea" targetRef="Event_1tc1avn" />
     <bpmn:sequenceFlow id="Flow_0sjd48h" sourceRef="task_klanttevredenheidsonderzoek" targetRef="Gateway_17bw8ea" />
     <bpmn:sequenceFlow id="Flow_0mcs4a3" sourceRef="task_prestatieverklaring" targetRef="Gateway_17bw8ea" />
-    <bpmn:sequenceFlow id="Flow_1pwnwe1" sourceRef="Event_049hit6" targetRef="task_ingediend_vve" />
     <bpmn:sequenceFlow id="Flow_0o1lwrx" sourceRef="Gateway_1tmui51" targetRef="Gateway_1uixn66" />
     <bpmn:sequenceFlow id="Flow_0sabn7v" sourceRef="Gateway_1uixn66" targetRef="Gateway_1ym227t" />
     <bpmn:userTask id="task_vve_prio_buurt" name="Vve prioriteitsbuurt">
@@ -734,6 +733,7 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1syj3pr" sourceRef="task_vve_prio_buurt" targetRef="Gateway_13w4ho9" />
     <bpmn:sequenceFlow id="Flow_0s80bmx" sourceRef="Gateway_13w4ho9" targetRef="Gateway_1ym227t" />
+    <bpmn:sequenceFlow id="Flow_13yhard" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -1421,12 +1421,6 @@
         <di:waypoint x="7470" y="1090" />
         <di:waypoint x="7470" y="1045" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1pwnwe1_di" bpmnElement="Flow_1pwnwe1">
-        <di:waypoint x="268" y="1010" />
-        <di:waypoint x="964" y="1010" />
-        <di:waypoint x="964" y="1030" />
-        <di:waypoint x="1659" y="1030" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0o1lwrx_di" bpmnElement="Flow_0o1lwrx">
         <di:waypoint x="1874" y="1010" />
         <di:waypoint x="1965" y="1010" />
@@ -1450,6 +1444,10 @@
         <di:waypoint x="2015" y="830" />
         <di:waypoint x="2209" y="830" />
         <di:waypoint x="2209" y="985" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13yhard_di" bpmnElement="Flow_13yhard">
+        <di:waypoint x="268" y="1010" />
+        <di:waypoint x="340" y="1010" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
