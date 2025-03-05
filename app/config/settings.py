@@ -253,6 +253,8 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.9.0": {},
                 "2.0.0": {},
                 "2.1.0": {},
+                "2.2.0": {},
+                "2.3.0": {},
             },
         },
         "sub_workflow": {
@@ -280,7 +282,7 @@ AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
 
-if DEBUG == False:
+if DEBUG is False:
     AZURE_TOKEN_CREDENTIAL = WorkloadIdentityCredential()
 
 if DEBUG:

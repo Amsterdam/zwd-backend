@@ -16,7 +16,6 @@ from SpiffWorkflow.camunda.parser.CamundaParser import CamundaParser
 from SpiffWorkflow.camunda.serializer.config import CAMUNDA_CONFIG
 from SpiffWorkflow.camunda.specs.user_task import UserTask
 from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
-from SpiffWorkflow.camunda.specs.event_definitions import MessageEventDefinition
 from SpiffWorkflow.bpmn import BpmnEvent
 from SpiffWorkflow.bpmn.specs.event_definitions.timer import TimerEventDefinition
 from .managers import BulkCreateSignalsManager
