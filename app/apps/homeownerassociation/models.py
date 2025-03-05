@@ -39,6 +39,10 @@ class Wijk(models.Model):
         verbose_name_plural = "Wijken"
 
 
+class PriorityZipCode(models.Model):
+    zip_code = models.CharField(max_length=6, unique=True)
+
+
 class HomeownerAssociation(models.Model):
     name = models.CharField(max_length=255, unique=True)
     build_year = models.IntegerField()
@@ -81,6 +85,10 @@ class HomeownerAssociation(models.Model):
             ):
                 return True
         return False
+
+    @property
+    def is_priority_neighborhood(self):
+        return PriorityZipCode.objects.filter(zip_code=self.zip_code).exists()
 
     def __str__(self):
         return self.name

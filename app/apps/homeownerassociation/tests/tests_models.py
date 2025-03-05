@@ -2,7 +2,11 @@ from django.test import TestCase
 from unittest.mock import patch
 
 
-from apps.homeownerassociation.models import HomeownerAssociation, Owner
+from apps.homeownerassociation.models import (
+    HomeownerAssociation,
+    Owner,
+    PriorityZipCode,
+)
 from model_bakery import baker
 
 
@@ -152,3 +156,22 @@ class HomeownerAssociationModelTest(TestCase):
             type="Natuurlijk persoon",
         )
         self.assertFalse(hoa.has_major_shareholder)
+
+    def test_is_priority_neighborhood_true(self):
+        zip_code = "1234AB"
+        baker.make(PriorityZipCode, zip_code=zip_code)
+        hoa = baker.make(HomeownerAssociation, zip_code=zip_code)
+        self.assertTrue(hoa.is_priority_neighborhood)
+
+    def test_is_priority_neighborhood_false(self):
+        zip_code = "5678CD"
+        hoa = baker.make(HomeownerAssociation, zip_code=zip_code)
+        self.assertFalse(hoa.is_priority_neighborhood)
+
+    def test_is_priority_neighborhood_no_zip_code(self):
+        hoa = baker.make(HomeownerAssociation, zip_code=None)
+        self.assertFalse(hoa.is_priority_neighborhood)
+
+    def test_is_priority_neighborhood_empty_zip_code(self):
+        hoa = baker.make(HomeownerAssociation, zip_code="")
+        self.assertFalse(hoa.is_priority_neighborhood)
