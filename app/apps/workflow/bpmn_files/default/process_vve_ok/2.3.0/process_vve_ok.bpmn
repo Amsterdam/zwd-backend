@@ -54,7 +54,6 @@
         <bpmn:flowNodeRef>Gateway_04hluwf</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_afwachten_eindfactuur</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_controleer_upload_eindfactuur</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_informatiebijeenkomst_plaatsgevonden</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_bestuur</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_extra_info</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1m8fwfx</bpmn:flowNodeRef>
@@ -65,9 +64,7 @@
         <bpmn:flowNodeRef>Activity_16jdr6g</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1c85mt4</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_1tc1avn</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_klanttevredenheidsonderzoek</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_17bw8ea</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_prestatieverklaring</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_upload_grootaandeelhouder_formulier</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_informeer_projectleider_adviseur</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_controle_gebouw</bpmn:flowNodeRef>
@@ -84,6 +81,9 @@
         <bpmn:flowNodeRef>Gateway_0p6zwwq</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0du1x64</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_01ko21h</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_prestatieverklaring</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_klanttevredenheidsonderzoek</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_informatiebijeenkomst_plaatsgevonden</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:exclusiveGateway id="Gateway_1tmui51" default="Flow_0o1lwrx">
@@ -533,7 +533,6 @@
       <bpmn:outgoing>Flow_16msb9f</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_0w4pnrx" sourceRef="task_afwachten_eindfactuur" targetRef="task_controleer_upload_eindfactuur" />
-    <bpmn:sequenceFlow id="Flow_16msb9f" sourceRef="task_controleer_upload_eindfactuur" targetRef="task_informatiebijeenkomst_plaatsgevonden" />
     <bpmn:sequenceFlow id="Flow_09rw6jq" sourceRef="Gateway_19g252m" targetRef="task_controleer_eindpresentatie" />
     <bpmn:sequenceFlow id="Flow_04gvloo" sourceRef="task_controleer_eindpresentatie" targetRef="Gateway_1m8fwfx" />
     <bpmn:sequenceFlow id="Flow_1evvdda" sourceRef="Gateway_19g252m" targetRef="task_accordeer_eindpresentatie" />
@@ -541,27 +540,6 @@
     <bpmn:sequenceFlow id="Flow_0g1fd8z" sourceRef="Activity_16jdr6g" targetRef="Gateway_1c85mt4" />
     <bpmn:sequenceFlow id="Flow_1u2gk07" sourceRef="Gateway_1m8fwfx" targetRef="Activity_16jdr6g" />
     <bpmn:sequenceFlow id="Flow_16mveaw" sourceRef="task_upload_eindpresentatie" targetRef="Gateway_19g252m" />
-    <bpmn:userTask id="task_informatiebijeenkomst_plaatsgevonden" name="Informatiebijeenkomst plaatsgevonden">
-      <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="informatiebijeenkomst_plaatsgevonden" label="Heeft er een informatiebijeenkomst plaatsgevonden?" type="enum">
-            <camunda:value id="yes" name="Ja" />
-            <camunda:value id="no" name="Nee" />
-          </camunda:formField>
-          <camunda:formField id="form_collega_informatiebijeenkomst_bijgewoond" label="Heeft een collega de informatiebijeenkomst bijgewoond?" type="enum">
-            <camunda:value id="yes" name="Ja" />
-            <camunda:value id="no" name="Nee" />
-          </camunda:formField>
-          <camunda:formField id="form_informatiebijeenkomst_toelichting" label="Toelichting" type="string">
-            <camunda:validation>
-              <camunda:constraint name="optional" config="true" />
-            </camunda:validation>
-          </camunda:formField>
-        </camunda:formData>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_16msb9f</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ce3u87</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:parallelGateway id="Gateway_1m8fwfx">
       <bpmn:incoming>Flow_04gvloo</bpmn:incoming>
       <bpmn:incoming>Flow_0c9jymf</bpmn:incoming>
@@ -585,7 +563,6 @@
       <bpmn:incoming>Flow_1evvdda</bpmn:incoming>
       <bpmn:outgoing>Flow_0c9jymf</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_0ce3u87" sourceRef="task_informatiebijeenkomst_plaatsgevonden" targetRef="task_upload_eindpresentatie" />
     <bpmn:userTask id="task_upload_eindpresentatie" name="Upload eindpresentatie">
       <bpmn:extensionElements>
         <camunda:formData>
@@ -613,19 +590,11 @@
     <bpmn:endEvent id="Event_1tc1avn">
       <bpmn:incoming>Flow_1dga19z</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="task_klanttevredenheidsonderzoek" name="Klanttevredenheidsonderzoek">
-      <bpmn:incoming>Flow_0sz4gcs</bpmn:incoming>
-      <bpmn:outgoing>Flow_0sjd48h</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:parallelGateway id="Gateway_17bw8ea">
       <bpmn:incoming>Flow_0mcs4a3</bpmn:incoming>
       <bpmn:incoming>Flow_0sjd48h</bpmn:incoming>
       <bpmn:outgoing>Flow_1dga19z</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:userTask id="task_prestatieverklaring" name="Prestatieverklaring">
-      <bpmn:incoming>Flow_1t2na2c</bpmn:incoming>
-      <bpmn:outgoing>Flow_0mcs4a3</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_0sz4gcs" sourceRef="Gateway_1c85mt4" targetRef="task_klanttevredenheidsonderzoek" />
     <bpmn:sequenceFlow id="Flow_1t2na2c" sourceRef="Gateway_1c85mt4" targetRef="task_prestatieverklaring" />
     <bpmn:sequenceFlow id="Flow_1dga19z" sourceRef="Gateway_17bw8ea" targetRef="Event_1tc1avn" />
@@ -638,7 +607,6 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1syj3pr" sourceRef="task_vve_prio_buurt" targetRef="Gateway_13w4ho9" />
     <bpmn:sequenceFlow id="Flow_0s80bmx" sourceRef="Gateway_13w4ho9" targetRef="Gateway_1ym227t" />
-    <bpmn:sequenceFlow id="Flow_13yhard" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
     <bpmn:userTask id="task_upload_grootaandeelhouder_formulier" name="Upload instemmingsformulier grootaandeelhouder">
       <bpmn:extensionElements>
         <camunda:formData>
@@ -754,6 +722,44 @@
     <bpmn:endEvent id="Event_01ko21h">
       <bpmn:incoming>Flow_0rcrplq</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:userTask id="task_prestatieverklaring" name="Prestatieverklaring">
+      <bpmn:incoming>Flow_1t2na2c</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mcs4a3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="task_klanttevredenheidsonderzoek" name="Klanttevredenheidsonderzoek">
+      <bpmn:incoming>Flow_0sz4gcs</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sjd48h</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="task_informatiebijeenkomst_plaatsgevonden" name="Informatiebijeenkomst plaatsgevonden">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="informatiebijeenkomst_plaatsgevonden" label="Heeft er een informatiebijeenkomst plaatsgevonden?" type="enum">
+            <camunda:value id="yes" name="Ja" />
+            <camunda:value id="no" name="Nee" />
+          </camunda:formField>
+          <camunda:formField id="form_collega_informatiebijeenkomst_bijgewoond" label="Heeft een collega de informatiebijeenkomst bijgewoond?" type="enum">
+            <camunda:validation />
+            <camunda:value id="yes" name="Ja" />
+            <camunda:value id="no" name="Nee" />
+          </camunda:formField>
+          <camunda:formField id="form_informatiebijeenkomst_datum" label="Wanneer heeft de bijeenkomst plaatsgevonden?" type="date">
+            <camunda:validation>
+              <camunda:constraint name="optional" config="true" />
+            </camunda:validation>
+          </camunda:formField>
+          <camunda:formField id="form_informatiebijeenkomst_toelichting" label="Toelichting" type="string">
+            <camunda:validation>
+              <camunda:constraint name="optional" config="true" />
+            </camunda:validation>
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_16msb9f</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ce3u87</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0ce3u87" sourceRef="task_informatiebijeenkomst_plaatsgevonden" targetRef="task_upload_eindpresentatie" />
+    <bpmn:sequenceFlow id="Flow_13yhard" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
+    <bpmn:sequenceFlow id="Flow_16msb9f" sourceRef="task_controleer_upload_eindfactuur" targetRef="task_informatiebijeenkomst_plaatsgevonden" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -970,16 +976,8 @@
       <bpmndi:BPMNShape id="Event_1tc1avn_di" bpmnElement="Event_1tc1avn">
         <dc:Bounds x="7542" y="1002" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1prc0ta_di" bpmnElement="task_klanttevredenheidsonderzoek">
-        <dc:Bounds x="7340" y="890" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_17bw8ea_di" bpmnElement="Gateway_17bw8ea">
         <dc:Bounds x="7445" y="995" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0fg73kj_di" bpmnElement="task_prestatieverklaring">
-        <dc:Bounds x="7330" y="1050" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_02iilmn_di" bpmnElement="task_upload_grootaandeelhouder_formulier">
         <dc:Bounds x="639" y="730" width="100" height="80" />
@@ -1035,6 +1033,14 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_01ko21h_di" bpmnElement="Event_01ko21h">
         <dc:Bounds x="3172" y="392" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0fg73kj_di" bpmnElement="task_prestatieverklaring">
+        <dc:Bounds x="7310" y="1050" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1prc0ta_di" bpmnElement="task_klanttevredenheidsonderzoek">
+        <dc:Bounds x="7310" y="890" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1emvbwn_di" bpmnElement="timer_bestuur">
         <dc:Bounds x="3297" y="552" width="36" height="36" />
@@ -1420,24 +1426,24 @@
       <bpmndi:BPMNEdge id="Flow_0sz4gcs_di" bpmnElement="Flow_0sz4gcs">
         <di:waypoint x="7240" y="995" />
         <di:waypoint x="7240" y="930" />
-        <di:waypoint x="7340" y="930" />
+        <di:waypoint x="7310" y="930" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1t2na2c_di" bpmnElement="Flow_1t2na2c">
         <di:waypoint x="7240" y="1045" />
         <di:waypoint x="7240" y="1090" />
-        <di:waypoint x="7330" y="1090" />
+        <di:waypoint x="7310" y="1090" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1dga19z_di" bpmnElement="Flow_1dga19z">
         <di:waypoint x="7495" y="1020" />
         <di:waypoint x="7542" y="1020" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0sjd48h_di" bpmnElement="Flow_0sjd48h">
-        <di:waypoint x="7440" y="930" />
+        <di:waypoint x="7410" y="930" />
         <di:waypoint x="7470" y="930" />
         <di:waypoint x="7470" y="995" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0mcs4a3_di" bpmnElement="Flow_0mcs4a3">
-        <di:waypoint x="7430" y="1090" />
+        <di:waypoint x="7410" y="1090" />
         <di:waypoint x="7470" y="1090" />
         <di:waypoint x="7470" y="1045" />
       </bpmndi:BPMNEdge>
