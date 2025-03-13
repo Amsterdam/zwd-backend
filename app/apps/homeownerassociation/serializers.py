@@ -27,6 +27,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     neighborhood = serializers.SerializerMethodField()
     wijk = serializers.SerializerMethodField()
     is_small = serializers.BooleanField()
+    is_priority_neighborhood = serializers.BooleanField()
 
     def get_district(self, obj):
         if not obj.district:

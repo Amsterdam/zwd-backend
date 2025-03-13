@@ -13,7 +13,12 @@ class CaseAdvisorMixin:
         responses=CaseAdvisorSerializer(many=True),
         description="Update the advisor for a case",
     )
-    @action(detail=True, methods=["get"], serializer_class=CaseAdvisorSerializer)
+    @action(
+        detail=True,
+        methods=["get"],
+        serializer_class=CaseAdvisorSerializer,
+        pagination_class=None,
+    )
     def advisors(self, _, pk):
         try:
             case = Case.objects.get(pk=pk)
