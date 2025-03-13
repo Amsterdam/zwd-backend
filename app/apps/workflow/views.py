@@ -1,5 +1,6 @@
 import logging
 from rest_framework import status
+from utils.pagination import CustomPagination
 from apps.cases.serializers import CaseDocumentWithTaskSerializer
 from apps.workflow.task_completion import (
     complete_generic_user_task_and_create_new_user_tasks,
@@ -35,6 +36,7 @@ class CaseUserTaskViewSet(
 ):
     serializer_class = CaseUserTaskListSerializer
     queryset = CaseUserTask.objects.filter(completed=False).prefetch_related("case")
+    pagination_class = CustomPagination
 
 
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
@@ -123,6 +125,8 @@ class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
 
 
 class BpmnViewSet(viewsets.GenericViewSet):
+    pagination_class = None
+
     @extend_schema(
         description="Get all BPMN model names",
         responses={200: BpmnModelListSerializer},  # Array of strings

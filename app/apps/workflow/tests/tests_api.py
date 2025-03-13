@@ -36,7 +36,9 @@ class CaseUserTaskApiTests(APITestCase):
         url = reverse("tasks-list")
         response = self.client.get(url)
         data = response.json()
-        self.assertEqual(data, [])
+        self.assertEqual(
+            data, {"count": 0, "next": None, "previous": None, "results": []}
+        )
 
     @patch("apps.workflow.views.complete_generic_user_task_and_create_new_user_tasks")
     def test_complete_file_task(

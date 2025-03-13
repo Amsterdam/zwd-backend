@@ -26,6 +26,7 @@ from django.http import FileResponse
 from apps.workflow.tasks import task_create_main_worflow_for_case
 from apps.workflow.tasks import task_start_worflow
 from apps.advisor.models import Advisor
+from utils.pagination import CustomPagination
 
 
 class CaseViewSet(
@@ -38,6 +39,7 @@ class CaseViewSet(
 ):
     queryset = Case.objects.all().prefetch_related("homeowner_association")
     serializer_class = CaseSerializer
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         if self.action == "create_document" or self.action == "get_documents":
@@ -167,6 +169,7 @@ class CaseViewSet(
         url_name="processes",
         methods=["get"],
         serializer_class=WorkflowOptionSerializer,
+        pagination_class=None,
     )
     def get_workflow_options(self, request):
         serializer = WorkflowOptionSerializer(
