@@ -65,7 +65,7 @@
         <bpmn:flowNodeRef>Gateway_1c85mt4</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_1tc1avn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_17bw8ea</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_upload_grootaandeelhouder_formulier</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_upload_grooteigenaar_formulier</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_informeer_projectleider_adviseur</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_controle_gebouw</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1uixn66</bpmn:flowNodeRef>
@@ -363,10 +363,10 @@
     <bpmn:sequenceFlow id="Flow_00876s7" sourceRef="Activity_1so3vlp" targetRef="task_upload_aanvraag_formulier" />
     <bpmn:sequenceFlow id="Flow_0ajxfee" sourceRef="task_upload_aanvraag_formulier" targetRef="Gateway_194que8" />
     <bpmn:sequenceFlow id="Flow_0isu3fo" sourceRef="Gateway_194que8" targetRef="Gateway_1pdq2pf" />
-    <bpmn:sequenceFlow id="Flow_02yy2x9" name="Grootaandeelhouder 25% woningbezit aanwezig" sourceRef="Gateway_194que8" targetRef="task_upload_grootaandeelhouder_formulier">
+    <bpmn:sequenceFlow id="Flow_02yy2x9" name="Grooteigenaar 25% woningbezit aanwezig" sourceRef="Gateway_194que8" targetRef="task_upload_grooteigenaar_formulier">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">has_major_shareholder.get("value") == True</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1rveqob" sourceRef="task_upload_grootaandeelhouder_formulier" targetRef="Gateway_1pdq2pf" />
+    <bpmn:sequenceFlow id="Flow_1rveqob" sourceRef="task_upload_grooteigenaar_formulier" targetRef="Gateway_1pdq2pf" />
     <bpmn:sequenceFlow id="Flow_086fr37" sourceRef="Gateway_1pdq2pf" targetRef="Activity_0xumr2i" />
     <bpmn:sequenceFlow id="Flow_0u8z0vo" name="Extra informatie benodigd" sourceRef="Gateway_16fvnma" targetRef="task_mail_gebruiker_controle_informatie">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">form_controle_informatie.get("value") == "no" or form_controle_informatie_formulier.get("value") == "no"</bpmn:conditionExpression>
@@ -607,10 +607,10 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1syj3pr" sourceRef="task_vve_prio_buurt" targetRef="Gateway_13w4ho9" />
     <bpmn:sequenceFlow id="Flow_0s80bmx" sourceRef="Gateway_13w4ho9" targetRef="Gateway_1ym227t" />
-    <bpmn:userTask id="task_upload_grootaandeelhouder_formulier" name="Upload instemmingsformulier grootaandeelhouder">
+    <bpmn:userTask id="task_upload_grooteigenaar_formulier" name="Upload instemmingsformulier grooteigenaar">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_upload_grootaandeelhouder" label="Upload het formulier van de grootaandeelhouder" type="file" />
+          <camunda:formField id="form_upload_grooteigenaar" label="Upload het formulier van de grooteigenaar" type="file" />
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_02yy2x9</bpmn:incoming>
@@ -979,7 +979,7 @@
       <bpmndi:BPMNShape id="Gateway_17bw8ea_di" bpmnElement="Gateway_17bw8ea">
         <dc:Bounds x="7445" y="995" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_02iilmn_di" bpmnElement="task_upload_grootaandeelhouder_formulier">
+      <bpmndi:BPMNShape id="Activity_02iilmn_di" bpmnElement="task_upload_grooteigenaar_formulier">
         <dc:Bounds x="639" y="730" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
