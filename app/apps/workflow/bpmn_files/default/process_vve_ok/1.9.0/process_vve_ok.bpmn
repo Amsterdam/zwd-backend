@@ -312,7 +312,7 @@
     <bpmn:scriptTask id="Activity_16jdr6g" name="Status update: &#34;Evaluatie&#34;">
       <bpmn:incoming>Flow_11ing8x</bpmn:incoming>
       <bpmn:outgoing>Flow_0g1fd8z</bpmn:outgoing>
-      <bpmn:script>set_status("Evaluatie ")</bpmn:script>
+      <bpmn:script>set_status("Evaluatie")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:exclusiveGateway id="Gateway_0p6zwwq" default="Flow_10pzthf">
       <bpmn:incoming>Flow_1cr0yoe</bpmn:incoming>

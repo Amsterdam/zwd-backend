@@ -44,10 +44,17 @@ class CaseCreateSerializer(serializers.ModelSerializer):
 
 class CaseListSerializer(serializers.ModelSerializer):
     homeowner_association = CaseHomeownerAssociationSerializer()
+    case_state_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
-        fields = ("id", "homeowner_association", "created")
+        fields = ("id", "homeowner_association", "created", "case_state_type")
+
+    def get_case_state_type(self, obj):
+        main_workflow = obj.workflows.filter(main_workflow=True).first()
+        if main_workflow and main_workflow.case_state_type:
+            return main_workflow.case_state_type.name
+        return None
 
 
 class CaseDocumentSerializer(serializers.ModelSerializer):
