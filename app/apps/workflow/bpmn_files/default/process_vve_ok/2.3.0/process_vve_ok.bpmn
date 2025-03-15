@@ -580,7 +580,7 @@
     <bpmn:scriptTask id="Activity_16jdr6g" name="Status update: &#34;Evaluatie&#34;">
       <bpmn:incoming>Flow_1u2gk07</bpmn:incoming>
       <bpmn:outgoing>Flow_0g1fd8z</bpmn:outgoing>
-      <bpmn:script>set_status("Evaluatie ")</bpmn:script>
+      <bpmn:script>set_status("Evaluatie")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:parallelGateway id="Gateway_1c85mt4">
       <bpmn:incoming>Flow_0g1fd8z</bpmn:incoming>
