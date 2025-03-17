@@ -24,6 +24,7 @@ services:
     networks:
       - zwd_network
     image: postgres:15.7
+    command: -c 'max_connections=500'
     shm_size: "512m"
     ports:
       - "6410:5432"

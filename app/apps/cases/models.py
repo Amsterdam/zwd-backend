@@ -42,6 +42,7 @@ class Case(ModelEventEmitter):
         on_delete=models.PROTECT,
         null=True,
     )
+    legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
 
     def __str__(self):
         return f"Case: {self.id}"

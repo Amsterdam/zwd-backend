@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from clients.dso_client import DsoClient
 from collections import Counter
 
@@ -105,26 +105,26 @@ class HomeownerAssociation(models.Model):
         district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
+        with transaction.atomic():
+            model = HomeownerAssociation.objects.create(
+                name=hoa_name,
+                build_year=distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar"),
+                number_of_appartments=len(distinct_hoa_response),
+                district=district,
+                neighborhood=neighborhood,
+                wijk=wijk,
+                zip_code=distinct_hoa_response[0].get("postcode"),
+                monument_status=distinct_hoa_response[0].get("mntMonumentstatus"),
+                ligt_in_beschermd_gebied=distinct_hoa_response[0].get(
+                    "bsdLigtInBeschermdGebied"
+                ),
+                beschermd_stadsdorpsgezicht=distinct_hoa_response[0].get(
+                    "bsdBeschermdStadsdorpsgezicht"
+                ),
+            )
 
-        model = HomeownerAssociation.objects.create(
-            name=hoa_name,
-            build_year=distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar"),
-            number_of_appartments=len(distinct_hoa_response),
-            district=district,
-            neighborhood=neighborhood,
-            wijk=wijk,
-            zip_code=distinct_hoa_response[0].get("postcode"),
-            monument_status=distinct_hoa_response[0].get("mntMonumentstatus"),
-            ligt_in_beschermd_gebied=distinct_hoa_response[0].get(
-                "bsdLigtInBeschermdGebied"
-            ),
-            beschermd_stadsdorpsgezicht=distinct_hoa_response[0].get(
-                "bsdBeschermdStadsdorpsgezicht"
-            ),
-        )
-
-        self._create_ownerships(distinct_hoa_response, model)
-        return model
+            self._create_ownerships(distinct_hoa_response, model)
+            return model
 
     def update_hoa_admin(self, hoa_name):
         client = DsoClient()
@@ -178,8 +178,8 @@ class HomeownerAssociation(models.Model):
 
         for (owner_type, owner_name), count in ownership_counts.items():
             owner, created = Owner.objects.get_or_create(
-                type=owner_type,
-                name=owner_name,
+                type=owner_type if owner_type is not None else "Onbekend",
+                name=owner_name if owner_name is not None else "Onbekend",
                 homeowner_association=hoa_obj,
                 number_of_appartments=count,
             )
