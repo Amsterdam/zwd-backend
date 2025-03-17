@@ -199,3 +199,23 @@ class CaseViewSet(
             case.save()
             return Response("Case updated", status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        responses=CaseListSerializer,
+        description="Retrieve case by legacy id",
+    )
+    @action(
+        detail=False,
+        url_path="legacy/(?P<id>[^/.]+)",
+        url_name="legacy",
+        methods=["get"],
+        serializer_class=CaseListSerializer,
+    )
+    def get_case_id_by_legacy_Id(self, _, id):
+        case = Case.objects.filter(legacy_id=id).first()
+        if case is None:
+            return Response(
+                data="Case not found",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(case.id)

@@ -39,6 +39,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
             "homeowner_association",
             "contacts",
             "author",
+            "legacy_id",
         )
 
 
@@ -64,7 +65,18 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
 
     def validate_document(self, value):
         ext = os.path.splitext(value.name)[1].lower()
-        if ext not in [".pdf", ".docx", ".txt", ".png", ".jpg", ".jpeg"]:
+        if ext not in [
+            ".pdf",
+            ".docx",
+            ".doc",
+            ".txt",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".xlsx",
+            ".xls",
+            ".csv",
+        ]:
             raise serializers.ValidationError("File extension not allowed")
 
         mime = magic.Magic(mime=True)
@@ -76,6 +88,8 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
             "text/plain",
             "image/png",
             "image/jpeg",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/csv",
         ]:
             raise serializers.ValidationError("File type not allowed")
 
