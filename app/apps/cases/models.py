@@ -41,6 +41,7 @@ class Case(ModelEventEmitter):
         related_name="case_advisor",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
 
@@ -67,6 +68,8 @@ class CaseStateType(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "Status"
+        verbose_name_plural = "Statuses "
 
 
 def get_upload_path(instance, filename):
@@ -75,7 +78,7 @@ def get_upload_path(instance, filename):
 
 class CaseDocument(models.Model):
     name = models.CharField(max_length=100)
-    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name="documents")
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="documents")
     document = models.FileField(upload_to=get_upload_path)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -85,3 +88,6 @@ class CaseDocument(models.Model):
     def delete(self):
         default_storage.delete(self.document.name)
         return super().delete()
+
+    class Meta:
+        verbose_name = "Document"

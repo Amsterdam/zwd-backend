@@ -23,6 +23,7 @@ class CaseSerializer(serializers.ModelSerializer):
             "workflows",
             "advice_type",
             "homeowner_association",
+            "legacy_id",
         )
 
 
