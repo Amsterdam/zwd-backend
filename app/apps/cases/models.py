@@ -59,6 +59,9 @@ class Case(ModelEventEmitter):
     def __get_case__(self):
         return self
 
+    class Meta:
+        ordering = ["-id"]
+
 
 class CaseStateType(models.Model):
     name = models.CharField(max_length=255, unique=True)

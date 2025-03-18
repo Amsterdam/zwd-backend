@@ -14,6 +14,7 @@ class District(models.Model):
     class Meta:
         verbose_name = "Stadsdeel"
         verbose_name_plural = "Stadsdelen"
+        ordering = ["name"]
 
 
 class Neighborhood(models.Model):
@@ -29,6 +30,7 @@ class Neighborhood(models.Model):
         unique_together = ("name", "district")
         verbose_name = "Buurt"
         verbose_name_plural = "Buurten"
+        ordering = ["name"]
 
 
 class Wijk(models.Model):
@@ -43,6 +45,7 @@ class Wijk(models.Model):
     class Meta:
         verbose_name = "Wijk"
         verbose_name_plural = "Wijken"
+        ordering = ["name"]
 
 
 class PriorityZipCode(models.Model):
@@ -51,6 +54,7 @@ class PriorityZipCode(models.Model):
     class Meta:
         verbose_name = "Prioriteitsbuurt postcode"
         verbose_name_plural = "Prioriteitsbuurt postcodes"
+        ordering = ["zip_code"]
 
 
 class HomeownerAssociation(models.Model):
@@ -231,6 +235,9 @@ class Contact(models.Model):
                 existing_contact.save()
 
             existing_contact.homeowner_associations.add(case.homeowner_association)
+
+    class Meta:
+        ordering = ["email"]
 
 
 class Owner(models.Model):
