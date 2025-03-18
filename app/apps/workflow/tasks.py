@@ -86,7 +86,7 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
         workflow_instance = CaseWorkflow.objects.create(
             case=case,
             # TODO: Make dynamic
-            workflow_type="process_vve_ok",
+            workflow_type="adviezen_proces",
             main_workflow=True,
             workflow_message_name=None,
             data=data,
