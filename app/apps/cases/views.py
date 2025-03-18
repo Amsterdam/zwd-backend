@@ -41,7 +41,7 @@ class CaseViewSet(
     serializer_class = CaseSerializer
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter,)
-    ordering_fields = ["id", "created"]
+    ordering_fields = ["id", "created", "updated"]
 
     def get_serializer_class(self):
         if self.action == "create_document" or self.action == "get_documents":
