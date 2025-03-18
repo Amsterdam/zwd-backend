@@ -54,6 +54,7 @@ class CaseEvent(models.Model):
 
     class Meta:
         ordering = ["created"]
+        verbose_name = "Event"
 
 
 class ModelEventEmitter(models.Model):

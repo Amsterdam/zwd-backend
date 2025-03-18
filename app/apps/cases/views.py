@@ -6,7 +6,7 @@ from apps.events.mixins import CaseEventsMixin
 from apps.advisor.mixins import CaseAdvisorMixin
 from apps.workflow.models import CaseWorkflow, WorkflowOption
 from apps.workflow.serializers import CaseWorkflowSerializer, WorkflowOptionSerializer
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -40,6 +40,8 @@ class CaseViewSet(
     queryset = Case.objects.all().prefetch_related("homeowner_association")
     serializer_class = CaseSerializer
     pagination_class = CustomPagination
+    filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ["id", "created", "updated"]
 
     def get_serializer_class(self):
         if self.action == "create_document" or self.action == "get_documents":

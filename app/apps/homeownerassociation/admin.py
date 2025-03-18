@@ -45,8 +45,8 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ("id", "fullname", "email", "phone", "role")
-    search_fields = ("id", "fullname", "email", "phone", "role")
+    list_display = ("id", "email", "fullname", "phone", "role")
+    search_fields = ("id", "email", "fullname", "phone", "role")
 
 
 @admin.register(Owner)
