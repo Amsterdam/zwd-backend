@@ -69,7 +69,7 @@ class CaseStateType(models.Model):
     class Meta:
         ordering = ["name"]
         verbose_name = "Status"
-        verbose_name_plural = "Statuses "
+        verbose_name_plural = "Statuses"
 
 
 def get_upload_path(instance, filename):
