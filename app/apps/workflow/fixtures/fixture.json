@@ -3,7 +3,16 @@
     "pk": 1,
     "fields": {
       "name": "Notitie toevoegen",
-      "message_name": "event_start_add_note_process"
+      "message_name": "event_start_add_note_process",
+      "enabled_on_case_closed": true
+    }
+  },
+  {
+    "model": "workflow.workflowoption",
+    "pk": 2,
+    "fields": {
+      "name": "Zaak afsluiten",
+      "message_name": "event_start_case_close"
     }
   }
 ]

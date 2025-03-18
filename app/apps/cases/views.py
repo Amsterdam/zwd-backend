@@ -27,6 +27,17 @@ from apps.workflow.tasks import task_create_main_worflow_for_case
 from apps.workflow.tasks import task_start_worflow
 from apps.advisor.models import Advisor
 from utils.pagination import CustomPagination
+from django_filters.rest_framework import DjangoFilterBackend
+import django_filters
+
+
+class CaseFilter(django_filters.FilterSet):
+    closed = django_filters.BooleanFilter(method="filter_closed_cases")
+
+    def filter_closed_cases(self, queryset, _, value):
+        if value:
+            return queryset.filter(end_date__isnull=False)
+        return queryset.filter(end_date__isnull=True)
 
 
 class CaseViewSet(
@@ -40,8 +51,10 @@ class CaseViewSet(
     queryset = Case.objects.all().prefetch_related("homeowner_association")
     serializer_class = CaseSerializer
     pagination_class = CustomPagination
-    filter_backends = (filters.OrderingFilter,)
+    filter_backends = (filters.OrderingFilter,DjangoFilterBackend)
     ordering_fields = ["id", "created", "updated"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CaseFilter
 
     def get_serializer_class(self):
         if self.action == "create_document" or self.action == "get_documents":
@@ -166,18 +179,20 @@ class CaseViewSet(
         description="Retrieve workflow options",
     )
     @action(
-        detail=False,
+        detail=True,
         url_path="processes",
         url_name="processes",
         methods=["get"],
         serializer_class=WorkflowOptionSerializer,
         pagination_class=None,
     )
-    def get_workflow_options(self, request):
-        serializer = WorkflowOptionSerializer(
-            WorkflowOption.objects.all(),
-            many=True,
-        )
+    def get_workflow_options(self, request, pk):
+        case = self.get_object()
+        case_closed = case.end_date != None
+        query_set = WorkflowOption.objects.all()
+        if case_closed:
+            query_set = query_set.filter(enabled_on_case_closed=True)
+        serializer = WorkflowOptionSerializer(query_set, many=True)
         return Response(serializer.data)
 
     @extend_schema(

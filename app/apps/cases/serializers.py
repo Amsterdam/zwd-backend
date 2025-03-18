@@ -53,7 +53,11 @@ class CaseListSerializer(serializers.ModelSerializer):
         fields = ("id", "homeowner_association", "created", "case_state_type")
 
     def get_case_state_type(self, obj):
-        main_workflow = obj.workflows.filter(main_workflow=True).first()
+        main_workflow = (
+            obj.workflows.filter(case_state_type__isnull=False)
+            .order_by("-started")
+            .first()
+        )
         if main_workflow and main_workflow.case_state_type:
             return main_workflow.case_state_type.name
         return None
