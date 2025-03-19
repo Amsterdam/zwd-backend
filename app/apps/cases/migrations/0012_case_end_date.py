@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("cases", "0010_case_legacy_id"),
+        ("cases", "0011_alter_case_advisor_alter_casedocument_case"),
     ]
 
     operations = [
