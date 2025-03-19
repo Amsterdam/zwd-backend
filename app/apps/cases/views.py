@@ -51,7 +51,7 @@ class CaseViewSet(
     queryset = Case.objects.all().prefetch_related("homeowner_association")
     serializer_class = CaseSerializer
     pagination_class = CustomPagination
-    filter_backends = (filters.OrderingFilter,DjangoFilterBackend)
+    filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     ordering_fields = ["id", "created", "updated"]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CaseFilter
