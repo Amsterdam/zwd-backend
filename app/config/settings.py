@@ -254,7 +254,7 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.0.0": {
                     "start_add_note_process": {},
                 },
-                "1.2.0": {
+                "1.1.0": {
                     "start_add_note_process": {},
                     "start_case_close": {},
                 },
