@@ -162,7 +162,7 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
 
 
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
-    process_vve_ok = WorkflowSpecConfigThemeSerializer(required=False)
+    adviezen_proces = WorkflowSpecConfigThemeSerializer(required=False)
     sub_workflow = WorkflowSpecConfigThemeSerializer(required=False)
 
     def run_validation(self, data=empty):

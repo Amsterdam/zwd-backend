@@ -242,32 +242,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 WORKFLOW_SPEC_CONFIG = {
     "default": {
-        "process_vve_ok": {
+        "adviezen_proces": {
             "initial_data": {"advice_type": {"value": "Default"}},
             "versions": {
                 "1.0.0": {},
-                "1.1.0": {},
-                "1.2.0": {},
-                "1.3.0": {},
-                "1.4.0": {},
-                "1.5.0": {},
-                "1.6.0": {},
-                "1.7.0": {},
-                "1.8.0": {},
-                "1.9.0": {},
-                "2.0.0": {},
-                "2.1.0": {},
-                "2.2.0": {},
-                "2.3.0": {},
             },
         },
         "sub_workflow": {
             "initial_data": {},
             "versions": {
                 "1.0.0": {
-                    "start_extra_information": {},
-                },
-                "1.1.0": {
                     "start_add_note_process": {},
                 },
             },

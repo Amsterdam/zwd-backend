@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1jjdo8n" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
   <bpmn:collaboration id="V">
-    <bpmn:participant id="Process" name="Process" processRef="process_vve_ok" />
+    <bpmn:participant id="Process" name="Process" processRef="adviezen_proces" />
   </bpmn:collaboration>
-  <bpmn:process id="process_vve_ok" name="Cursus gevolgd?" isExecutable="true">
+  <bpmn:process id="adviezen_proces" name="Cursus gevolgd?" isExecutable="true">
     <bpmn:laneSet id="LaneSet_1n6s6fa">
       <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
         <bpmn:flowNodeRef>Gateway_1tmui51</bpmn:flowNodeRef>

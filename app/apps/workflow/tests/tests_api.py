@@ -124,7 +124,7 @@ class CaseUserTaskApiTests(APITestCase):
         case = self._create_case()
         case = Case.objects.get(id=case)
         case_wf = CaseWorkflow.objects.create(
-            case=case, completed=False, workflow_type="process_vve_ok"
+            case=case, completed=False, workflow_type="adviezen_proces"
         )
         user = get_test_user()
         case_user_task = CaseUserTask.objects.create(
@@ -161,7 +161,7 @@ class CaseUserTaskApiTests(APITestCase):
         case_id = self._create_case()
         case = Case.objects.get(id=case_id)
         case_wf = CaseWorkflow.objects.create(
-            case=case, completed=False, workflow_type="process_vve_ok"
+            case=case, completed=False, workflow_type="adviezen_proces"
         )
         case_user_task = CaseUserTask.objects.create(
             task_name="task1",
