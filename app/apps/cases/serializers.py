@@ -13,7 +13,7 @@ import os
 class CaseSerializer(serializers.ModelSerializer):
     workflows = CaseWorkflowSerializer(many=True)
     homeowner_association = CaseHomeownerAssociationSerializer()
-    case_state_type = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -25,11 +25,11 @@ class CaseSerializer(serializers.ModelSerializer):
             "advice_type",
             "homeowner_association",
             "legacy_id",
-            "case_state_type",
+            "status",
         )
 
-    def get_case_state_type(self, obj):
-        return obj.case_state_type.name if obj.case_state_type else None
+    def get_status(self, obj):
+        return obj.status.name if obj.status else None
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):
@@ -51,14 +51,14 @@ class CaseCreateSerializer(serializers.ModelSerializer):
 
 class CaseListSerializer(serializers.ModelSerializer):
     homeowner_association = CaseHomeownerAssociationSerializer()
-    case_state_type = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
-        fields = ("id", "homeowner_association", "created", "case_state_type")
+        fields = ("id", "homeowner_association", "created", "status")
 
-    def get_case_state_type(self, obj):
-        return obj.case_state_type.name if obj.case_state_type else None
+    def get_status(self, obj):
+        return obj.status.name if obj.status else None
 
 
 class CaseDocumentSerializer(serializers.ModelSerializer):
