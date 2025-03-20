@@ -26,7 +26,6 @@ class CaseSerializer(serializers.ModelSerializer):
             "homeowner_association",
             "legacy_id",
             "case_state_type",
-            "end_date",
         )
 
     def get_case_state_type(self, obj):
