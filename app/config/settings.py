@@ -15,6 +15,7 @@ from os.path import join
 from pathlib import Path
 from .azure_settings import Azure
 from azure.identity import WorkloadIdentityCredential
+import sys
 
 azure = Azure()
 
@@ -274,7 +275,9 @@ AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
 
-if DEBUG is False:
+
+# Do not attempt WorkloadIdentityCredential when adding migrations to prevent an exception
+if DEBUG is False and "makemigrations" not in sys.argv:
     AZURE_TOKEN_CREDENTIAL = WorkloadIdentityCredential()
 
 if DEBUG:

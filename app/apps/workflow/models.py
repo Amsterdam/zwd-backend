@@ -59,15 +59,6 @@ class CaseWorkflow(models.Model):
     )
     data = models.JSONField(null=True)
     serializer = BpmnWorkflowSerializer
-
-    case_state_type = models.ForeignKey(
-        to="cases.CaseStateType",
-        related_name="workflows",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-
     main_workflow = models.BooleanField(
         default=False,
     )
@@ -154,10 +145,10 @@ class CaseWorkflow(models.Model):
         return path
 
     def _set_case_state_type(self, state_name):
-        self.case_state_type, _ = CaseStateType.objects.get_or_create(
+        self.case.case_state_type, _ = CaseStateType.objects.get_or_create(
             name=state_name,
         )
-        self.save()
+        self.case.save()
 
     def _save_workflow_state(self, wf):
         if wf.last_task:

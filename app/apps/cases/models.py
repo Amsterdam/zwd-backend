@@ -46,6 +46,13 @@ class Case(ModelEventEmitter):
         blank=True,
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    case_state_type = models.ForeignKey(
+        to="cases.CaseStateType",
+        related_name="cases_state_type",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     def close_case(self):
         with transaction.atomic():
