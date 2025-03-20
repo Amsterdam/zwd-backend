@@ -1,5 +1,6 @@
+from django.utils import timezone
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from apps.advisor.models import Advisor
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.events.models import CaseEvent, ModelEventEmitter
@@ -36,6 +37,7 @@ class Case(ModelEventEmitter):
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    end_date = models.DateField(null=True, blank=True)
     advisor = models.ForeignKey(
         to=Advisor,
         related_name="case_advisor",
@@ -44,6 +46,19 @@ class Case(ModelEventEmitter):
         blank=True,
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    status = models.ForeignKey(
+        to="cases.CaseStatus",
+        related_name="cases_status",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    def close_case(self):
+        with transaction.atomic():
+            self.workflows.all().delete()
+            self.end_date = timezone.datetime.now()
+            self.save()
 
     def __str__(self):
         return f"Case: {self.id}"
@@ -63,7 +78,7 @@ class Case(ModelEventEmitter):
         ordering = ["-id"]
 
 
-class CaseStateType(models.Model):
+class CaseStatus(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):

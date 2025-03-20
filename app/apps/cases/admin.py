@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Case, CaseDocument, CaseStateType
+from .models import Case, CaseDocument, CaseStatus
 
 
 @admin.register(Case)
@@ -21,8 +21,8 @@ class CaseDocumentAdmin(admin.ModelAdmin):
     search_fields = ("id",)
 
 
-@admin.register(CaseStateType)
-class CaseStateTypeAdmin(admin.ModelAdmin):
+@admin.register(CaseStatus)
+class CaseStatusAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",

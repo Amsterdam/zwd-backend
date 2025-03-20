@@ -4,11 +4,13 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from apps.workflow.models import WorkflowOption
 from apps.advisor.models import Advisor
 from apps.cases.models import AdviceType, Case
 from apps.homeownerassociation.models import HomeownerAssociation
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
 from model_bakery import baker
+from django.utils import timezone
 
 
 class CaseApiTest(APITestCase):
@@ -226,6 +228,38 @@ class CaseApiTest(APITestCase):
         url = reverse("cases-advisors", args=[999])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_processes_returns_options(self):
+        case = self._create_case()
+        option_name = "test_workflow_option"
+        baker.make(WorkflowOption, name=option_name)
+        url = reverse("cases-processes", args=[case])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(option["name"] == option_name for option in response.data))
+
+    def test_processes_closed_cases(self):
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=13
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+            end_date=timezone.datetime.now(),
+        )
+        option_name = "test_workflow_option"
+        option_name_closed_case = "test_workflow_option_closed"
+        baker.make(WorkflowOption, name=option_name)
+        baker.make(
+            WorkflowOption, name=option_name_closed_case, enabled_on_case_closed=True
+        )
+        url = reverse("cases-processes", args=[case.id])
+        response = self.client.get(url)
+        self.assertFalse(any(option["name"] == option_name for option in response.data))
+        self.assertTrue(
+            any(option["name"] == option_name_closed_case for option in response.data)
+        )
 
     def _create_sample_document(self):
         url = reverse("cases-create-document")

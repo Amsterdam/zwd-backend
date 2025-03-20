@@ -11,7 +11,6 @@ class CaseWorkflowAdmin(admin.ModelAdmin):
         "main_workflow",
         "workflow_type",
         "workflow_version",
-        "case_state_type",
         "completed",
     )
 
