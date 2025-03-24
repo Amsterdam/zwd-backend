@@ -20,6 +20,22 @@ class AdviceType(Enum):
         return [(key.value, key.name) for key in cls]
 
 
+class CaseStatus(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Status"
+        verbose_name_plural = "Statuses"
+
+
+def get_upload_path(instance, filename):
+    return os.path.join("uploads", "cases", "%s" % instance.case.id, filename)
+
+
 class Case(ModelEventEmitter):
     description = models.TextField(null=True, blank=True)
     advice_type = models.CharField(
@@ -47,7 +63,7 @@ class Case(ModelEventEmitter):
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     status = models.ForeignKey(
-        to="cases.CaseStateType",
+        to=CaseStatus,
         related_name="cases_status",
         on_delete=models.CASCADE,
         null=True,
@@ -76,22 +92,6 @@ class Case(ModelEventEmitter):
 
     class Meta:
         ordering = ["-id"]
-
-
-class CaseStateType(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return f"{self.name}"
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "Status"
-        verbose_name_plural = "Statuses"
-
-
-def get_upload_path(instance, filename):
-    return os.path.join("uploads", "cases", "%s" % instance.case.id, filename)
 
 
 class CaseDocument(models.Model):
