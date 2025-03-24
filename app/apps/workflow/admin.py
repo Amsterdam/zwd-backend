@@ -65,4 +65,6 @@ class WorkflowOptionAdmin(admin.ModelAdmin):
         "id",
         "name",
         "message_name",
+        "enabled_on_case_closed",
     )
+    list_filter = ("enabled_on_case_closed",)
