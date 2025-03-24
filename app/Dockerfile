@@ -1,5 +1,4 @@
 FROM python:3.12-slim-bullseye
-LABEL maintainer="datapunt@amsterdam.nl"
 
 RUN apt-get update && apt-get install -y
 RUN apt-get install libpq-dev -y
@@ -13,7 +12,6 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY . /app/
-
 
 RUN chmod +x /app/celery.sh
 
