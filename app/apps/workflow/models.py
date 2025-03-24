@@ -4,7 +4,7 @@ import os
 
 from apps.users import auth
 from apps.events.models import CaseEvent, TaskModelEventEmitter
-from apps.cases.models import Case, CaseStatus
+from apps.cases.models import Case, CaseStateType
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -145,7 +145,7 @@ class CaseWorkflow(models.Model):
         return path
 
     def _set_case_status(self, state_name):
-        self.case.status, _ = CaseStatus.objects.get_or_create(
+        self.case.status, _ = CaseStateType.objects.get_or_create(
             name=state_name,
         )
         self.case.save()

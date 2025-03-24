@@ -47,7 +47,7 @@ class Case(ModelEventEmitter):
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     status = models.ForeignKey(
-        to="cases.CaseStatus",
+        to="cases.CaseStateType",
         related_name="cases_status",
         on_delete=models.CASCADE,
         null=True,
@@ -78,7 +78,7 @@ class Case(ModelEventEmitter):
         ordering = ["-id"]
 
 
-class CaseStatus(models.Model):
+class CaseStateType(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
