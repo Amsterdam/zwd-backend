@@ -11,7 +11,6 @@ class CaseWorkflowAdmin(admin.ModelAdmin):
         "main_workflow",
         "workflow_type",
         "workflow_version",
-        "case_state_type",
         "completed",
     )
 
@@ -66,4 +65,6 @@ class WorkflowOptionAdmin(admin.ModelAdmin):
         "id",
         "name",
         "message_name",
+        "enabled_on_case_closed",
     )
+    list_filter = ("enabled_on_case_closed",)

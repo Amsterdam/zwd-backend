@@ -4,7 +4,7 @@ import os
 
 from apps.users import auth
 from apps.events.models import CaseEvent, TaskModelEventEmitter
-from apps.cases.models import Case, CaseStateType
+from apps.cases.models import Case, CaseStatus
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -59,15 +59,6 @@ class CaseWorkflow(models.Model):
     )
     data = models.JSONField(null=True)
     serializer = BpmnWorkflowSerializer
-
-    case_state_type = models.ForeignKey(
-        to="cases.CaseStateType",
-        related_name="workflows",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-
     main_workflow = models.BooleanField(
         default=False,
     )
@@ -153,11 +144,11 @@ class CaseWorkflow(models.Model):
         )
         return path
 
-    def _set_case_state_type(self, state_name):
-        self.case_state_type, _ = CaseStateType.objects.get_or_create(
+    def _set_case_status(self, state_name):
+        self.case.status, _ = CaseStatus.objects.get_or_create(
             name=state_name,
         )
-        self.save()
+        self.case.save()
 
     def _save_workflow_state(self, wf):
         if wf.last_task:
@@ -321,13 +312,16 @@ class CaseWorkflow(models.Model):
         workflow_instance = self
 
         def set_status(input):
-            workflow_instance._set_case_state_type(input)
+            workflow_instance._set_case_status(input)
 
         def script_wait(message, data={}):
             task_script_wait.delay(workflow_instance.id, message, data)
 
         def start_subworkflow(subworkflow_name, data={}):
             task_start_subworkflow.delay(subworkflow_name, workflow_instance.id, data)
+
+        def close_case():
+            workflow_instance.case.close_case()
 
         def parse_duration_string(str_duration):
             # If the environment is not production, the duration is set to 2 minutes for testing purposes
@@ -343,6 +337,7 @@ class CaseWorkflow(models.Model):
                     "script_wait": script_wait,
                     "start_subworkflow": start_subworkflow,
                     "parse_duration": parse_duration_string,
+                    "close_case": close_case,
                 }
             )
         )
@@ -457,6 +452,7 @@ class GenericCompletedTask(TaskModelEventEmitter):
 class WorkflowOption(models.Model):
     name = models.CharField(max_length=255)
     message_name = models.CharField(max_length=255)
+    enabled_on_case_closed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} - {self.message_name}"

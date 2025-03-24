@@ -29,3 +29,4 @@ django-storages==1.14.4
 azure-storage-blob==12.23.1
 python-magic==0.4.27
 watchdog==6.0.0
+django-filter==25.1
