@@ -53,7 +53,6 @@ class CaseViewSet(
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     ordering_fields = ["id", "created", "updated"]
-    filter_backends = [DjangoFilterBackend]
     filterset_class = CaseFilter
 
     def get_serializer_class(self):
@@ -188,7 +187,7 @@ class CaseViewSet(
     )
     def get_workflow_options(self, request, pk):
         case = self.get_object()
-        case_closed = case.end_date != None
+        case_closed = case.end_date is not None
         query_set = WorkflowOption.objects.all()
         if case_closed:
             query_set = query_set.filter(enabled_on_case_closed=True)

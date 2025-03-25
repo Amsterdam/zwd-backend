@@ -13,7 +13,7 @@ from apps.workflow.utils import (
 )
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
@@ -25,6 +25,8 @@ from .serializers import (
     GenericCompletedTaskCreateSerializer,
     GenericCompletedTaskSerializer,
 )
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,8 @@ class CaseUserTaskViewSet(
     serializer_class = CaseUserTaskListSerializer
     queryset = CaseUserTask.objects.filter(completed=False).prefetch_related("case")
     pagination_class = CustomPagination
+    filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
+    ordering_fields = ["id", "created"]
 
 
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
