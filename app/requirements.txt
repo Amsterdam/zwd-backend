@@ -18,7 +18,7 @@ django_celery_results==2.5.1
 django-celery-beat==2.7.0
 
 redis==5.0.7
-azure-identity==1.16.1
+azure-identity==1.21.0
 mozilla-django-oidc==4.0.1
 spiffworkflow==3.0.0
 debugpy==1.8.2
