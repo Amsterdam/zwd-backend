@@ -4,7 +4,7 @@ services:
     hostname: zwd-backend
     image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
     ports:
-      - 8081:8000
+      - 5173:8000
       - 5679:5678
     networks:
       - zwd_network

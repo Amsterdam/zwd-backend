@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
+import requests
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import PermissionDenied
 import datetime
@@ -69,6 +70,18 @@ class OIDCAuthenticationBackend(OIDCAuthenticationBackend):
         userinfo = self.verify_token(access_token)
         self.validate_id_token(userinfo)
         return userinfo
+
+    def get_token(self, payload):
+        response = requests.post(
+            self.OIDC_OP_TOKEN_ENDPOINT,
+            data=payload,
+            verify=self.get_settings("OIDC_VERIFY_SSL", True),
+            timeout=self.get_settings("OIDC_TIMEOUT", None),
+            proxies=self.get_settings("OIDC_PROXY", None),
+            headers={"Origin": "https://test.nl"},
+        )
+        self.raise_token_response_error(response)
+        return response.json()
 
 
 class DevelopmentAuthenticationBackend(OIDCAuthenticationBackend):

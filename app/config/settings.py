@@ -133,7 +133,8 @@ OIDC_OP_ISSUER = os.getenv(
 
 OIDC_TRUSTED_AUDIENCES = f"api://{OIDC_RP_CLIENT_ID}"
 OIDC_RP_SIGN_ALGO = "RS256"
-
+OIDC_USE_PKCE = True
+OIDC_RP_SCOPES = f"openid email api://{OIDC_RP_CLIENT_ID}/user_impersonation"
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -318,6 +319,11 @@ DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
+
+# LOGIN_URL_NAME = 'oidc_authentication_callback'
+LOGOUT_URL_NAME = "oidc_logout"
+LOGIN_URL = "/oidc/authenticate/"
+# OIDC_AUTHENTICATION_CALLBACK_URL = "login"
 
 
 # Do not attempt WorkloadIdentityCredential when adding migrations to prevent an exception
