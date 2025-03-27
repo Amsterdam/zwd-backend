@@ -55,7 +55,7 @@ class CaseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Case
-        fields = ("id", "homeowner_association", "created", "status")
+        fields = ("id", "created", "homeowner_association", "legacy_id", "status")
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None
