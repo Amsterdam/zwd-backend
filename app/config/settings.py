@@ -267,6 +267,18 @@ WORKFLOW_SPEC_CONFIG = {
                 },
             },
         },
+        "facturatie": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
+            },
+        },
+        "evaluatie": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
+            },
+        },
     }
 }
 

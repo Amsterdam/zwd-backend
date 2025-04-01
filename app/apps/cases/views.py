@@ -72,7 +72,8 @@ class CaseViewSet(
         case = self.get_object()
         workflows = CaseWorkflow.objects.filter(
             case=case, completed=False, tasks__isnull=False
-        )
+        ).distinct()
+        print(workflows)
         serializer = CaseWorkflowSerializer(workflows, many=True)
         return Response(serializer.data)
 
