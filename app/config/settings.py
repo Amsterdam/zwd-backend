@@ -243,6 +243,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 WORKFLOW_SPEC_CONFIG = {
     "default": {
+        "director": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
+            },
+        },
         "adviezen_proces": {
             "initial_data": {"advice_type": {"value": "Default"}},
             "versions": {

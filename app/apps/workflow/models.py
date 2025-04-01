@@ -1,3 +1,4 @@
+import copy
 import datetime
 import os
 
@@ -31,6 +32,14 @@ from django.utils.timezone import make_aware
 class CaseWorkflow(models.Model):
 
     WORKFLOW_TYPE_SUB = "sub_workflow"
+
+    parent_workflow = models.ForeignKey(
+        to="workflow.CaseWorkflow",
+        related_name="child_workflows",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     case = models.ForeignKey(
         to=Case,
@@ -163,6 +172,22 @@ class CaseWorkflow(models.Model):
         self.serialized_workflow_state = state
         self.started = True
         self.save()
+
+        if self.completed and self.parent_workflow:
+            parent_workflow = CaseWorkflow.objects.get(id=self.parent_workflow.id)
+            data = copy.deepcopy(wf.last_task.data) if wf.last_task else {}
+            if parent_workflow and parent_workflow.workflow_type == "director":
+                parent_workflow.data.update(data)
+                wf = parent_workflow._get_or_restore_workflow_state()
+                wf.refresh_waiting_tasks()
+                wf.do_engine_steps()
+                wf.catch(
+                    BpmnEvent(
+                        MessageEventDefinition(f"resume_after_{self.workflow_type}"),
+                        {"result_var": "result_var", "payload": "payload"},
+                    )
+                )
+                parent_workflow.update_workflow(wf)
 
     def _update_tasks(self, wf):
         self._set_obsolete_tasks_to_completed(wf)
@@ -407,11 +432,6 @@ class CaseUserTask(models.Model):
         default=False,
         help_text="Indicates whether this task requires review by another user.",
     )
-
-    @property
-    def get_form_variables(self):
-        # TODO: Return corresponding spiff task data, currently used only to provide frontend with the current summon_id
-        return self.workflow.get_data()
 
     def complete(self):
         self.completed = True

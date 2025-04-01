@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1ll6h3a" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:collaboration id="Collaboration_1cgjm5f">
+    <bpmn:participant id="director_process" name="director process" processRef="director" />
+  </bpmn:collaboration>
+  <bpmn:process id="director" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_139cvcz">
+      <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_subworkflow_adviezen_proces</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_04fk3gu</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0xa55eq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resume_after_adviezen_proces</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0q4xypf</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0eflefx</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="script_start_subworkflow_adviezen_proces" name="Start adviezen proces">
+      <bpmn:incoming>Flow_0eflefx</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
+      <bpmn:script>start_subworkflow("adviezen_proces")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0eflefx" sourceRef="StartEvent_1" targetRef="script_start_subworkflow_adviezen_proces" />
+    <bpmn:endEvent id="Event_04fk3gu">
+      <bpmn:incoming>Flow_1dv7sqf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1dv7sqf" sourceRef="Activity_0xa55eq" targetRef="Event_04fk3gu" />
+    <bpmn:scriptTask id="Activity_0xa55eq" name="Start adviezen proces">
+      <bpmn:incoming>Flow_0sajjd5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1dv7sqf</bpmn:outgoing>
+      <bpmn:script>start_subworkflow("adviezen_proces")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_adviezen_proces" targetRef="Activity_0xa55eq" />
+    <bpmn:intermediateCatchEvent id="resume_after_adviezen_proces" name="resume_after_adviezen_proces">
+      <bpmn:incoming>Flow_0hxvayr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sajjd5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0rem877" messageRef="Message_0s8g375" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_subworkflow_adviezen_proces" targetRef="Activity_0q4xypf" />
+    <bpmn:scriptTask id="Activity_0q4xypf" name="test">
+      <bpmn:incoming>Flow_1qqjv57</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hxvayr</bpmn:outgoing>
+      <bpmn:script>print("******AFTER***")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0hxvayr" sourceRef="Activity_0q4xypf" targetRef="resume_after_adviezen_proces" />
+  </bpmn:process>
+  <bpmn:message id="Message_0s8g375" name="resume_after_adviezen_proces" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1cgjm5f">
+      <bpmndi:BPMNShape id="Participant_1akc5kn_di" bpmnElement="director_process" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="600" height="470" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_16c0oj9_di" bpmnElement="Lane_Projectmedewerker" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="570" height="470" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="259" y="319" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_116dos9_di" bpmnElement="script_start_subworkflow_adviezen_proces">
+        <dc:Bounds x="350" y="297" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_04fk3gu_di" bpmnElement="Event_04fk3gu">
+        <dc:Bounds x="672" y="319" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0j4dhpt" bpmnElement="Activity_0xa55eq">
+        <dc:Bounds x="550" y="420" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1yuqiak_di" bpmnElement="resume_after_adviezen_proces">
+        <dc:Bounds x="582" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="558" y="244.5" width="84" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0q4xypf_di" bpmnElement="Activity_0q4xypf">
+        <dc:Bounds x="410" y="190" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0eflefx_di" bpmnElement="Flow_0eflefx">
+        <di:waypoint x="295" y="337" />
+        <di:waypoint x="350" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1dv7sqf_di" bpmnElement="Flow_1dv7sqf">
+        <di:waypoint x="650" y="460" />
+        <di:waypoint x="661" y="460" />
+        <di:waypoint x="661" y="337" />
+        <di:waypoint x="672" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sajjd5_di" bpmnElement="Flow_0sajjd5">
+        <di:waypoint x="600" y="318" />
+        <di:waypoint x="600" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qqjv57_di" bpmnElement="Flow_1qqjv57">
+        <di:waypoint x="400" y="297" />
+        <di:waypoint x="400" y="284" />
+        <di:waypoint x="460" y="284" />
+        <di:waypoint x="460" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hxvayr_di" bpmnElement="Flow_0hxvayr">
+        <di:waypoint x="510" y="230" />
+        <di:waypoint x="546" y="230" />
+        <di:waypoint x="546" y="300" />
+        <di:waypoint x="582" y="300" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

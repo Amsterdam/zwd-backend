@@ -70,7 +70,9 @@ class CaseViewSet(
     @action(detail=True, methods=["get"], url_path="workflows")
     def get_workflows(self, request, pk=None):
         case = self.get_object()
-        workflows = CaseWorkflow.objects.filter(case=case, completed=False)
+        workflows = CaseWorkflow.objects.filter(
+            case=case, completed=False, tasks__isnull=False
+        )
         serializer = CaseWorkflowSerializer(workflows, many=True)
         return Response(serializer.data)
 

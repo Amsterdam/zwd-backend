@@ -65,7 +65,7 @@ def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_dat
 
     parent_workflow = CaseWorkflow.objects.get(id=parent_workflow_id)
     with transaction.atomic():
-        data = copy.deepcopy(parent_workflow.get_data())
+        data = copy.deepcopy(parent_workflow.data)
         data.update(extra_data)
         subworkflow = CaseWorkflow.objects.create(
             case=parent_workflow.case,
@@ -73,6 +73,7 @@ def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_dat
             workflow_type=subworkflow_name,
             data=data,
         )
+        subworkflow.start()
 
     return f"task_start_subworkflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
 
@@ -86,7 +87,7 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
         workflow_instance = CaseWorkflow.objects.create(
             case=case,
             # TODO: Make dynamic
-            workflow_type="adviezen_proces",
+            workflow_type="director",
             main_workflow=True,
             workflow_message_name=None,
             data=data,
