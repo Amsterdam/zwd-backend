@@ -249,7 +249,7 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.0.0": {},
             },
         },
-        "adviezen_proces": {
+        "beoordeling": {
             "initial_data": {"advice_type": {"value": "Default"}},
             "versions": {
                 "1.0.0": {},

@@ -172,23 +172,41 @@ def validate_workflow_spec(workflow_spec_config):
     return serializer.data
 
 
-def get_latest_version_from_config(workflow_type):
+def get_latest_version_from_config(workflow_type, director_version=None):
+    def get_major(version):
+        return int(version.split(".")[0])
+
+    # Validate and retrieve the workflow spec configuration
     validated_workflow_spec_config = validate_workflow_spec(
         settings.WORKFLOW_SPEC_CONFIG
     )
     theme_name = "default"
-    config = validated_workflow_spec_config.get(theme_name, {})
+    config = validated_workflow_spec_config.get(theme_name, {}).get(workflow_type, {})
 
-    config = config.get(workflow_type, {})
     if not config:
         raise Exception(
-            f"Workflow type '{workflow_type}', does not exist in this workflow_spec config"
+            f"Workflow type '{workflow_type}' does not exist in the workflow spec config"
         )
 
-    workflow_type_versions = sorted([v for v, k in config.get("versions").items()])
+    # Retrieve and sort workflow type versions
+    workflow_type_versions = sorted(config.get("versions", {}).keys())
     if not workflow_type_versions:
         raise Exception(
-            f"Workflow version for theme name '{theme_name}', with type '{workflow_type}', does not exist in this workflow_spec config"
+            f"No versions found for workflow type '{workflow_type}' under theme '{theme_name}'"
         )
-    highest_sub_version = workflow_type_versions[-1]
-    return highest_sub_version
+
+    if director_version:
+        # Filter versions to ensure they are not higher than the director's major version
+        workflow_type_versions = [
+            version
+            for version in workflow_type_versions
+            if get_major(director_version) >= get_major(version)
+        ]
+
+    if not workflow_type_versions:
+        raise Exception(
+            f"No compatible versions found for workflow type '{workflow_type}' with director version '{director_version}'"
+        )
+
+    # Return the highest available version
+    return workflow_type_versions[-1]

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1jjdo8n" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
   <bpmn:collaboration id="V">
-    <bpmn:participant id="Process" name="Process" processRef="adviezen_proces" />
+    <bpmn:participant id="Process" name="Process" processRef="beoordeling" />
   </bpmn:collaboration>
-  <bpmn:process id="adviezen_proces" name="Cursus gevolgd?" isExecutable="true">
+  <bpmn:process id="beoordeling" name="Cursus gevolgd?" isExecutable="true">
     <bpmn:laneSet id="LaneSet_1n6s6fa">
       <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
         <bpmn:flowNodeRef>Gateway_1tmui51</bpmn:flowNodeRef>
@@ -53,12 +53,10 @@
         <bpmn:flowNodeRef>Gateway_0p6zwwq</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_0du1x64</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_01ko21h</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_versturen_adviseur</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_0nh6ajz</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_uploaden_intake_formulier</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Event_0dvxbn8</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_bestuur</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_extra_info</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0jaysq0</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:exclusiveGateway id="Gateway_1tmui51" default="Flow_0o1lwrx">
@@ -400,20 +398,6 @@
     <bpmn:endEvent id="Event_01ko21h">
       <bpmn:incoming>Flow_0rcrplq</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="task_versturen_adviseur" name="Toekennen aan adviseur">
-      <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="form_add_advisor" label="Selecteer een adviseur" type="advisor" />
-        </camunda:formData>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_08ufbro</bpmn:incoming>
-      <bpmn:outgoing>Flow_10509z8</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:scriptTask id="Activity_0nh6ajz" name="Status update: &#34;Toegekend aan adviseur&#34;">
-      <bpmn:incoming>Flow_10509z8</bpmn:incoming>
-      <bpmn:outgoing>Flow_0e2zofn</bpmn:outgoing>
-      <bpmn:script>set_status("Toegekend aan adviseur")</bpmn:script>
-    </bpmn:scriptTask>
     <bpmn:userTask id="task_uploaden_intake_formulier" name="Uploaden intakeformulier">
       <bpmn:extensionElements>
         <camunda:formData>
@@ -421,11 +405,8 @@
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1i8l9e8</bpmn:incoming>
-      <bpmn:outgoing>Flow_08ufbro</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0jl52nm</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:endEvent id="Event_0dvxbn8">
-      <bpmn:incoming>Flow_0e2zofn</bpmn:incoming>
-    </bpmn:endEvent>
     <bpmn:boundaryEvent id="timer_bestuur" name="14 dagen" attachedToRef="task_monitor_mail_bestuur">
       <bpmn:outgoing>Flow_00f0qoe</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0id9baz">
@@ -524,9 +505,10 @@
     <bpmn:sequenceFlow id="Flow_0ul0oq9" name="Gebouw onjuiste staat of recente renovatie" sourceRef="Gateway_0p6zwwq" targetRef="Gateway_0du1x64">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">form_controle_gebouw.get("value") == "close"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_08ufbro" sourceRef="task_uploaden_intake_formulier" targetRef="task_versturen_adviseur" />
-    <bpmn:sequenceFlow id="Flow_10509z8" sourceRef="task_versturen_adviseur" targetRef="Activity_0nh6ajz" />
-    <bpmn:sequenceFlow id="Flow_0e2zofn" sourceRef="Activity_0nh6ajz" targetRef="Event_0dvxbn8" />
+    <bpmn:sequenceFlow id="Flow_0jl52nm" sourceRef="task_uploaden_intake_formulier" targetRef="Event_0jaysq0" />
+    <bpmn:endEvent id="Event_0jaysq0">
+      <bpmn:incoming>Flow_0jl52nm</bpmn:incoming>
+    </bpmn:endEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -702,20 +684,12 @@
       <bpmndi:BPMNShape id="Event_01ko21h_di" bpmnElement="Event_01ko21h">
         <dc:Bounds x="3171" y="392" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0xgwkuz_di" bpmnElement="task_versturen_adviseur">
-        <dc:Bounds x="4349" y="970" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_04zw4dh" bpmnElement="Activity_0nh6ajz">
-        <dc:Bounds x="4529" y="970" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0w1jx6a_di" bpmnElement="task_uploaden_intake_formulier">
         <dc:Bounds x="4169" y="970" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0dvxbn8_di" bpmnElement="Event_0dvxbn8">
-        <dc:Bounds x="4661" y="992" width="36" height="36" />
+      <bpmndi:BPMNShape id="Event_0jaysq0_di" bpmnElement="Event_0jaysq0">
+        <dc:Bounds x="4322" y="992" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1emvbwn_di" bpmnElement="timer_bestuur">
         <dc:Bounds x="3296" y="552" width="36" height="36" />
@@ -1020,17 +994,9 @@
           <dc:Bounds x="2858" y="855" width="82" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_08ufbro_di" bpmnElement="Flow_08ufbro">
+      <bpmndi:BPMNEdge id="Flow_0jl52nm_di" bpmnElement="Flow_0jl52nm">
         <di:waypoint x="4269" y="1010" />
-        <di:waypoint x="4349" y="1010" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_10509z8_di" bpmnElement="Flow_10509z8">
-        <di:waypoint x="4449" y="1010" />
-        <di:waypoint x="4529" y="1010" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0e2zofn_di" bpmnElement="Flow_0e2zofn">
-        <di:waypoint x="4629" y="1010" />
-        <di:waypoint x="4661" y="1010" />
+        <di:waypoint x="4322" y="1010" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

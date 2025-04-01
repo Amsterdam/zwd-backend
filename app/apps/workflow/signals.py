@@ -21,10 +21,11 @@ def case_workflow_pre_save(sender, instance, **kwargs):
                 },
             }
         )
-        # existing_main_workflow = CaseWorkflow.objects.filter(
-        #     case=instance.case,
-        #     main_workflow=True,
-        # ).first()
+        existing_main_workflow = CaseWorkflow.objects.filter(
+            case=instance.case,
+            main_workflow=True,
+        ).first()
         instance.workflow_version = get_latest_version_from_config(
-            instance.workflow_type
+            instance.workflow_type,
+            existing_main_workflow.workflow_version if existing_main_workflow else None,
         )

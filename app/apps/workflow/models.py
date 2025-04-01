@@ -94,15 +94,7 @@ class CaseWorkflow(models.Model):
         initial_data.update(self.data)
         workflow = self._initial_data(workflow, initial_data)
         if self.workflow_message_name:
-            workflow.refresh_waiting_tasks()
-            workflow.do_engine_steps()
-            # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
-            workflow.catch(
-                BpmnEvent(
-                    MessageEventDefinition(self.workflow_message_name),
-                    {"result_var": "result_var", "payload": "payload"},
-                )
-            )
+            self._handle_workflow_event(workflow, self.workflow_message_name)
 
         workflow = self.update_workflow(workflow)
         return
@@ -137,6 +129,17 @@ class CaseWorkflow(models.Model):
                     )
                     return True
         return False
+
+    def _handle_workflow_event(self, workflow, message_name):
+        workflow.refresh_waiting_tasks()
+        workflow.do_engine_steps()
+        # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
+        workflow.catch(
+            BpmnEvent(
+                MessageEventDefinition(message_name),
+                {"result_var": "result_var", "payload": "payload"},
+            )
+        )
 
     def _get_workflow_path(
         # TODO make dynamic
@@ -179,14 +182,7 @@ class CaseWorkflow(models.Model):
             if parent_workflow and parent_workflow.workflow_type == "director":
                 parent_workflow.data.update(data)
                 wf = parent_workflow._get_or_restore_workflow_state()
-                wf.refresh_waiting_tasks()
-                wf.do_engine_steps()
-                wf.catch(
-                    BpmnEvent(
-                        MessageEventDefinition(f"resume_after_{self.workflow_type}"),
-                        {"result_var": "result_var", "payload": "payload"},
-                    )
-                )
+                self._handle_workflow_event(wf, f"resume_after_{self.workflow_type}")
                 parent_workflow.update_workflow(wf)
 
     def _update_tasks(self, wf):
