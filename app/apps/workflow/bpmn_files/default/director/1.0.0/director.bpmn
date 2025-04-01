@@ -6,55 +6,55 @@
   <bpmn:process id="director" isExecutable="true">
     <bpmn:laneSet id="LaneSet_139cvcz">
       <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
-        <bpmn:flowNodeRef>script_start_subworkflow_beoordeling</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_beoordeling</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>resume_after_beoordeling</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>script_start_subworkflow_facturatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_facturatie</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>script_start_subworkflow_evaluatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_evaluatie</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>resume_after_facturatie</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>resume_after_evaluatie</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_04fk3gu</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_beoordeling" targetRef="script_start_subworkflow_facturatie" />
-    <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_subworkflow_beoordeling" targetRef="resume_after_beoordeling" />
-    <bpmn:scriptTask id="script_start_subworkflow_beoordeling" name="Start beoordeling">
+    <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_beoordeling" targetRef="script_start_workflow_facturatie" />
+    <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_workflow_beoordeling" targetRef="resume_after_beoordeling" />
+    <bpmn:scriptTask id="script_start_workflow_beoordeling" name="Start beoordeling">
       <bpmn:incoming>Flow_16ah6yg</bpmn:incoming>
       <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
-      <bpmn:script>start_subworkflow("beoordeling")</bpmn:script>
+      <bpmn:script>start_workflow("beoordeling")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:intermediateCatchEvent id="resume_after_beoordeling" name="resume_after_beoordeling">
       <bpmn:incoming>Flow_1qqjv57</bpmn:incoming>
       <bpmn:outgoing>Flow_0sajjd5</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0rem877" messageRef="Message_0s8g375" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:scriptTask id="script_start_subworkflow_facturatie" name="Start facturatie">
+    <bpmn:scriptTask id="script_start_workflow_facturatie" name="Start facturatie">
       <bpmn:incoming>Flow_0sajjd5</bpmn:incoming>
       <bpmn:outgoing>Flow_0nb6083</bpmn:outgoing>
-      <bpmn:script>start_subworkflow("facturatie")</bpmn:script>
+      <bpmn:script>start_workflow("facturatie")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_16ah6yg</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_16ah6yg" sourceRef="StartEvent_1" targetRef="script_start_subworkflow_beoordeling" />
+    <bpmn:sequenceFlow id="Flow_16ah6yg" sourceRef="StartEvent_1" targetRef="script_start_workflow_beoordeling" />
     <bpmn:intermediateCatchEvent id="resume_after_facturatie" name="resume_after_facturatie">
       <bpmn:incoming>Flow_0nb6083</bpmn:incoming>
       <bpmn:outgoing>Flow_0emx0cc</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0dol716" messageRef="Message_21ddler" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="Flow_0nb6083" sourceRef="script_start_subworkflow_facturatie" targetRef="resume_after_facturatie" />
-    <bpmn:scriptTask id="script_start_subworkflow_evaluatie" name="Start evaluatie">
+    <bpmn:sequenceFlow id="Flow_0nb6083" sourceRef="script_start_workflow_facturatie" targetRef="resume_after_facturatie" />
+    <bpmn:scriptTask id="script_start_workflow_evaluatie" name="Start evaluatie">
       <bpmn:incoming>Flow_0emx0cc</bpmn:incoming>
       <bpmn:outgoing>Flow_1yq0o8d</bpmn:outgoing>
-      <bpmn:script>start_subworkflow("evaluatie")</bpmn:script>
+      <bpmn:script>start_workflow("evaluatie")</bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:sequenceFlow id="Flow_0emx0cc" sourceRef="resume_after_facturatie" targetRef="script_start_subworkflow_evaluatie" />
+    <bpmn:sequenceFlow id="Flow_0emx0cc" sourceRef="resume_after_facturatie" targetRef="script_start_workflow_evaluatie" />
     <bpmn:intermediateCatchEvent id="resume_after_evaluatie" name="resume_after_evaluatie">
       <bpmn:incoming>Flow_1yq0o8d</bpmn:incoming>
       <bpmn:outgoing>Flow_1kp25xn</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1ux22bs" messageRef="Message_1qfqeao" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="Flow_1yq0o8d" sourceRef="script_start_subworkflow_evaluatie" targetRef="resume_after_evaluatie" />
+    <bpmn:sequenceFlow id="Flow_1yq0o8d" sourceRef="script_start_workflow_evaluatie" targetRef="resume_after_evaluatie" />
     <bpmn:sequenceFlow id="Flow_1kp25xn" sourceRef="resume_after_evaluatie" targetRef="Event_04fk3gu" />
     <bpmn:endEvent id="Event_04fk3gu">
       <bpmn:incoming>Flow_1kp25xn</bpmn:incoming>
@@ -73,7 +73,7 @@
         <dc:Bounds x="190" y="80" width="1110" height="470" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_116dos9_di" bpmnElement="script_start_subworkflow_beoordeling">
+      <bpmndi:BPMNShape id="Activity_116dos9_di" bpmnElement="script_start_workflow_beoordeling">
         <dc:Bounds x="310" y="297" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -83,7 +83,7 @@
           <dc:Bounds x="428" y="281.5" width="84" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0j4dhpt" bpmnElement="script_start_subworkflow_facturatie">
+      <bpmndi:BPMNShape id="BPMNShape_0j4dhpt" bpmnElement="script_start_workflow_facturatie">
         <dc:Bounds x="530" y="297" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -96,7 +96,7 @@
           <dc:Bounds x="645" y="281" width="90" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1e3e3h9_di" bpmnElement="script_start_subworkflow_evaluatie">
+      <bpmndi:BPMNShape id="Activity_1e3e3h9_di" bpmnElement="script_start_workflow_evaluatie">
         <dc:Bounds x="750" y="297" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>

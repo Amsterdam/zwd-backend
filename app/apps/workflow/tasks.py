@@ -60,7 +60,7 @@ def task_accept_message_for_workflow(self, workflow_id, message, extra_data):
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
-def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_data={}):
+def task_start_workflow(self, subworkflow_name, parent_workflow_id, extra_data={}):
     from apps.workflow.models import CaseWorkflow
 
     parent_workflow = CaseWorkflow.objects.get(id=parent_workflow_id)
@@ -75,7 +75,7 @@ def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_dat
         )
         subworkflow.start()
 
-    return f"task_start_subworkflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
+    return f"task_start_workflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)

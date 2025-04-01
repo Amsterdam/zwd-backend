@@ -23,7 +23,7 @@ from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
     task_script_wait,
-    task_start_subworkflow,
+    task_start_workflow,
 )
 from .utils import get_initial_data_from_config
 from django.utils.timezone import make_aware
@@ -338,8 +338,8 @@ class CaseWorkflow(models.Model):
         def script_wait(message, data={}):
             task_script_wait.delay(workflow_instance.id, message, data)
 
-        def start_subworkflow(subworkflow_name, data={}):
-            task_start_subworkflow.delay(subworkflow_name, workflow_instance.id, data)
+        def start_workflow(subworkflow_name, data={}):
+            task_start_workflow.delay(subworkflow_name, workflow_instance.id, data)
 
         def close_case():
             workflow_instance.case.close_case()
@@ -356,7 +356,7 @@ class CaseWorkflow(models.Model):
                 environment_globals={
                     "set_status": set_status,
                     "script_wait": script_wait,
-                    "start_subworkflow": start_subworkflow,
+                    "start_workflow": start_workflow,
                     "parse_duration": parse_duration_string,
                     "close_case": close_case,
                 }
