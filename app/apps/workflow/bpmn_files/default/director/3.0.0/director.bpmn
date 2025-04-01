@@ -18,7 +18,7 @@
     </bpmn:laneSet>
     <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_beoordeling" targetRef="script_start_subworkflow_facturatie" />
     <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_subworkflow_beoordeling" targetRef="resume_after_beoordeling" />
-    <bpmn:scriptTask id="script_start_subworkflow_beoordeling" name="Start beoordeling">
+    <bpmn:scriptTask id="script_start_subworkflow_beoordeling" name="Start adviezen proces">
       <bpmn:incoming>Flow_16ah6yg</bpmn:incoming>
       <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
       <bpmn:script>start_subworkflow("beoordeling")</bpmn:script>
