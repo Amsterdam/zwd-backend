@@ -276,7 +276,7 @@ class CaseApiTest(APITestCase):
     # Django test create a test db, celery is unaware of that db so mock celery methods
     @patch("apps.cases.views.CaseViewSet.start_workflow")
     def _create_case(self, mock_start_workflow):
-        mock_start_workflow.return_value = "task_start_worflow: completed"
+        mock_start_workflow.return_value = "task_start_workflow: completed"
         url = reverse("cases-list")
         data = {"description": "Test case description"}
 

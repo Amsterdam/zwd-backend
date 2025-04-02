@@ -24,7 +24,7 @@ from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
 from apps.workflow.tasks import task_create_main_worflow_for_case
-from apps.workflow.tasks import task_start_worflow
+from apps.workflow.tasks import task_start_workflow
 from apps.advisor.models import Advisor
 from utils.pagination import CustomPagination
 from django_filters.rest_framework import DjangoFilterBackend
@@ -94,7 +94,7 @@ class CaseViewSet(
             case_id=case.id, data={"initiated_by": user_id}
         )
         task.wait(timeout=None, interval=0.5)
-        start_workflow_task = task_start_worflow.delay(
+        start_workflow_task = task_start_workflow.delay(
             CaseWorkflow.objects.get(case=case).id
         )
         start_workflow_task.wait(timeout=None, interval=0.5)
@@ -163,7 +163,7 @@ class CaseViewSet(
                 workflow_message_name=instance.message_name,
                 data={"initiated_by": request.user.id},
             )
-            task = task_start_worflow.delay(case_workflow.id)
+            task = task_start_workflow.delay(case_workflow.id)
             task.wait(timeout=None, interval=0.5)
             return Response(
                 data=f"Workflow has started {str(instance)}",
