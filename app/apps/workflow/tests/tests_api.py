@@ -180,7 +180,7 @@ class CaseUserTaskApiTests(APITestCase):
         hoa = HomeownerAssociation.objects.create(
             name="HOA", number_of_appartments=12, build_year=2010
         )
-        mock_start_workflow.return_value = "task_start_worflow: completed"
+        mock_start_workflow.return_value = "task_start_workflow: completed"
         url = reverse("cases-list")
         data = {"description": "Test case description", "homeowner_association": hoa.id}
 

@@ -1,5 +1,3 @@
-import copy
-
 import celery
 from apps.cases.models import Case
 from celery.utils.log import get_task_logger
@@ -60,25 +58,6 @@ def task_accept_message_for_workflow(self, workflow_id, message, extra_data):
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
-def task_start_workflow(self, subworkflow_name, parent_workflow_id, extra_data={}):
-    from apps.workflow.models import CaseWorkflow
-
-    parent_workflow = CaseWorkflow.objects.get(id=parent_workflow_id)
-    with transaction.atomic():
-        data = copy.deepcopy(parent_workflow.data)
-        data.update(extra_data)
-        subworkflow = CaseWorkflow.objects.create(
-            case=parent_workflow.case,
-            parent_workflow=parent_workflow,
-            workflow_type=subworkflow_name,
-            data=data,
-        )
-        subworkflow.start()
-
-    return f"task_start_workflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
-
-
-@celery.shared_task(bind=True, base=BaseTaskWithRetry)
 def task_create_main_worflow_for_case(self, case_id, data={}):
     from apps.workflow.models import CaseWorkflow
 
@@ -96,12 +75,12 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
-def task_start_worflow(self, worklow_id):
+def task_start_workflow(self, worklow_id):
     from apps.workflow.models import CaseWorkflow
 
     workflow_instance = CaseWorkflow.objects.get(id=worklow_id)
     workflow_instance.start()
-    return f"task_start_worflow: workflow id '{worklow_id}', started"
+    return f"task_start_workflow: workflow id '{worklow_id}', started"
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)

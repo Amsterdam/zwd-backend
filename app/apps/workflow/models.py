@@ -23,10 +23,10 @@ from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
     task_script_wait,
-    task_start_workflow,
 )
 from .utils import get_initial_data_from_config
 from django.utils.timezone import make_aware
+from django.db import transaction
 
 
 class CaseWorkflow(models.Model):
@@ -325,6 +325,23 @@ class CaseWorkflow(models.Model):
             if os.path.isfile(os.path.join(path, f)) and self._is_bpmn_file(f)
         ]
 
+    def _start_child_workflow(
+        self, subworkflow_name, parent_workflow_id, extra_data={}
+    ):
+        from apps.workflow.models import CaseWorkflow
+
+        parent_workflow = CaseWorkflow.objects.get(id=parent_workflow_id)
+        with transaction.atomic():
+            data = copy.deepcopy(parent_workflow.data)
+            data.update(extra_data)
+            subworkflow = CaseWorkflow.objects.create(
+                case=parent_workflow.case,
+                parent_workflow=parent_workflow,
+                workflow_type=subworkflow_name,
+                data=data,
+            )
+            subworkflow.start()
+
     def _is_bpmn_file(self, file_name):
         return file_name.split(".")[-1] == "bpmn"
 
@@ -339,7 +356,7 @@ class CaseWorkflow(models.Model):
             task_script_wait.delay(workflow_instance.id, message, data)
 
         def start_workflow(subworkflow_name, data={}):
-            task_start_workflow.delay(subworkflow_name, workflow_instance.id, data)
+            self._start_child_workflow(subworkflow_name, workflow_instance.id, data)
 
         def close_case():
             workflow_instance.case.close_case()
