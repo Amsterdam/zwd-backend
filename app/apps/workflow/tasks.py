@@ -60,12 +60,12 @@ def task_accept_message_for_workflow(self, workflow_id, message, extra_data):
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
-def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_data={}):
+def task_start_workflow(self, subworkflow_name, parent_workflow_id, extra_data={}):
     from apps.workflow.models import CaseWorkflow
 
     parent_workflow = CaseWorkflow.objects.get(id=parent_workflow_id)
     with transaction.atomic():
-        data = copy.deepcopy(parent_workflow.get_data())
+        data = copy.deepcopy(parent_workflow.data)
         data.update(extra_data)
         subworkflow = CaseWorkflow.objects.create(
             case=parent_workflow.case,
@@ -73,8 +73,9 @@ def task_start_subworkflow(self, subworkflow_name, parent_workflow_id, extra_dat
             workflow_type=subworkflow_name,
             data=data,
         )
+        subworkflow.start()
 
-    return f"task_start_subworkflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
+    return f"task_start_workflow:  subworkflow id '{subworkflow.id}', for parent workflow with id '{parent_workflow_id}', created"
 
 
 @celery.shared_task(bind=True, base=BaseTaskWithRetry)
@@ -86,7 +87,7 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
         workflow_instance = CaseWorkflow.objects.create(
             case=case,
             # TODO: Make dynamic
-            workflow_type="adviezen_proces",
+            workflow_type="director",
             main_workflow=True,
             workflow_message_name=None,
             data=data,

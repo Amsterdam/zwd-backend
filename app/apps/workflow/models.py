@@ -1,3 +1,4 @@
+import copy
 import datetime
 import os
 
@@ -22,7 +23,7 @@ from .managers import BulkCreateSignalsManager
 from .tasks import (
     task_complete_user_task_and_create_new_user_tasks,
     task_script_wait,
-    task_start_subworkflow,
+    task_start_workflow,
 )
 from .utils import get_initial_data_from_config
 from django.utils.timezone import make_aware
@@ -31,6 +32,14 @@ from django.utils.timezone import make_aware
 class CaseWorkflow(models.Model):
 
     WORKFLOW_TYPE_SUB = "sub_workflow"
+
+    parent_workflow = models.ForeignKey(
+        to="workflow.CaseWorkflow",
+        related_name="child_workflows",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     case = models.ForeignKey(
         to=Case,
@@ -85,15 +94,7 @@ class CaseWorkflow(models.Model):
         initial_data.update(self.data)
         workflow = self._initial_data(workflow, initial_data)
         if self.workflow_message_name:
-            workflow.refresh_waiting_tasks()
-            workflow.do_engine_steps()
-            # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
-            workflow.catch(
-                BpmnEvent(
-                    MessageEventDefinition(self.workflow_message_name),
-                    {"result_var": "result_var", "payload": "payload"},
-                )
-            )
+            self._handle_workflow_event(workflow, self.workflow_message_name)
 
         workflow = self.update_workflow(workflow)
         return
@@ -129,6 +130,17 @@ class CaseWorkflow(models.Model):
                     return True
         return False
 
+    def _handle_workflow_event(self, workflow, message_name):
+        workflow.refresh_waiting_tasks()
+        workflow.do_engine_steps()
+        # Only the message name is relevant here, the other parameters are not used but the docs don't really specify what they are used for.
+        workflow.catch(
+            BpmnEvent(
+                MessageEventDefinition(message_name),
+                {"result_var": "result_var", "payload": "payload"},
+            )
+        )
+
     def _get_workflow_path(
         # TODO make dynamic
         self,
@@ -163,6 +175,15 @@ class CaseWorkflow(models.Model):
         self.serialized_workflow_state = state
         self.started = True
         self.save()
+
+        if self.completed and self.parent_workflow:
+            parent_workflow = CaseWorkflow.objects.get(id=self.parent_workflow.id)
+            data = copy.deepcopy(wf.last_task.data) if wf.last_task else {}
+            if parent_workflow and parent_workflow.workflow_type == "director":
+                parent_workflow.data.update(data)
+                wf = parent_workflow._get_or_restore_workflow_state()
+                self._handle_workflow_event(wf, f"resume_after_{self.workflow_type}")
+                parent_workflow.update_workflow(wf)
 
     def _update_tasks(self, wf):
         self._set_obsolete_tasks_to_completed(wf)
@@ -317,8 +338,8 @@ class CaseWorkflow(models.Model):
         def script_wait(message, data={}):
             task_script_wait.delay(workflow_instance.id, message, data)
 
-        def start_subworkflow(subworkflow_name, data={}):
-            task_start_subworkflow.delay(subworkflow_name, workflow_instance.id, data)
+        def start_workflow(subworkflow_name, data={}):
+            task_start_workflow.delay(subworkflow_name, workflow_instance.id, data)
 
         def close_case():
             workflow_instance.case.close_case()
@@ -335,7 +356,7 @@ class CaseWorkflow(models.Model):
                 environment_globals={
                     "set_status": set_status,
                     "script_wait": script_wait,
-                    "start_subworkflow": start_subworkflow,
+                    "start_workflow": start_workflow,
                     "parse_duration": parse_duration_string,
                     "close_case": close_case,
                 }
@@ -407,11 +428,6 @@ class CaseUserTask(models.Model):
         default=False,
         help_text="Indicates whether this task requires review by another user.",
     )
-
-    @property
-    def get_form_variables(self):
-        # TODO: Return corresponding spiff task data, currently used only to provide frontend with the current summon_id
-        return self.workflow.get_data()
 
     def complete(self):
         self.completed = True

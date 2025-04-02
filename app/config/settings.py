@@ -243,7 +243,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 WORKFLOW_SPEC_CONFIG = {
     "default": {
-        "adviezen_proces": {
+        "director": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
+            },
+        },
+        "beoordeling": {
             "initial_data": {"advice_type": {"value": "Default"}},
             "versions": {
                 "1.0.0": {},
@@ -259,6 +265,18 @@ WORKFLOW_SPEC_CONFIG = {
                     "start_add_note_process": {},
                     "start_case_close": {},
                 },
+            },
+        },
+        "facturatie": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
+            },
+        },
+        "evaluatie": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
             },
         },
     }

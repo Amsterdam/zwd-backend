@@ -150,8 +150,11 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
 
 
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
-    adviezen_proces = WorkflowSpecConfigThemeSerializer(required=False)
+    beoordeling = WorkflowSpecConfigThemeSerializer(required=False)
     sub_workflow = WorkflowSpecConfigThemeSerializer(required=False)
+    director = WorkflowSpecConfigThemeSerializer(required=False)
+    facturatie = WorkflowSpecConfigThemeSerializer(required=False)
+    evaluatie = WorkflowSpecConfigThemeSerializer(required=False)
 
     def run_validation(self, data=empty):
         if data is not empty:
