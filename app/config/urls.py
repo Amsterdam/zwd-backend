@@ -48,6 +48,7 @@ def ok(request):
 
 urlpatterns = [
     path("startup/", ok),
+    path("", ok),
     path("oidc/", include("mozilla_django_oidc.urls")),
     path("admin/login/", admin_redirect),
     path("admin/", admin.site.urls),
@@ -58,9 +59,5 @@ urlpatterns = [
         "api/schema/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
-    ),
-    path(
-        ".well-known/security.txt",
-        lambda: redirect("https://www.amsterdam.nl/security.txt"),
     ),
 ]
