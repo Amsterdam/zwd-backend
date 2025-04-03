@@ -18,6 +18,8 @@ from django.http import HttpResponse
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 
 router = DefaultRouter()
 router.register(r"cases", CaseViewSet, basename="cases")
@@ -32,9 +34,6 @@ router.register(r"districts", DistrictViewset, basename="district")
 router.register(r"wijken", WijkViewset, basename="wijk")
 router.register(r"case-statuses", CaseStatusViewset, basename="case-status")
 router.register(r"neighborhoods", NeighborhoodViewset, basename="neighborhoods")
-
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
 
 
 @login_required
@@ -59,5 +58,9 @@ urlpatterns = [
         "api/schema/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
+    ),
+    path(
+        ".well-known/security.txt",
+        lambda: redirect("https://www.amsterdam.nl/security.txt"),
     ),
 ]

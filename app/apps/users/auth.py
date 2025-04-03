@@ -78,6 +78,7 @@ class OIDCAuthenticationBackend(OIDCAuthenticationBackend):
             verify=self.get_settings("OIDC_VERIFY_SSL", True),
             timeout=self.get_settings("OIDC_TIMEOUT", None),
             proxies=self.get_settings("OIDC_PROXY", None),
+            # Add origin headers to the request because Azure requires it in the PKCE flow
             headers={"Origin": "https://test.nl"},
         )
         self.raise_token_response_error(response)
