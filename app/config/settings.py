@@ -320,10 +320,9 @@ AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
 
-# LOGIN_URL_NAME = 'oidc_authentication_callback'
+
 LOGOUT_URL_NAME = "oidc_logout"
 LOGIN_URL = "/oidc/authenticate/"
-# OIDC_AUTHENTICATION_CALLBACK_URL = "login"
 
 
 # Do not attempt WorkloadIdentityCredential when adding migrations to prevent an exception
