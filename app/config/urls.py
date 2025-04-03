@@ -26,7 +26,6 @@ router.register(
 
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 
 
 @login_required
@@ -40,7 +39,6 @@ def ok(request):
 
 urlpatterns = [
     path("startup/", ok),
-    path("", OIDCAuthenticationCallbackView.as_view(), name="login"),
     path("oidc/", include("mozilla_django_oidc.urls")),
     path("admin/login/", admin_redirect),
     path("admin/", admin.site.urls),
