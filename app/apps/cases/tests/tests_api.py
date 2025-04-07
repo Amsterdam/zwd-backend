@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.workflow.models import WorkflowOption
 from apps.advisor.models import Advisor
-from apps.cases.models import AdviceType, Case
+from apps.cases.models import AdviceType, Case, CaseDocument
 from apps.homeownerassociation.models import HomeownerAssociation
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
 from model_bakery import baker
@@ -119,6 +119,26 @@ class CaseApiTest(APITestCase):
         non_existent_doc_id = 999
         url = reverse("cases-delete-document", args=[self.case, non_existent_doc_id])
         response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_document_name(self):
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=13
+        )
+        case = baker.make(Case, homeowner_association=homeowner_association)
+        case_document = baker.make(CaseDocument, case=case, name="old_name")
+        url = reverse("cases-update-document-name", args=[case.id, case_document.id])
+        data = {"name": "new_name"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        case_document.refresh_from_db()
+        self.assertEqual(case_document.name, "new_name")
+        self.assertEqual(response.data["name"], "new_name")
+
+    def test_update_document_name_not_found(self):
+        url = reverse("cases-update-document-name", args=[self.case, 999])
+        data = {"name": "new_name"}
+        response = self.client.patch(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_advisor_success(self):

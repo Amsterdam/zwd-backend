@@ -116,3 +116,9 @@ class StartWorkflowSerializer(serializers.Serializer):
     workflow_option_id = serializers.PrimaryKeyRelatedField(
         queryset=WorkflowOption.objects.all()
     )
+
+
+class CaseDocumentNameUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CaseDocument
+        fields = ["name"]
