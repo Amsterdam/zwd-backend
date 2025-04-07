@@ -17,6 +17,7 @@ from .serializers import (
     CaseSerializer,
     CaseListSerializer,
     StartWorkflowSerializer,
+    CaseDocumentNameUpdateSerializer,
 )
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.types import OpenApiTypes
@@ -138,6 +139,28 @@ class CaseViewSet(
         case_document = get_object_or_404(CaseDocument, case=case, id=doc_id)
         case_document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        request=CaseDocumentNameUpdateSerializer,
+        responses=CaseDocumentNameUpdateSerializer,
+        description="Update the name of a document",
+    )
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="documents/(?P<doc_id>[^/.]+)/update-name",
+    )
+    def update_document_name(self, request, pk=None, doc_id=None):
+        case = self.get_object()
+        case_document = get_object_or_404(CaseDocument, case=case, id=doc_id)
+
+        serializer = CaseDocumentNameUpdateSerializer(
+            case_document, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         responses=StartWorkflowSerializer,
