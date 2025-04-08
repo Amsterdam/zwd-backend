@@ -95,6 +95,8 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/csv",
             "application/CDFV2",
+            "application/vnd.ms-outlook",
+            "application/msoutlook",
         ]:
             raise serializers.ValidationError("File type not allowed")
 
