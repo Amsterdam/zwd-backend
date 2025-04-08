@@ -22,6 +22,13 @@ class DistrictSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class WijkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = ["id", "name"]
+        depth = 1
+
+
 class HomeownerAssociationSerializer(serializers.ModelSerializer):
     district = serializers.SerializerMethodField()
     neighborhood = serializers.SerializerMethodField()

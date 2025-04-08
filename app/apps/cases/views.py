@@ -1,6 +1,6 @@
 import mimetypes
 from apps.advisor.serializers import UpdateCaseAdvisorSerializer
-from apps.homeownerassociation.models import Contact
+from apps.homeownerassociation.models import Contact, District, Wijk
 from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
 from apps.advisor.mixins import CaseAdvisorMixin
@@ -10,12 +10,13 @@ from rest_framework import mixins, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Case, CaseDocument
+from .models import Case, CaseDocument, CaseStatus
 from .serializers import (
     CaseCreateSerializer,
     CaseDocumentSerializer,
     CaseSerializer,
     CaseListSerializer,
+    CaseStatusSerializer,
     StartWorkflowSerializer,
     CaseDocumentNameUpdateSerializer,
 )
@@ -34,11 +35,52 @@ import django_filters
 
 class CaseFilter(django_filters.FilterSet):
     closed = django_filters.BooleanFilter(method="filter_closed_cases")
+    district = django_filters.ModelMultipleChoiceFilter(
+        queryset=District.objects.all(),
+        method="filter_district",
+        to_field_name="name",
+    )
+    wijk = django_filters.ModelMultipleChoiceFilter(
+        queryset=Wijk.objects.all(),
+        method="filter_wijk",
+        to_field_name="name",
+    )
+    status = django_filters.ModelMultipleChoiceFilter(
+        queryset=CaseStatus.objects.all(),
+        method="filter_status",
+        to_field_name="name",
+    )
+
+    homeowner_association_name = django_filters.CharFilter(
+        field_name="homeowner_association__name",
+        lookup_expr="icontains",
+    )
 
     def filter_closed_cases(self, queryset, _, value):
         if value:
             return queryset.filter(end_date__isnull=False)
         return queryset.filter(end_date__isnull=True)
+
+    def filter_district(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                homeowner_association__district__in=value,
+            )
+        return queryset
+
+    def filter_wijk(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                homeowner_association__wijk__in=value,
+            )
+        return queryset
+
+    def filter_status(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                status__in=value,
+            )
+        return queryset
 
 
 class CaseViewSet(
@@ -260,3 +302,16 @@ class CaseViewSet(
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(case.id)
+
+
+class CaseStatusViewset(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = CaseStatus.objects.all()
+    serializer_class = CaseStatusSerializer
+
+    def list(self, _, *args, **kwargs):
+        names = self.get_queryset().values_list("name", flat=True).distinct()
+        return Response(list(names))
