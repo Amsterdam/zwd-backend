@@ -79,6 +79,7 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
             ".xlsx",
             ".xls",
             ".csv",
+            ".msg",
         ]:
             raise serializers.ValidationError("File extension not allowed")
 
@@ -93,6 +94,9 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
             "image/jpeg",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/csv",
+            "application/CDFV2",
+            "application/vnd.ms-outlook",
+            "application/msoutlook",
         ]:
             raise serializers.ValidationError("File type not allowed")
 
