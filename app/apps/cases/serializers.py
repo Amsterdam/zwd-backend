@@ -126,3 +126,9 @@ class CaseDocumentNameUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseDocument
         fields = ["name"]
+
+
+class CaseStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Case
+        fields = ["status"]
