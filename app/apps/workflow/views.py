@@ -1,5 +1,8 @@
 import logging
+import django_filters
 from rest_framework import status
+from apps.cases.models import CaseStatus
+from apps.homeownerassociation.models import District, Wijk
 from utils.pagination import CustomPagination
 from apps.cases.serializers import CaseDocumentWithTaskSerializer
 from apps.workflow.task_completion import (
@@ -31,6 +34,50 @@ from django_filters.rest_framework import DjangoFilterBackend
 logger = logging.getLogger(__name__)
 
 
+class CaseUserTaskFilter(django_filters.FilterSet):
+    district = django_filters.ModelMultipleChoiceFilter(
+        queryset=District.objects.all(),
+        method="filter_district",
+        to_field_name="name",
+    )
+    wijk = django_filters.ModelMultipleChoiceFilter(
+        queryset=Wijk.objects.all(),
+        method="filter_wijk",
+        to_field_name="name",
+    )
+    status = django_filters.ModelMultipleChoiceFilter(
+        queryset=CaseStatus.objects.all(),
+        method="filter_status",
+        to_field_name="name",
+    )
+
+    homeowner_association_name = django_filters.CharFilter(
+        field_name="case__homeowner_association__name",
+        lookup_expr="icontains",
+    )
+
+    def filter_district(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                case__homeowner_association__district__in=value,
+            )
+        return queryset
+
+    def filter_wijk(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                case__homeowner_association__wijk__in=value,
+            )
+        return queryset
+
+    def filter_status(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                case__status__in=value,
+            )
+        return queryset
+
+
 class CaseUserTaskViewSet(
     viewsets.GenericViewSet,
     mixins.RetrieveModelMixin,
@@ -41,6 +88,7 @@ class CaseUserTaskViewSet(
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     ordering_fields = ["id", "created"]
+    filterset_class = CaseUserTaskFilter
 
 
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
