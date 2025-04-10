@@ -3,6 +3,7 @@ from apps.homeownerassociation.models import (
     District,
     HomeownerAssociation,
     Neighborhood,
+    Wijk,
 )
 from rest_framework import serializers
 
@@ -19,6 +20,13 @@ class DistrictSerializer(serializers.ModelSerializer):
     class Meta:
         model = District
         fields = ["id", "name", "neighborhoods"]
+        depth = 1
+
+
+class WijkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wijk
+        fields = ["id", "name"]
         depth = 1
 
 
