@@ -3,7 +3,7 @@ from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
 )
-from apps.cases.models import Case, CaseDocument
+from apps.cases.models import Case, CaseDocument, CaseStatus
 from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import serializers
 import magic
@@ -130,5 +130,5 @@ class CaseDocumentNameUpdateSerializer(serializers.ModelSerializer):
 
 class CaseStatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Case
-        fields = ["status"]
+        model = CaseStatus
+        fields = ["name"]
