@@ -356,6 +356,15 @@ class CaseApiTest(APITestCase):
             any(option["name"] == option_name_closed_case for option in response.data)
         )
 
+    def test_retrieve_case_status(self):
+        url = reverse("case-status-list")
+        case_status = baker.make(CaseStatus, name="Test Status")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(response.data[0], case_status.name)
+
     def _create_sample_document(self):
         url = reverse("cases-create-document")
         document_data = {
