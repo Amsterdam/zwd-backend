@@ -19,7 +19,7 @@
     <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_beoordeling" targetRef="script_start_workflow_facturatie" />
     <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_workflow_beoordeling" targetRef="resume_after_beoordeling" />
     <bpmn:scriptTask id="script_start_workflow_beoordeling" name="Start beoordeling">
-      <bpmn:incoming>Flow_16ah6yg</bpmn:incoming>
+      <bpmn:incoming>Flow_1sqstvg</bpmn:incoming>
       <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
       <bpmn:script>start_workflow("beoordeling")</bpmn:script>
     </bpmn:scriptTask>
@@ -34,9 +34,8 @@
       <bpmn:script>start_workflow("facturatie")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>Flow_16ah6yg</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1sqstvg</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="Flow_16ah6yg" sourceRef="StartEvent_1" targetRef="script_start_workflow_beoordeling" />
     <bpmn:intermediateCatchEvent id="resume_after_facturatie" name="resume_after_facturatie">
       <bpmn:incoming>Flow_0nb6083</bpmn:incoming>
       <bpmn:outgoing>Flow_0emx0cc</bpmn:outgoing>
@@ -59,6 +58,7 @@
     <bpmn:endEvent id="Event_04fk3gu">
       <bpmn:incoming>Flow_1kp25xn</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1sqstvg" sourceRef="StartEvent_1" targetRef="script_start_workflow_beoordeling" />
   </bpmn:process>
   <bpmn:message id="Message_0s8g375" name="resume_after_beoordeling" />
   <bpmn:message id="Message_21ddler" name="resume_after_facturatie" />
@@ -117,10 +117,6 @@
         <di:waypoint x="410" y="337" />
         <di:waypoint x="452" y="337" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_16ah6yg_di" bpmnElement="Flow_16ah6yg">
-        <di:waypoint x="248" y="337" />
-        <di:waypoint x="310" y="337" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0nb6083_di" bpmnElement="Flow_0nb6083">
         <di:waypoint x="630" y="337" />
         <di:waypoint x="672" y="337" />
@@ -136,6 +132,10 @@
       <bpmndi:BPMNEdge id="Flow_1kp25xn_di" bpmnElement="Flow_1kp25xn">
         <di:waypoint x="928" y="337" />
         <di:waypoint x="972" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1sqstvg_di" bpmnElement="Flow_1sqstvg">
+        <di:waypoint x="248" y="337" />
+        <di:waypoint x="310" y="337" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

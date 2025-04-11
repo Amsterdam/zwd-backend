@@ -253,6 +253,7 @@ WORKFLOW_SPEC_CONFIG = {
             "initial_data": {"advice_type": {"value": "Default"}},
             "versions": {
                 "1.0.0": {},
+                "1.1.0": {},
             },
         },
         "sub_workflow": {
@@ -271,12 +272,14 @@ WORKFLOW_SPEC_CONFIG = {
             "initial_data": {},
             "versions": {
                 "1.0.0": {},
+                "1.1.0": {},
             },
         },
         "evaluatie": {
             "initial_data": {},
             "versions": {
                 "1.0.0": {},
+                "1.1.0": {},
             },
         },
     }
