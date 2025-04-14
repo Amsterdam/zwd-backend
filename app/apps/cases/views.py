@@ -20,7 +20,7 @@ from .serializers import (
     StartWorkflowSerializer,
     CaseDocumentNameUpdateSerializer,
 )
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
@@ -109,6 +109,20 @@ class CaseViewSet(
             return CaseEventSerializer
 
         return CaseSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="status",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                many=True,
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"], url_path="workflows")
     def get_workflows(self, request, pk=None):
