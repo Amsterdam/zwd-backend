@@ -1,8 +1,9 @@
 from rest_framework import viewsets, mixins
-from .models import District, HomeownerAssociation, Wijk
+from .models import District, HomeownerAssociation, Neighborhood, Wijk
 from .serializers import (
     DistrictSerializer,
     HomeownerAssociationSerializer,
+    NeighborhoodSerializer,
     WijkSerializer,
 )
 from rest_framework.decorators import action
@@ -72,6 +73,19 @@ class WijkViewset(
 ):
     queryset = Wijk.objects.all()
     serializer_class = WijkSerializer
+
+    def list(self, _, *args, **kwargs):
+        names = self.get_queryset().values_list("name", flat=True).distinct()
+        return Response(list(names))
+
+
+class NeighborhoodViewset(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = Neighborhood.objects.all()
+    serializer_class = NeighborhoodSerializer
 
     def list(self, _, *args, **kwargs):
         names = self.get_queryset().values_list("name", flat=True).distinct()

@@ -2,7 +2,7 @@ import logging
 import django_filters
 from rest_framework import status
 from apps.cases.models import CaseStatus
-from apps.homeownerassociation.models import District, Wijk
+from apps.homeownerassociation.models import District, Neighborhood, Wijk
 from utils.pagination import CustomPagination
 from apps.cases.serializers import CaseDocumentWithTaskSerializer
 from apps.workflow.task_completion import (
@@ -45,6 +45,13 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         method="filter_wijk",
         to_field_name="name",
     )
+
+    neighborhood = django_filters.ModelMultipleChoiceFilter(
+        queryset=Neighborhood.objects.all(),
+        method="filter_neighborhood",
+        to_field_name="name",
+    )
+
     status = django_filters.ModelMultipleChoiceFilter(
         queryset=CaseStatus.objects.all(),
         method="filter_status",
@@ -67,6 +74,13 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(
                 case__homeowner_association__wijk__in=value,
+            )
+        return queryset
+
+    def filter_neighborhood(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                case__homeowner_association__neighborhood__in=value,
             )
         return queryset
 

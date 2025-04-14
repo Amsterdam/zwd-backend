@@ -1,6 +1,6 @@
 import mimetypes
 from apps.advisor.serializers import UpdateCaseAdvisorSerializer
-from apps.homeownerassociation.models import Contact, District, Wijk
+from apps.homeownerassociation.models import Contact, District, Neighborhood, Wijk
 from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
 from apps.advisor.mixins import CaseAdvisorMixin
@@ -45,6 +45,11 @@ class CaseFilter(django_filters.FilterSet):
         method="filter_wijk",
         to_field_name="name",
     )
+    neighborhood = django_filters.ModelMultipleChoiceFilter(
+        queryset=Neighborhood.objects.all(),
+        method="filter_neighborhood",
+        to_field_name="name",
+    )
     status = django_filters.ModelMultipleChoiceFilter(
         queryset=CaseStatus.objects.all(),
         method="filter_status",
@@ -72,6 +77,13 @@ class CaseFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(
                 homeowner_association__wijk__in=value,
+            )
+        return queryset
+
+    def filter_neighborhood(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                homeowner_association__neighborhood__in=value,
             )
         return queryset
 

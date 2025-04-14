@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.workflow.models import WorkflowOption
 from apps.advisor.models import Advisor
 from apps.cases.models import AdviceType, Case, CaseDocument, CaseStatus
-from apps.homeownerassociation.models import HomeownerAssociation
+from apps.homeownerassociation.models import HomeownerAssociation, Neighborhood
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
 from model_bakery import baker
 from django.utils import timezone
@@ -71,6 +71,26 @@ class CaseApiTest(APITestCase):
         )
         url = reverse("cases-list")
         response = self.client.get(url, {"wijk": wijk_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], case.id)
+
+    def test_retrieve_cases_filter_by_neighborhood(self):
+        neighborhood_name = "Buurt A"
+        neighborhood = baker.make(Neighborhood, name=neighborhood_name)
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=20,
+            neighborhood=neighborhood,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.HBO.value,
+        )
+        url = reverse("cases-list")
+        response = self.client.get(url, {"neighborhood": neighborhood})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["id"], case.id)

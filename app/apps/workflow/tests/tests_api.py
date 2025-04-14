@@ -3,7 +3,12 @@ from django.core import management
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from apps.homeownerassociation.models import District, HomeownerAssociation, Wijk
+from apps.homeownerassociation.models import (
+    District,
+    HomeownerAssociation,
+    Neighborhood,
+    Wijk,
+)
 from apps.cases.models import AdviceType, Case, CaseDocument, CaseStatus
 from apps.workflow.models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 from utils.test_utils import (
@@ -111,6 +116,44 @@ class CaseUserTaskApiTests(APITestCase):
         )
 
         response = self.client.get(url, {"wijk": wijk_name})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
+    def test_retrieve_tasks_filter_by_neighborhood(self):
+        url = reverse("tasks-list")
+        neighborhood_name = "Buurt a"
+        neighborhood = baker.make(Neighborhood, name=neighborhood_name)
+        baker.make(Neighborhood, name="Other name")
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            neighborhood=neighborhood,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        response = self.client.get(url, {"neighborhood": neighborhood_name})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
