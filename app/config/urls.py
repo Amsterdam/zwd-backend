@@ -27,9 +27,9 @@ router.register(r"address", AddressViewset, basename="address")
 router.register(
     r"homeowner-association", HomeOwnerAssociationView, basename="homeownerassociation"
 )
-router.register(r"district", DistrictViewset, basename="district")
-router.register(r"wijk", WijkViewset, basename="wijk")
-router.register(r"case-status", CaseStatusViewset, basename="case-status")
+router.register(r"districts", DistrictViewset, basename="district")
+router.register(r"wijken", WijkViewset, basename="wijk")
+router.register(r"case-statuses", CaseStatusViewset, basename="case-status")
 
 
 def ok(request):
