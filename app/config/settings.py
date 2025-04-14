@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from os.path import join
 from pathlib import Path
+import socket
 from .azure_settings import Azure
 from azure.identity import WorkloadIdentityCredential
 import sys
@@ -198,6 +199,15 @@ BROKER_CONNECTION_TIMEOUT = 120
 CELERY_TASK_TRACK_STARTED = True
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "socket_keepalive": True,
+    "socket_keepalive_options": {
+        socket.TCP_KEEPIDLE: 60,
+        socket.TCP_KEEPCNT: 5,
+        socket.TCP_KEEPINTVL: 10,
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
