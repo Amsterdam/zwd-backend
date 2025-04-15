@@ -129,7 +129,7 @@
     <bpmn:userTask id="Activity_0biofup" name="Upload en beoordeel startfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_upload_startfactuur" label="Upload factuur pas na je beoordeling dat deze aan voorwaarden voldoet" type="file" />
+          <camunda:formField id="form_upload_startfactuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1sfl4ie</bpmn:incoming>
@@ -167,7 +167,7 @@
     <bpmn:userTask id="Activity_14gjvcz" name="Upload en beoordeel tussenfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_upload_tweede_factuur" label="Upload factuur pas na je beoordeling dat deze aan voorwaarden voldoet" type="file" />
+          <camunda:formField id="form_upload_tweede_factuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1wwqjb6</bpmn:incoming>
@@ -188,7 +188,7 @@
     <bpmn:userTask id="Activity_12cc63t" name="Upload en beoordeel eindfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_upload_eindfactuur" label="Upload factuur pas na je beoordeling dat deze aan voorwaarden voldoet" type="file" />
+          <camunda:formField id="form_upload_eindfactuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1ax5s41</bpmn:incoming>

@@ -37,7 +37,7 @@
     <bpmn:userTask id="task_klanttevredenheidsonderzoek" name="Klanttevredenheidsonderzoek">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_klanttevredenheidsonderzoek" label="Vul e-mail contactpersoon in Excel voor Onderzoek en Statistiek en stuur ze een e-mail." type="enum">
+          <camunda:formField id="form_klanttevredenheidsonderzoek" label="Vul het e-mailadres van de contactpersoon in het Excelbestand voor Onderzoek en Statistiek in en stuur ze daarna een e-mail" type="enum">
             <camunda:value id="yes" name="Ja, afgerond" />
           </camunda:formField>
         </camunda:formData>
