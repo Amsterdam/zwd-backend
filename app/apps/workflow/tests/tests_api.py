@@ -3,8 +3,13 @@ from django.core import management
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from apps.homeownerassociation.models import HomeownerAssociation
-from apps.cases.models import Case, CaseDocument
+from apps.homeownerassociation.models import (
+    District,
+    HomeownerAssociation,
+    Neighborhood,
+    Wijk,
+)
+from apps.cases.models import AdviceType, Case, CaseDocument, CaseStatus
 from apps.workflow.models import CaseUserTask, CaseWorkflow, GenericCompletedTask
 from utils.test_utils import (
     get_authenticated_client,
@@ -13,6 +18,7 @@ from utils.test_utils import (
 )
 import uuid
 from django.core.files.uploadedfile import SimpleUploadedFile
+from model_bakery import baker
 
 
 class CaseUserTaskApiTests(APITestCase):
@@ -39,6 +45,189 @@ class CaseUserTaskApiTests(APITestCase):
         self.assertEqual(
             data, {"count": 0, "next": None, "previous": None, "results": []}
         )
+
+    def test_retrieve_tasks_filter_by_district(self):
+        url = reverse("tasks-list")
+        district_name = "District A"
+        district = baker.make(District, name=district_name)
+        baker.make(District, name="other district")
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            district=district,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        response = self.client.get(url, {"district": district_name})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
+    def test_retrieve_tasks_filter_by_wijk(self):
+        url = reverse("tasks-list")
+        wijk_name = "Wijk B"
+        wijk = baker.make(Wijk, name=wijk_name)
+        baker.make(Wijk, name="Other name")
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            wijk=wijk,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        response = self.client.get(url, {"wijk": wijk_name})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
+    def test_retrieve_tasks_filter_by_neighborhood(self):
+        url = reverse("tasks-list")
+        neighborhood_name = "Buurt a"
+        neighborhood = baker.make(Neighborhood, name=neighborhood_name)
+        baker.make(Neighborhood, name="Other name")
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            neighborhood=neighborhood,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        response = self.client.get(url, {"neighborhood": neighborhood_name})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
+    def test_retrieve_tasks_filter_status(self):
+        url = reverse("tasks-list")
+        case_status = baker.make(CaseStatus, name="Closed")
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=13, name="ABC"
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+            status=case_status,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        response = self.client.get(url, {"status": case_status})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
+    def test_search_task_by_homeowner_association(self):
+        url = reverse("tasks-list")
+        homeowner_association_name = "HOA for task test"
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            name=homeowner_association_name,
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        homeowner_association_name_partial = homeowner_association_name[2:8]
+        response = self.client.get(
+            url, {"homeowner_association_name": homeowner_association_name_partial}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
 
     @patch("apps.workflow.views.complete_generic_user_task_and_create_new_user_tasks")
     def test_complete_file_task(

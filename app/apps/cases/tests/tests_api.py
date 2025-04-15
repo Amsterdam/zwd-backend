@@ -6,8 +6,8 @@ from rest_framework.test import APITestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.workflow.models import WorkflowOption
 from apps.advisor.models import Advisor
-from apps.cases.models import AdviceType, Case, CaseDocument
-from apps.homeownerassociation.models import HomeownerAssociation
+from apps.cases.models import AdviceType, Case, CaseDocument, CaseStatus
+from apps.homeownerassociation.models import HomeownerAssociation, Neighborhood
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
 from model_bakery import baker
 from django.utils import timezone
@@ -37,6 +37,101 @@ class CaseApiTest(APITestCase):
         url = reverse("cases-detail", args=[case_id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_retrieve_cases_filter_by_district(self):
+        district_name = "District A"
+        district = baker.make("District", name=district_name)
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            district=district,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        url = reverse("cases-list")
+        response = self.client.get(url, {"district": district_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], case.id)
+
+    def test_retrieve_cases_filter_by_wijk(self):
+        wijk_name = "Wijk B"
+        wijk = baker.make("Wijk", name=wijk_name)
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=20, wijk=wijk, name="ABC"
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.HBO.value,
+        )
+        url = reverse("cases-list")
+        response = self.client.get(url, {"wijk": wijk_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], case.id)
+
+    def test_retrieve_cases_filter_by_neighborhood(self):
+        neighborhood_name = "Buurt A"
+        neighborhood = baker.make(Neighborhood, name=neighborhood_name)
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=20,
+            neighborhood=neighborhood,
+            name="ABC",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.HBO.value,
+        )
+        url = reverse("cases-list")
+        response = self.client.get(url, {"neighborhood": neighborhood})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], case.id)
+
+    def test_retrieve_cases_filter_by_status(self):
+        case_status = baker.make(CaseStatus, name="Closed")
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_appartments=13, name="ABC"
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.HBO.value,
+            status=case_status,
+        )
+        url = reverse("cases-list")
+        response = self.client.get(url, {"status": case_status})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], case.id)
+
+    def test_search_cases_by_homeowner_association(self):
+        homeowner_association_name = "Homeowner Association A"
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_appartments=13,
+            name=homeowner_association_name,
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        url = reverse("cases-list")
+        homeowner_association_name_partial = homeowner_association_name[2:8]
+        response = self.client.get(
+            url, {"homeowner_association_name": homeowner_association_name_partial}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], case.id)
 
     def test_create_document_success(self):
         url = reverse("cases-create-document")
@@ -280,6 +375,15 @@ class CaseApiTest(APITestCase):
         self.assertTrue(
             any(option["name"] == option_name_closed_case for option in response.data)
         )
+
+    def test_retrieve_case_status(self):
+        url = reverse("case-status-list")
+        case_status = baker.make(CaseStatus, name="Test Status")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertEqual(response.data[0], case_status.name)
 
     def _create_sample_document(self):
         url = reverse("cases-create-document")

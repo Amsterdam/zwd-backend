@@ -1,7 +1,12 @@
 from django.shortcuts import redirect
-from apps.homeownerassociation.views import HomeOwnerAssociationView
+from apps.homeownerassociation.views import (
+    DistrictViewset,
+    HomeOwnerAssociationView,
+    NeighborhoodViewset,
+    WijkViewset,
+)
 from apps.address.views import AddressViewset
-from apps.cases.views import CaseViewSet
+from apps.cases.views import CaseStatusViewset, CaseViewSet
 from apps.workflow.views import (
     CaseUserTaskViewSet,
     GenericCompletedTaskViewSet,
@@ -23,6 +28,10 @@ router.register(r"address", AddressViewset, basename="address")
 router.register(
     r"homeowner-association", HomeOwnerAssociationView, basename="homeownerassociation"
 )
+router.register(r"districts", DistrictViewset, basename="district")
+router.register(r"wijken", WijkViewset, basename="wijk")
+router.register(r"case-statuses", CaseStatusViewset, basename="case-status")
+router.register(r"neighborhoods", NeighborhoodViewset, basename="neighborhoods")
 
 
 def ok(request):

@@ -1,6 +1,11 @@
 from rest_framework import viewsets, mixins
-from .models import HomeownerAssociation
-from .serializers import HomeownerAssociationSerializer
+from .models import District, HomeownerAssociation, Neighborhood, Wijk
+from .serializers import (
+    DistrictSerializer,
+    HomeownerAssociationSerializer,
+    NeighborhoodSerializer,
+    WijkSerializer,
+)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from apps.cases.models import Case
@@ -46,3 +51,42 @@ class HomeOwnerAssociationView(
             {"message": f"Zip code {zip_code} has been added to priority zip codes"},
             status=status.HTTP_201_CREATED,
         )
+
+
+class DistrictViewset(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = District.objects.all()
+    serializer_class = DistrictSerializer
+
+    def list(self, _, *args, **kwargs):
+        names = self.get_queryset().values_list("name", flat=True).distinct()
+        return Response(list(names))
+
+
+class WijkViewset(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = Wijk.objects.all()
+    serializer_class = WijkSerializer
+
+    def list(self, _, *args, **kwargs):
+        names = self.get_queryset().values_list("name", flat=True).distinct()
+        return Response(list(names))
+
+
+class NeighborhoodViewset(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = Neighborhood.objects.all()
+    serializer_class = NeighborhoodSerializer
+
+    def list(self, _, *args, **kwargs):
+        names = self.get_queryset().values_list("name", flat=True).distinct()
+        return Response(list(names))
