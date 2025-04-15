@@ -200,10 +200,10 @@
       <bpmn:outgoing>Flow_1gby6d6</bpmn:outgoing>
       <bpmn:outgoing>Flow_0szubqz</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="task_eerder_ingediend" name="Aanvraag eerder ingediend">
+    <bpmn:userTask id="task_eerder_ingediend" name="Controle eerder advies ontvangen">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_aanvraag_ingediend" label="Heeft de vve na 2021 al een aanvraag ingediend?" type="enum">
+          <camunda:formField id="form_aanvraag_ingediend" label="Heeft de vve na 2021 al een advies ontvangen?" type="enum">
             <camunda:value id="yes" name="Ja" />
             <camunda:value id="no" name="Nee" />
           </camunda:formField>

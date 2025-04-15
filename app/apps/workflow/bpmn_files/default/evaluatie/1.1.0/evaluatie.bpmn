@@ -21,7 +21,9 @@
       <bpmn:outgoing>Flow_0m22gzk</bpmn:outgoing>
       <bpmn:script>set_status("Evaluatie")</bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:endEvent id="Event_1tc1avn" />
+    <bpmn:endEvent id="Event_1tc1avn">
+      <bpmn:incoming>Flow_1o55mew</bpmn:incoming>
+    </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_10jptkf" sourceRef="StartEvent_1" targetRef="Activity_16jdr6g" />
     <bpmn:userTask id="task_vragenlijst_dienstverlening_vve" name="Vragenlijst dienstverlening vve">
       <bpmn:extensionElements>
@@ -30,6 +32,7 @@
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0qjzph7</bpmn:incoming>
+      <bpmn:outgoing>Flow_1o55mew</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="task_klanttevredenheidsonderzoek" name="Klanttevredenheidsonderzoek">
       <bpmn:extensionElements>
@@ -44,6 +47,7 @@
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_0m22gzk" sourceRef="Activity_16jdr6g" targetRef="task_klanttevredenheidsonderzoek" />
     <bpmn:sequenceFlow id="Flow_0qjzph7" sourceRef="task_klanttevredenheidsonderzoek" targetRef="task_vragenlijst_dienstverlening_vve" />
+    <bpmn:sequenceFlow id="Flow_1o55mew" sourceRef="task_vragenlijst_dienstverlening_vve" targetRef="Event_1tc1avn" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1do09kn">
@@ -83,6 +87,10 @@
       <bpmndi:BPMNEdge id="Flow_0qjzph7_di" bpmnElement="Flow_0qjzph7">
         <di:waypoint x="560" y="260" />
         <di:waypoint x="600" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1o55mew_di" bpmnElement="Flow_1o55mew">
+        <di:waypoint x="700" y="260" />
+        <di:waypoint x="772" y="260" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
