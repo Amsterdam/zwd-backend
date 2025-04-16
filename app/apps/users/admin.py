@@ -8,10 +8,9 @@ admin.site.unregister(User)
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
     list_display = (
-        "id",
+        "email",
         "first_name",
         "last_name",
-        "email",
         "is_staff",
         "last_login",
         "date_joined",
