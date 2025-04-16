@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.homeownerassociation",
     "apps.address",
     "apps.advisor",
+    "apps.users",
     "django_spaghetti",
     "drf_spectacular",
     "django_celery_beat",

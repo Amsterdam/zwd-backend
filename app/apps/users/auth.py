@@ -4,8 +4,8 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from mozilla_django_oidc.contrib.drf import OIDCAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import PermissionDenied
+import datetime
 import time
-
 
 DEFAULT_EMAIL = "admin@admin.com"
 DEFAULT_USERNAME = "Local User"
@@ -18,6 +18,7 @@ class OIDCAuthenticationBackend(OIDCAuthenticationBackend):
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
         user.username = claims.get("email")
+        user.last_login = datetime.datetime.now(datetime.timezone.utc)
         user.save()
         return user
 
