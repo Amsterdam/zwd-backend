@@ -3,6 +3,7 @@ from apps.homeownerassociation.models import (
     District,
     HomeownerAssociation,
     Neighborhood,
+    Owner,
     Wijk,
 )
 from rest_framework import serializers
@@ -30,12 +31,24 @@ class WijkSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class OwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Owner
+        fields = [
+            "type",
+            "name",
+            "number_of_appartments",
+        ]
+        depth = 1
+
+
 class HomeownerAssociationSerializer(serializers.ModelSerializer):
     district = serializers.SerializerMethodField()
     neighborhood = serializers.SerializerMethodField()
     wijk = serializers.SerializerMethodField()
     is_small = serializers.BooleanField()
     is_priority_neighborhood = serializers.BooleanField()
+    owners = OwnerSerializer(many=True, required=False)
 
     def get_district(self, obj):
         if not obj.district:
