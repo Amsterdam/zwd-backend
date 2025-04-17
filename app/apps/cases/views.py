@@ -34,7 +34,14 @@ import django_filters
 
 
 class CaseFilter(django_filters.FilterSet):
-    closed = django_filters.BooleanFilter(method="filter_closed_cases")
+    def __init__(self, data=None, queryset=None, *args, **kwargs):
+        if queryset is not None:
+            # Only exclude closed cases if status isn't filtering for closed
+            status_names = data.getlist("status") if data else []
+            if not status_names:
+                queryset = queryset.exclude(end_date__isnull=False)
+        super().__init__(data=data, queryset=queryset, *args, **kwargs)
+
     district = django_filters.ModelMultipleChoiceFilter(
         queryset=District.objects.all(),
         method="filter_district",
@@ -60,11 +67,6 @@ class CaseFilter(django_filters.FilterSet):
         field_name="homeowner_association__name",
         lookup_expr="icontains",
     )
-
-    def filter_closed_cases(self, queryset, _, value):
-        if value:
-            return queryset.filter(end_date__isnull=False)
-        return queryset.filter(end_date__isnull=True)
 
     def filter_district(self, queryset, _, value):
         if value:
@@ -108,7 +110,6 @@ class CaseViewSet(
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     ordering_fields = ["id", "created", "updated"]
-    filterset_class = CaseFilter
 
     def get_serializer_class(self):
         if self.action == "create_document" or self.action == "get_documents":
@@ -134,7 +135,16 @@ class CaseViewSet(
         ],
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+        filtered_queryset = CaseFilter(request.GET, queryset=queryset).qs
+
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(filtered_queryset, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["get"], url_path="workflows")
     def get_workflows(self, request, pk=None):
