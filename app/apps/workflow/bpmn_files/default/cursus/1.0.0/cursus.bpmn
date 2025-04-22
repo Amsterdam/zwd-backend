@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0211ytf" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:collaboration id="Collaboration_1g9q603">
+    <bpmn:participant id="Participant_0iymhp7" processRef="cursus" />
+  </bpmn:collaboration>
+  <bpmn:process id="cursus" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_1035x5y">
+      <bpmn:lane id="projectmedewerker" name="projectmedewerker">
+        <bpmn:flowNodeRef>Event_0bpand0</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_set_status_cursus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_vve_prio_buurt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1hjkbyt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_afwijzing_sturen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_cursus_datum</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_093jqrg</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_aanwezigheid_cursus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1lofoyf</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Event_0bpand0">
+      <bpmn:outgoing>Flow_0azk91v</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="script_set_status_cursus" name="Status update: &#34;Cursus&#34;">
+      <bpmn:incoming>Flow_0azk91v</bpmn:incoming>
+      <bpmn:outgoing>Flow_093i1a1</bpmn:outgoing>
+      <bpmn:script>set_status("Cursus")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:userTask id="task_vve_prio_buurt" name="Vve prioriteitsbuurt">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_vve_prio_buurt" label="De vve ligt niet in een prioriteitsbuurt, wil je doorgaan met de aanvraag?" type="enum">
+            <camunda:value id="yes" name="Ja" />
+            <camunda:value id="no" name="Nee, doorgaan naar afwijzing" />
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_03t30nv</bpmn:incoming>
+      <bpmn:outgoing>Flow_1fzpso5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_1hjkbyt" default="Flow_04qed0l">
+      <bpmn:incoming>Flow_1fzpso5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mx3cig</bpmn:outgoing>
+      <bpmn:outgoing>Flow_04qed0l</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="task_afwijzing_sturen" name="Afwijzing sturen">
+      <bpmn:incoming>Flow_0mx3cig</bpmn:incoming>
+    </bpmn:userTask>
+    <bpmn:userTask id="task_cursus_datum" name="Cursus datum">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_cursus_startdatum" label="Wanneer is de startdatum van de cursus?" type="date" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_04qed0l</bpmn:incoming>
+      <bpmn:incoming>Flow_0s026ds</bpmn:incoming>
+      <bpmn:outgoing>Flow_001wmyt</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_093jqrg" default="Flow_0s026ds">
+      <bpmn:incoming>Flow_093i1a1</bpmn:incoming>
+      <bpmn:outgoing>Flow_03t30nv</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0s026ds</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0azk91v" sourceRef="Event_0bpand0" targetRef="script_set_status_cursus" />
+    <bpmn:sequenceFlow id="Flow_093i1a1" sourceRef="script_set_status_cursus" targetRef="Gateway_093jqrg" />
+    <bpmn:sequenceFlow id="Flow_03t30nv" name="vve niet in prioriteitsbuurt" sourceRef="Gateway_093jqrg" targetRef="task_vve_prio_buurt">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">is_priority_neighborhood.get("value") == False</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1fzpso5" sourceRef="task_vve_prio_buurt" targetRef="Gateway_1hjkbyt" />
+    <bpmn:sequenceFlow id="Flow_0mx3cig" name="Niet doorgaan met aanvraag" sourceRef="Gateway_1hjkbyt" targetRef="task_afwijzing_sturen">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">form_vve_prio_buurt.get("value") == "no"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_04qed0l" sourceRef="Gateway_1hjkbyt" targetRef="task_cursus_datum" />
+    <bpmn:sequenceFlow id="Flow_0s026ds" sourceRef="Gateway_093jqrg" targetRef="task_cursus_datum" />
+    <bpmn:userTask id="task_aanwezigheid_cursus" name="Aanwezigheid cursus">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_aanwezigheid_cursus" label="Is er voldaan aan de aanwezigheidsplicht?" type="enum">
+            <camunda:value id="yes" name="Ja" />
+            <camunda:value id="no" name="Nee" />
+          </camunda:formField>
+          <camunda:formField id="form_aanwezigheid_cursus_toelichting" label="Toelichting" type="string">
+            <camunda:validation>
+              <camunda:constraint name="optional" config="true" />
+            </camunda:validation>
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_001wmyt</bpmn:incoming>
+      <bpmn:outgoing>Flow_12acmyg</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_001wmyt" sourceRef="task_cursus_datum" targetRef="task_aanwezigheid_cursus" />
+    <bpmn:endEvent id="Event_1lofoyf">
+      <bpmn:incoming>Flow_12acmyg</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_12acmyg" sourceRef="task_aanwezigheid_cursus" targetRef="Event_1lofoyf" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1g9q603">
+      <bpmndi:BPMNShape id="Participant_0iymhp7_di" bpmnElement="Participant_0iymhp7" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1570" height="515" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_11ezhhd_di" bpmnElement="projectmedewerker" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1540" height="515" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0s1o4ed" bpmnElement="Event_0bpand0">
+        <dc:Bounds x="252" y="302" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_12lqw35" bpmnElement="script_set_status_cursus">
+        <dc:Bounds x="320" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1c8vcn1_di" bpmnElement="task_vve_prio_buurt">
+        <dc:Bounds x="670" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1hjkbyt_di" bpmnElement="Gateway_1hjkbyt" isMarkerVisible="true">
+        <dc:Bounds x="815" y="295" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_127u5e0_di" bpmnElement="task_afwijzing_sturen">
+        <dc:Bounds x="790" y="105" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0svx1r1_di" bpmnElement="task_cursus_datum">
+        <dc:Bounds x="940" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_093jqrg_di" bpmnElement="Gateway_093jqrg" isMarkerVisible="true">
+        <dc:Bounds x="455" y="295" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0a1gvy3_di" bpmnElement="task_aanwezigheid_cursus">
+        <dc:Bounds x="1120" y="280" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1lofoyf_di" bpmnElement="Event_1lofoyf">
+        <dc:Bounds x="1302" y="302" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0azk91v_di" bpmnElement="Flow_0azk91v">
+        <di:waypoint x="288" y="320" />
+        <di:waypoint x="320" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_093i1a1_di" bpmnElement="Flow_093i1a1">
+        <di:waypoint x="420" y="320" />
+        <di:waypoint x="455" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03t30nv_di" bpmnElement="Flow_03t30nv">
+        <di:waypoint x="505" y="320" />
+        <di:waypoint x="670" y="320" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="553" y="286" width="71" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fzpso5_di" bpmnElement="Flow_1fzpso5">
+        <di:waypoint x="770" y="320" />
+        <di:waypoint x="815" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mx3cig_di" bpmnElement="Flow_0mx3cig">
+        <di:waypoint x="840" y="295" />
+        <di:waypoint x="840" y="185" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="765" y="221" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04qed0l_di" bpmnElement="Flow_04qed0l">
+        <di:waypoint x="865" y="320" />
+        <di:waypoint x="940" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0s026ds_di" bpmnElement="Flow_0s026ds">
+        <di:waypoint x="480" y="345" />
+        <di:waypoint x="480" y="430" />
+        <di:waypoint x="990" y="430" />
+        <di:waypoint x="990" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_001wmyt_di" bpmnElement="Flow_001wmyt">
+        <di:waypoint x="1040" y="320" />
+        <di:waypoint x="1120" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12acmyg_di" bpmnElement="Flow_12acmyg">
+        <di:waypoint x="1220" y="320" />
+        <di:waypoint x="1302" y="320" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

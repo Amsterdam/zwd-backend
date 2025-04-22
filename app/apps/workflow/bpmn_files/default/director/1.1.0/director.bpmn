@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1ll6h3a" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:collaboration id="Collaboration_1cgjm5f">
+    <bpmn:participant id="director_process" name="director process" processRef="director" />
+  </bpmn:collaboration>
+  <bpmn:process id="director" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_139cvcz">
+      <bpmn:lane id="Lane_Projectmedewerker" name="Projectmedewerker">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_facturatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resume_after_facturatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_evaluatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resume_after_evaluatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_04fk3gu</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_beoordeling</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_0ubmmog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>script_start_workflow_cursus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resume_after_beoordeling</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>resume_after_cursus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1ko5dk6</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_workflow_beoordeling" targetRef="resume_after_beoordeling" />
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0ryhmy4</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="script_start_workflow_facturatie" name="Start facturatie">
+      <bpmn:incoming>Flow_0sajjd5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0nb6083</bpmn:outgoing>
+      <bpmn:script>start_workflow("facturatie")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:intermediateCatchEvent id="resume_after_facturatie" name="resume_after_facturatie">
+      <bpmn:incoming>Flow_0nb6083</bpmn:incoming>
+      <bpmn:outgoing>Flow_0emx0cc</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0dol716" messageRef="Message_21ddler" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:scriptTask id="script_start_workflow_evaluatie" name="Start evaluatie">
+      <bpmn:incoming>Flow_0emx0cc</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yq0o8d</bpmn:outgoing>
+      <bpmn:script>start_workflow("evaluatie")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:intermediateCatchEvent id="resume_after_evaluatie" name="resume_after_evaluatie">
+      <bpmn:incoming>Flow_1yq0o8d</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kp25xn</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1ux22bs" messageRef="Message_1qfqeao" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_04fk3gu">
+      <bpmn:incoming>Flow_1kp25xn</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_beoordeling" targetRef="script_start_workflow_facturatie" />
+    <bpmn:sequenceFlow id="Flow_0nb6083" sourceRef="script_start_workflow_facturatie" targetRef="resume_after_facturatie" />
+    <bpmn:sequenceFlow id="Flow_0emx0cc" sourceRef="resume_after_facturatie" targetRef="script_start_workflow_evaluatie" />
+    <bpmn:sequenceFlow id="Flow_1yq0o8d" sourceRef="script_start_workflow_evaluatie" targetRef="resume_after_evaluatie" />
+    <bpmn:sequenceFlow id="Flow_1kp25xn" sourceRef="resume_after_evaluatie" targetRef="Event_04fk3gu" />
+    <bpmn:scriptTask id="script_start_workflow_beoordeling" name="Start beoordeling">
+      <bpmn:incoming>Flow_1ptqejq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
+      <bpmn:script>start_workflow("beoordeling")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="Gateway_0ubmmog" default="Flow_1ptqejq">
+      <bpmn:incoming>Flow_0ryhmy4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ptqejq</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1w3jnnu</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0ryhmy4" sourceRef="StartEvent_1" targetRef="Gateway_0ubmmog" />
+    <bpmn:sequenceFlow id="Flow_1ptqejq" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_beoordeling" />
+    <bpmn:scriptTask id="script_start_workflow_cursus" name="Start cursus">
+      <bpmn:incoming>Flow_1w3jnnu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kj6g1g</bpmn:outgoing>
+      <bpmn:script>start_workflow("cursus")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_1w3jnnu" name="Cursus adviestype" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_cursus">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">advice_type.get("value") == "Cursus"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:intermediateCatchEvent id="resume_after_beoordeling" name="resume_after_beoordeling">
+      <bpmn:incoming>Flow_1qqjv57</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sajjd5</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0rem877" messageRef="Message_0s8g375" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1kj6g1g" sourceRef="script_start_workflow_cursus" targetRef="resume_after_cursus" />
+    <bpmn:intermediateCatchEvent id="resume_after_cursus" name="resume_after_cursus">
+      <bpmn:incoming>Flow_1kj6g1g</bpmn:incoming>
+      <bpmn:outgoing>Flow_07n5knj</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0y1l14q" messageRef="Message_2spe0h9" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_1ko5dk6">
+      <bpmn:incoming>Flow_07n5knj</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_07n5knj" sourceRef="resume_after_cursus" targetRef="Event_1ko5dk6" />
+  </bpmn:process>
+  <bpmn:message id="Message_0s8g375" name="resume_after_beoordeling" />
+  <bpmn:message id="Message_21ddler" name="resume_after_facturatie" />
+  <bpmn:message id="Message_1qfqeao" name="resume_after_evaluatie" />
+  <bpmn:message id="Message_2spe0h9" name="resume_after_cursus" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1cgjm5f">
+      <bpmndi:BPMNShape id="Participant_1akc5kn_di" bpmnElement="director_process" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1140" height="470" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_16c0oj9_di" bpmnElement="Lane_Projectmedewerker" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1110" height="470" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="212" y="319" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0j4dhpt" bpmnElement="script_start_workflow_facturatie">
+        <dc:Bounds x="730" y="297" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1wj9cmy_di" bpmnElement="resume_after_facturatie">
+        <dc:Bounds x="872" y="319" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="846" y="281" width="89" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1e3e3h9_di" bpmnElement="script_start_workflow_evaluatie">
+        <dc:Bounds x="950" y="297" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1m8sbu3_di" bpmnElement="resume_after_evaluatie">
+        <dc:Bounds x="1092" y="319" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1075" y="281" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_04fk3gu_di" bpmnElement="Event_04fk3gu">
+        <dc:Bounds x="1172" y="319" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_116dos9_di" bpmnElement="script_start_workflow_beoordeling">
+        <dc:Bounds x="460" y="297" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0ubmmog_di" bpmnElement="Gateway_0ubmmog" isMarkerVisible="true">
+        <dc:Bounds x="315" y="312" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0qsf8zn_di" bpmnElement="script_start_workflow_cursus">
+        <dc:Bounds x="460" y="410" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1yuqiak_di" bpmnElement="resume_after_beoordeling">
+        <dc:Bounds x="622" y="319" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="595" y="282" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0giveo4_di" bpmnElement="resume_after_cursus">
+        <dc:Bounds x="622" y="432" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="599" y="475" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ko5dk6_di" bpmnElement="Event_1ko5dk6">
+        <dc:Bounds x="722" y="432" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1qqjv57_di" bpmnElement="Flow_1qqjv57">
+        <di:waypoint x="560" y="337" />
+        <di:waypoint x="622" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sajjd5_di" bpmnElement="Flow_0sajjd5">
+        <di:waypoint x="658" y="337" />
+        <di:waypoint x="730" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nb6083_di" bpmnElement="Flow_0nb6083">
+        <di:waypoint x="830" y="337" />
+        <di:waypoint x="872" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0emx0cc_di" bpmnElement="Flow_0emx0cc">
+        <di:waypoint x="908" y="337" />
+        <di:waypoint x="950" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yq0o8d_di" bpmnElement="Flow_1yq0o8d">
+        <di:waypoint x="1050" y="337" />
+        <di:waypoint x="1092" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kp25xn_di" bpmnElement="Flow_1kp25xn">
+        <di:waypoint x="1128" y="337" />
+        <di:waypoint x="1172" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ryhmy4_di" bpmnElement="Flow_0ryhmy4">
+        <di:waypoint x="248" y="337" />
+        <di:waypoint x="315" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ptqejq_di" bpmnElement="Flow_1ptqejq">
+        <di:waypoint x="365" y="337" />
+        <di:waypoint x="460" y="337" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1w3jnnu_di" bpmnElement="Flow_1w3jnnu">
+        <di:waypoint x="340" y="362" />
+        <di:waypoint x="340" y="450" />
+        <di:waypoint x="460" y="450" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="363" y="416" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kj6g1g_di" bpmnElement="Flow_1kj6g1g">
+        <di:waypoint x="560" y="450" />
+        <di:waypoint x="622" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07n5knj_di" bpmnElement="Flow_07n5knj">
+        <di:waypoint x="658" y="450" />
+        <di:waypoint x="722" y="450" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

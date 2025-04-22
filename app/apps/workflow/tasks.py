@@ -65,7 +65,6 @@ def task_create_main_worflow_for_case(self, case_id, data={}):
     with transaction.atomic():
         workflow_instance = CaseWorkflow.objects.create(
             case=case,
-            # TODO: Make dynamic
             workflow_type="director",
             main_workflow=True,
             workflow_message_name=None,
