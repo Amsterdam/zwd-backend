@@ -258,6 +258,7 @@ WORKFLOW_SPEC_CONFIG = {
             "initial_data": {},
             "versions": {
                 "1.0.0": {},
+                "1.1.0": {},
             },
         },
         "beoordeling": {
@@ -291,6 +292,12 @@ WORKFLOW_SPEC_CONFIG = {
             "versions": {
                 "1.0.0": {},
                 "1.1.0": {},
+            },
+        },
+        "cursus": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
             },
         },
     }
