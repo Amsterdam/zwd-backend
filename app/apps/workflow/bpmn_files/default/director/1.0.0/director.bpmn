@@ -19,7 +19,7 @@
     <bpmn:sequenceFlow id="Flow_0sajjd5" sourceRef="resume_after_beoordeling" targetRef="script_start_workflow_facturatie" />
     <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_workflow_beoordeling" targetRef="resume_after_beoordeling" />
     <bpmn:scriptTask id="script_start_workflow_beoordeling" name="Start beoordeling">
-      <bpmn:incoming>Flow_1sqstvg</bpmn:incoming>
+      <bpmn:incoming>Flow_1hvsezl</bpmn:incoming>
       <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
       <bpmn:script>start_workflow("beoordeling")</bpmn:script>
     </bpmn:scriptTask>
@@ -34,7 +34,7 @@
       <bpmn:script>start_workflow("facturatie")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>Flow_1sqstvg</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1hvsezl</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:intermediateCatchEvent id="resume_after_facturatie" name="resume_after_facturatie">
       <bpmn:incoming>Flow_0nb6083</bpmn:incoming>
@@ -58,7 +58,7 @@
     <bpmn:endEvent id="Event_04fk3gu">
       <bpmn:incoming>Flow_1kp25xn</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1sqstvg" sourceRef="StartEvent_1" targetRef="script_start_workflow_beoordeling" />
+    <bpmn:sequenceFlow id="Flow_1hvsezl" sourceRef="StartEvent_1" targetRef="script_start_workflow_beoordeling" />
   </bpmn:process>
   <bpmn:message id="Message_0s8g375" name="resume_after_beoordeling" />
   <bpmn:message id="Message_21ddler" name="resume_after_facturatie" />
@@ -133,7 +133,7 @@
         <di:waypoint x="928" y="337" />
         <di:waypoint x="972" y="337" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1sqstvg_di" bpmnElement="Flow_1sqstvg">
+      <bpmndi:BPMNEdge id="Flow_1hvsezl_di" bpmnElement="Flow_1hvsezl">
         <di:waypoint x="248" y="337" />
         <di:waypoint x="310" y="337" />
       </bpmndi:BPMNEdge>

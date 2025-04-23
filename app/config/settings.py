@@ -266,6 +266,7 @@ WORKFLOW_SPEC_CONFIG = {
             "versions": {
                 "1.0.0": {},
                 "1.1.0": {},
+                "1.2.0": {},
             },
         },
         "sub_workflow": {
@@ -285,6 +286,7 @@ WORKFLOW_SPEC_CONFIG = {
             "versions": {
                 "1.0.0": {},
                 "1.1.0": {},
+                "1.2.0": {},
             },
         },
         "evaluatie": {
@@ -292,6 +294,7 @@ WORKFLOW_SPEC_CONFIG = {
             "versions": {
                 "1.0.0": {},
                 "1.1.0": {},
+                "1.2.0": {},
             },
         },
         "cursus": {
