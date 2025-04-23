@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_07b8w9o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.25.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <bpmn:collaboration id="Collaboration_1do09kn">
+    <bpmn:participant id="Participant_0iymhp7" processRef="evaluatie" />
+  </bpmn:collaboration>
+  <bpmn:process id="evaluatie" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_1hshphw">
+      <bpmn:lane id="projectmedewerker" name="projectmedewerker">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_16jdr6g</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1aklcv4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_vragenlijst_dienstverlening_vve</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_klanttevredenheidsonderzoek</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_16ievum</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1tc1avn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0thuepc</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_10jptkf</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_16jdr6g" name="Status update: &#34;Evaluatie&#34;">
+      <bpmn:incoming>Flow_10jptkf</bpmn:incoming>
+      <bpmn:outgoing>Flow_06e0hk1</bpmn:outgoing>
+      <bpmn:script>set_status("Evaluatie")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_10jptkf" sourceRef="StartEvent_1" targetRef="Activity_16jdr6g" />
+    <bpmn:parallelGateway id="Gateway_1aklcv4">
+      <bpmn:incoming>Flow_06e0hk1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xhqsmg</bpmn:outgoing>
+      <bpmn:outgoing>Flow_18tq7kg</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_06e0hk1" sourceRef="Activity_16jdr6g" targetRef="Gateway_1aklcv4" />
+    <bpmn:userTask id="task_vragenlijst_dienstverlening_vve" name="Verzoek vragenlijst dienstverlening vve ">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_18tq7kg</bpmn:incoming>
+      <bpmn:outgoing>Flow_132ygns</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0xhqsmg" sourceRef="Gateway_1aklcv4" targetRef="task_klanttevredenheidsonderzoek" />
+    <bpmn:sequenceFlow id="Flow_18tq7kg" sourceRef="Gateway_1aklcv4" targetRef="task_vragenlijst_dienstverlening_vve" />
+    <bpmn:userTask id="task_klanttevredenheidsonderzoek" name="Klanttevredenheidsonderzoek">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_0xhqsmg</bpmn:incoming>
+      <bpmn:outgoing>Flow_1b2g1vb</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1b2g1vb" sourceRef="task_klanttevredenheidsonderzoek" targetRef="Gateway_16ievum" />
+    <bpmn:parallelGateway id="Gateway_16ievum">
+      <bpmn:incoming>Flow_1b2g1vb</bpmn:incoming>
+      <bpmn:incoming>Flow_132ygns</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mlckud</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_132ygns" sourceRef="task_vragenlijst_dienstverlening_vve" targetRef="Gateway_16ievum" />
+    <bpmn:sequenceFlow id="Flow_1mlckud" sourceRef="Gateway_16ievum" targetRef="Activity_0thuepc" />
+    <bpmn:endEvent id="Event_1tc1avn">
+      <bpmn:incoming>Flow_1rcb73m</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Activity_0thuepc" name="Upload vragenlijst dienstverlening vve">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_upload_vragenlijst_dienstverlerning_vve" label="Upload de ingevulde vragenlijst" type="file" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1mlckud</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rcb73m</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1rcb73m" sourceRef="Activity_0thuepc" targetRef="Event_1tc1avn" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1do09kn">
+      <bpmndi:BPMNShape id="Participant_0iymhp7_di" bpmnElement="Participant_0iymhp7" isHorizontal="true">
+        <dc:Bounds x="129" y="70" width="819" height="370" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_11ezhhd_di" bpmnElement="projectmedewerker" isHorizontal="true">
+        <dc:Bounds x="159" y="70" width="789" height="370" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="222" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_12lqw35" bpmnElement="Activity_16jdr6g">
+        <dc:Bounds x="310" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1aklcv4_di" bpmnElement="Gateway_1aklcv4">
+        <dc:Bounds x="465" y="235" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0fg73kj_di" bpmnElement="task_vragenlijst_dienstverlening_vve">
+        <dc:Bounds x="530" y="310" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1prc0ta_di" bpmnElement="task_klanttevredenheidsonderzoek">
+        <dc:Bounds x="530" y="140" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_16ievum_di" bpmnElement="Gateway_16ievum">
+        <dc:Bounds x="655" y="235" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1tc1avn_di" bpmnElement="Event_1tc1avn">
+        <dc:Bounds x="862" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0thuepc_di" bpmnElement="Activity_0thuepc">
+        <dc:Bounds x="740" y="220" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_10jptkf_di" bpmnElement="Flow_10jptkf">
+        <di:waypoint x="258" y="260" />
+        <di:waypoint x="310" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06e0hk1_di" bpmnElement="Flow_06e0hk1">
+        <di:waypoint x="410" y="260" />
+        <di:waypoint x="465" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xhqsmg_di" bpmnElement="Flow_0xhqsmg">
+        <di:waypoint x="490" y="235" />
+        <di:waypoint x="490" y="180" />
+        <di:waypoint x="530" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18tq7kg_di" bpmnElement="Flow_18tq7kg">
+        <di:waypoint x="490" y="285" />
+        <di:waypoint x="490" y="350" />
+        <di:waypoint x="530" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1b2g1vb_di" bpmnElement="Flow_1b2g1vb">
+        <di:waypoint x="630" y="180" />
+        <di:waypoint x="680" y="180" />
+        <di:waypoint x="680" y="235" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_132ygns_di" bpmnElement="Flow_132ygns">
+        <di:waypoint x="630" y="350" />
+        <di:waypoint x="680" y="350" />
+        <di:waypoint x="680" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mlckud_di" bpmnElement="Flow_1mlckud">
+        <di:waypoint x="705" y="260" />
+        <di:waypoint x="740" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rcb73m_di" bpmnElement="Flow_1rcb73m">
+        <di:waypoint x="840" y="260" />
+        <di:waypoint x="862" y="260" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
