@@ -114,8 +114,8 @@ class HomeownerAssociation(models.Model):
         if existing_hoa:
             return existing_hoa
 
-        hoa_response = client.get_hoa_by_name(hoa_name)
-        distinct_hoa_response = self._get_distinct_hoa_response(hoa_response)
+        distinct_hoa_response = client.get_hoa_by_name(hoa_name)
+
         district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
@@ -142,8 +142,7 @@ class HomeownerAssociation(models.Model):
 
     def update_hoa_admin(self, hoa_name):
         client = DsoClient()
-        hoa_response = client.get_hoa_by_name(hoa_name)
-        distinct_hoa_response = self._get_distinct_hoa_response(hoa_response)
+        distinct_hoa_response = client.get_hoa_by_name(hoa_name)
         district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
@@ -165,9 +164,6 @@ class HomeownerAssociation(models.Model):
         self.save()
 
         self._create_ownerships(distinct_hoa_response, self)
-
-    def _get_distinct_hoa_response(self, hoa_response):
-        return list({hoa["votIdentificatie"]: hoa for hoa in hoa_response}.values())
 
     def _get_district_and_neighborhood_and_wijk(self, distinct_hoa_response):
         district, created = District.objects.get_or_create(

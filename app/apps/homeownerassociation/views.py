@@ -1,7 +1,10 @@
 from rest_framework import viewsets, mixins
+
+from clients.dso_client import DsoClient
 from .models import District, HomeownerAssociation, Neighborhood, Wijk
 from .serializers import (
     DistrictSerializer,
+    HomeownerAssociationSearchSerializer,
     HomeownerAssociationSerializer,
     NeighborhoodSerializer,
     WijkSerializer,
@@ -51,6 +54,24 @@ class HomeOwnerAssociationView(
             {"message": f"Zip code {zip_code} has been added to priority zip codes"},
             status=status.HTTP_201_CREATED,
         )
+
+    @action(
+        detail=False,
+        url_path="search",
+        methods=["get"],
+    )
+    def search_hoa_by_name(self, request):
+        hoa_name = request.query_params.get("hoa_name")
+        if not hoa_name:
+            return Response(
+                {"detail": "Homeowner Association name is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        dso_client = DsoClient()
+        result = dso_client.search_hoa_by_name(hoa_name)
+        print(result)
+        serializer = HomeownerAssociationSearchSerializer(result, many=True)
+        return Response(serializer.data)
 
 
 class DistrictViewset(

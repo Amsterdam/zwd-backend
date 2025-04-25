@@ -103,3 +103,8 @@ class ContactSerializer(serializers.ModelSerializer):
             "role",
         ]
         depth = 1
+
+
+class HomeownerAssociationSearchSerializer(serializers.Serializer):
+    brkVveStatutaireNaam = serializers.CharField()
+    votIdentificatie = serializers.CharField()
