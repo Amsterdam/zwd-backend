@@ -1,3 +1,4 @@
+from time import sleep
 from django.contrib import admin
 
 from apps.workflow.models import CaseWorkflow
@@ -7,12 +8,11 @@ from django.db import transaction
 
 
 @admin.action(description="Restart main workflow and delete existing workflows")
-def start_workflow(modeladmin, request, queryset):
+def restart_workflow(modeladmin, request, queryset):
     for case in queryset:
         with transaction.atomic():
-            existing_case_workflows = CaseWorkflow.objects.filter(
-                case=case, main_workflow=True
-            )
+            sleep(1)
+            existing_case_workflows = CaseWorkflow.objects.filter(case=case)
             for existing_workflow in existing_case_workflows:
                 existing_workflow.delete()
             task = task_create_main_worflow_for_case.delay(
@@ -43,7 +43,7 @@ class CaseAdmin(admin.ModelAdmin):
         "advice_type",
         "status",
     )
-    actions = [start_workflow]
+    actions = [restart_workflow]
 
 
 @admin.register(CaseDocument)

@@ -3,12 +3,6 @@ from django.contrib import admin
 from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask, WorkflowOption
 
 
-@admin.action(description="Restart workflow")
-def restart_workflow(modeladmin, request, queryset):
-    for wf in queryset:
-        wf.start()
-
-
 @admin.register(CaseWorkflow)
 class CaseWorkflowAdmin(admin.ModelAdmin):
     list_display = (
@@ -21,7 +15,6 @@ class CaseWorkflowAdmin(admin.ModelAdmin):
     )
 
     search_fields = ("case__id",)
-    actions = [restart_workflow]
     list_filter = ("main_workflow", "completed")
 
 
