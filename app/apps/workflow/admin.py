@@ -15,7 +15,6 @@ class CaseWorkflowAdmin(admin.ModelAdmin):
     )
 
     search_fields = ("case__id",)
-
     list_filter = ("main_workflow", "completed")
 
 
