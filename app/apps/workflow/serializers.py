@@ -156,6 +156,7 @@ class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
     facturatie = WorkflowSpecConfigThemeSerializer(required=False)
     evaluatie = WorkflowSpecConfigThemeSerializer(required=False)
     cursus = WorkflowSpecConfigThemeSerializer(required=False)
+    close_case = WorkflowSpecConfigThemeSerializer(required=False)
 
     def run_validation(self, data=empty):
         if data is not empty:

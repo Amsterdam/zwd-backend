@@ -260,6 +260,7 @@ WORKFLOW_SPEC_CONFIG = {
             "versions": {
                 "1.0.0": {},
                 "1.1.0": {},
+                "1.2.0": {},
             },
         },
         "beoordeling": {
@@ -269,6 +270,7 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.1.0": {},
                 "1.2.0": {},
                 "1.3.0": {},
+                "1.4.0": {},
             },
         },
         "sub_workflow": {
@@ -278,6 +280,10 @@ WORKFLOW_SPEC_CONFIG = {
                     "start_add_note_process": {},
                 },
                 "1.1.0": {
+                    "start_add_note_process": {},
+                    "start_case_close": {},
+                },
+                "1.2.0": {
                     "start_add_note_process": {},
                     "start_case_close": {},
                 },
@@ -301,6 +307,12 @@ WORKFLOW_SPEC_CONFIG = {
             },
         },
         "cursus": {
+            "initial_data": {},
+            "versions": {
+                "1.0.0": {},
+            },
+        },
+        "close_case": {
             "initial_data": {},
             "versions": {
                 "1.0.0": {},
