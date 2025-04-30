@@ -164,7 +164,6 @@ class CaseWorkflow(models.Model):
 
     def _save_workflow_state(self, wf):
         if wf.last_task:
-            # update this workflow with the latest task data
             self.data.update(wf.last_task.data)
 
         if wf.is_completed() and not self.completed:
@@ -184,6 +183,8 @@ class CaseWorkflow(models.Model):
                 wf = parent_workflow._get_or_restore_workflow_state()
                 self._handle_workflow_event(wf, f"resume_after_{self.workflow_type}")
                 parent_workflow.update_workflow(wf)
+                parent_workflow.data.update(data)
+                parent_workflow.save()
 
     def _update_tasks(self, wf):
         self._set_obsolete_tasks_to_completed(wf)
@@ -336,7 +337,9 @@ class CaseWorkflow(models.Model):
             data.update(extra_data)
             subworkflow = CaseWorkflow.objects.create(
                 case=parent_workflow.case,
-                parent_workflow=parent_workflow,
+                parent_workflow=(
+                    parent_workflow if subworkflow_name != "close_case" else None
+                ),
                 workflow_type=subworkflow_name,
                 data=data,
             )
@@ -361,6 +364,9 @@ class CaseWorkflow(models.Model):
         def close_case():
             workflow_instance.case.close_case()
 
+        def get_data(field_name):
+            return self.data.get(field_name, {}).get("value")
+
         def parse_duration_string(str_duration):
             # If the environment is not production, the duration is set to 2 minutes for testing purposes
             if settings.ENVIRONMENT != "production":
@@ -376,6 +382,7 @@ class CaseWorkflow(models.Model):
                     "start_workflow": start_workflow,
                     "parse_duration": parse_duration_string,
                     "close_case": close_case,
+                    "get_data": get_data,
                 }
             )
         )
