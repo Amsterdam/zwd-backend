@@ -271,13 +271,13 @@
       <bpmn:outgoing>Flow_0zdexh9</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:scriptTask id="Activity_1so3vlp" name="Status update: &#34;Aanvraag invoeren&#34;">
+      <bpmn:incoming>Flow_0zdexh9</bpmn:incoming>
       <bpmn:outgoing>Flow_00876s7</bpmn:outgoing>
       <bpmn:script>set_status("Aanvraag invoeren")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:userTask id="task_afwijzing_sturen" name="Afwijzing sturen">
       <bpmn:extensionElements />
       <bpmn:incoming>Flow_01qyetz</bpmn:incoming>
-      <bpmn:incoming>Flow_0zdexh9</bpmn:incoming>
       <bpmn:outgoing>Flow_1xhy1yy</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="task_controle_afwijzing" name="Controle afwijzing">
@@ -536,7 +536,7 @@
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_1lnkdh8" sourceRef="task_uploaden_intake_formulier" targetRef="Gateway_0fqmxsa" />
     <bpmn:sequenceFlow id="Flow_18d6bna" sourceRef="task_datum_ontvangst_intakeformulier" targetRef="Gateway_0fqmxsa" />
-    <bpmn:sequenceFlow id="Flow_0zdexh9" sourceRef="Event_049hit6" targetRef="task_afwijzing_sturen" />
+    <bpmn:sequenceFlow id="Flow_0zdexh9" sourceRef="Event_049hit6" targetRef="Activity_1so3vlp" />
     <bpmn:scriptTask id="Activity_159r4lf" name="Afsluiten zaak">
       <bpmn:incoming>Flow_1xhy1yy</bpmn:incoming>
       <bpmn:outgoing>Flow_1ri1bvm</bpmn:outgoing>
@@ -1064,9 +1064,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0zdexh9_di" bpmnElement="Flow_0zdexh9">
         <di:waypoint x="267" y="1010" />
-        <di:waypoint x="1033" y="1010" />
-        <di:waypoint x="1033" y="260" />
-        <di:waypoint x="1798" y="260" />
+        <di:waypoint x="339" y="1010" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xhy1yy_di" bpmnElement="Flow_1xhy1yy">
         <di:waypoint x="1898" y="270" />
