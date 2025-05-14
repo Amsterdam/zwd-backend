@@ -20,6 +20,7 @@ class CaseSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "created",
+            "end_date",
             "description",
             "workflows",
             "advice_type",
@@ -55,7 +56,14 @@ class CaseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Case
-        fields = ("id", "created", "homeowner_association", "legacy_id", "status")
+        fields = (
+            "id",
+            "created",
+            "homeowner_association",
+            "legacy_id",
+            "status",
+            "end_date",
+        )
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None
