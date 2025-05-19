@@ -69,7 +69,6 @@ class HomeOwnerAssociationView(
             )
         dso_client = DsoClient()
         result = dso_client.search_hoa_by_name(hoa_name)
-        print(result)
         serializer = HomeownerAssociationSearchSerializer(result, many=True)
         return Response(serializer.data)
 
