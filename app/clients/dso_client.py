@@ -23,7 +23,18 @@ class DsoClient:
     def get_hoa_by_name(self, hoa_name):
         url = f"{settings.DSO_API_URL}?brkVveStatutaireNaam={hoa_name}&_pageSize=300"
         hoa_json = self._get_paginated_response(url)
-        return hoa_json["_embedded"]["wonen_verblijfsobject"]
+        hoa_verblijfsobject = hoa_json["_embedded"]["wonen_verblijfsobject"]
+        return list(
+            {hoa["votIdentificatie"]: hoa for hoa in hoa_verblijfsobject}.values()
+        )
+
+    def search_hoa_by_name(self, hoa_name):
+        url = f"{settings.DSO_API_URL}?brkVveIsEigendomVve=ja&brkVveStatutaireNaam[like]=*{hoa_name}*&_pageSize=300"
+        hoa_json = self._get_paginated_response(url)
+        hoa_verblijfsobject = hoa_json["_embedded"]["wonen_verblijfsobject"]
+        return list(
+            {hoa["brkVveStatutaireNaam"]: hoa for hoa in hoa_verblijfsobject}.values()
+        )
 
     def _get_paginated_response(self, url):
         response = requests.get(url, headers=self.headers)
