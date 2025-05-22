@@ -211,7 +211,7 @@ class Contact(models.Model):
     def __str__(self):
         return self.email
 
-    def process_contacts(case, contacts):
+    def process_contacts(homeowner_association, contacts):
         for contact in contacts:
             email = contact.get("email")
             if not email:
@@ -230,7 +230,7 @@ class Contact(models.Model):
                     setattr(existing_contact, key, value)
                 existing_contact.save()
 
-            existing_contact.homeowner_associations.add(case.homeowner_association)
+            existing_contact.homeowner_associations.add(homeowner_association)
 
     class Meta:
         ordering = ["email"]
