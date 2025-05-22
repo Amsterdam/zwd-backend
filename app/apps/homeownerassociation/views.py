@@ -15,12 +15,14 @@ from apps.cases.models import Case
 from apps.cases.serializers import CaseListSerializer
 from rest_framework import status
 from apps.homeownerassociation.models import PriorityZipCode
+from .mixins import ContactMixin
 
 
 class HomeOwnerAssociationView(
     viewsets.GenericViewSet,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
+    ContactMixin,
 ):
     queryset = HomeownerAssociation.objects.all()
     serializer_class = HomeownerAssociationSerializer

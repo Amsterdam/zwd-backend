@@ -154,7 +154,7 @@ class CaseViewSet(
         # Prevents exception on case creation
         contacts_data = validated_data.pop("contacts", [])
         case = Case.objects.create(**validated_data)
-        Contact.process_contacts(case, contacts_data)
+        Contact.process_contacts(case.homeowner_association, contacts_data)
         self.start_workflow(case, request.user.id)
         return Response(CaseSerializer(case).data, status=201)
 
