@@ -70,6 +70,14 @@ class Case(ModelEventEmitter):
         blank=True,
     )
 
+    @property
+    def prefixed_dossier_id(self):
+        if self.advice_type == AdviceType.COURSE.value:
+            return f"CUR{self.id}"
+        elif self.advice_type == AdviceType.HBO.value:
+            return f"HBO{self.id}"
+        return f"EA{self.id}"
+
     def close_case(self):
         with transaction.atomic():
             self.workflows.all().delete()
