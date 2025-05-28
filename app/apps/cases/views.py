@@ -107,7 +107,14 @@ class CaseViewSet(
     serializer_class = CaseSerializer
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
-    ordering_fields = ["id", "created", "updated"]
+    ordering_fields = [
+        "id",
+        "created",
+        "updated",
+        "homeowner_association__name",
+        "legacy_id",
+        "status",
+    ]
     filterset_class = CaseFilter
 
     def get_serializer_class(self):

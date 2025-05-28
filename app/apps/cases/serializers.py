@@ -27,6 +27,7 @@ class CaseSerializer(serializers.ModelSerializer):
             "homeowner_association",
             "legacy_id",
             "status",
+            "prefixed_dossier_id",
         )
 
     def get_status(self, obj):
@@ -63,6 +64,7 @@ class CaseListSerializer(serializers.ModelSerializer):
             "legacy_id",
             "status",
             "end_date",
+            "prefixed_dossier_id",
         )
 
     def get_status(self, obj):
