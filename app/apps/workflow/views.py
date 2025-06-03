@@ -29,6 +29,7 @@ from .serializers import (
     GenericCompletedTaskSerializer,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import F
 
 
 logger = logging.getLogger(__name__)
@@ -98,10 +99,14 @@ class CaseUserTaskViewSet(
     mixins.ListModelMixin,
 ):
     serializer_class = CaseUserTaskListSerializer
-    queryset = CaseUserTask.objects.filter(completed=False).prefetch_related("case")
+    queryset = (
+        CaseUserTask.objects.filter(completed=False)
+        .select_related("case__homeowner_association")
+        .annotate(homeowner_association_name=F("case__homeowner_association__name"))
+    )
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
-    ordering_fields = ["id", "created"]
+    ordering_fields = ["id", "created", "name", "homeowner_association_name"]
     filterset_class = CaseUserTaskFilter
 
 
