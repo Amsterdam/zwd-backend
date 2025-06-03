@@ -18,16 +18,16 @@ class CaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = (
-            "id",
-            "created",
-            "end_date",
-            "description",
-            "workflows",
             "advice_type",
+            "created",
+            "description",
+            "end_date",
             "homeowner_association",
+            "id",
             "legacy_id",
-            "status",
             "prefixed_dossier_id",
+            "status",
+            "workflows",
         )
 
     def get_status(self, obj):
@@ -41,12 +41,12 @@ class CaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = (
-            "id",
-            "description",
             "advice_type",
-            "homeowner_association",
-            "contacts",
             "author",
+            "contacts",
+            "description",
+            "homeowner_association",
+            "id",
             "legacy_id",
         )
 
@@ -58,13 +58,14 @@ class CaseListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = (
-            "id",
             "created",
-            "homeowner_association",
-            "legacy_id",
-            "status",
             "end_date",
+            "homeowner_association",
+            "id",
+            "legacy_id",
             "prefixed_dossier_id",
+            "status",
+            "updated",
         )
 
     def get_status(self, obj):
@@ -79,17 +80,17 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
     def validate_document(self, value):
         ext = os.path.splitext(value.name)[1].lower()
         if ext not in [
-            ".pdf",
-            ".docx",
-            ".doc",
-            ".txt",
-            ".png",
-            ".jpg",
-            ".jpeg",
-            ".xlsx",
-            ".xls",
             ".csv",
+            ".doc",
+            ".docx",
+            ".jpeg",
+            ".jpg",
             ".msg",
+            ".pdf",
+            ".png",
+            ".txt",
+            ".xls",
+            ".xlsx",
         ]:
             raise serializers.ValidationError("File extension not allowed")
 
@@ -97,16 +98,16 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
         file_mime_type = mime.from_buffer(value.read(2048))
         value.seek(0)
         if file_mime_type not in [
-            "application/pdf",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "text/plain",
-            "image/png",
-            "image/jpeg",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/csv",
             "application/CDFV2",
-            "application/vnd.ms-outlook",
+            "application/csv",
             "application/msoutlook",
+            "application/pdf",
+            "application/vnd.ms-outlook",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "image/jpeg",
+            "image/png",
+            "text/plain",
         ]:
             raise serializers.ValidationError("File type not allowed")
 
@@ -121,8 +122,8 @@ class CaseDocumentWithTaskSerializer(CaseDocumentSerializer):
 
     class Meta(CaseDocumentSerializer.Meta):
         fields = CaseDocumentSerializer.Meta.fields + (
-            "case_user_task_id",
             "author",
+            "case_user_task_id",
         )
 
 
