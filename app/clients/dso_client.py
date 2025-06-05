@@ -23,10 +23,19 @@ class DsoClient:
     def get_hoa_by_name(self, hoa_name):
         url = f"{settings.DSO_API_URL}?brkVveStatutaireNaam={hoa_name}&_pageSize=300"
         hoa_json = self._get_paginated_response(url)
-        hoa_verblijfsobject = hoa_json["_embedded"]["wonen_verblijfsobject"]
-        return list(
-            {hoa["votIdentificatie"]: hoa for hoa in hoa_verblijfsobject}.values()
+        verblijfsobjecten = hoa_json.get("_embedded", {}).get(
+            "wonen_verblijfsobject", []
         )
+
+        # Filter for residential use only
+        woon_objecten = [
+            obj
+            for obj in verblijfsobjecten
+            if obj.get("bagGebruiksdoel") == "woonfunctie"
+        ]
+
+        # Use dict to deduplicate by 'votIdentificatie'
+        return list({obj["votIdentificatie"]: obj for obj in woon_objecten}.values())
 
     def search_hoa_by_name(self, hoa_name):
         url = f"{settings.DSO_API_URL}?brkVveIsEigendomVve=ja&brkVveStatutaireNaam[like]=*{hoa_name}*&_pageSize=300"
