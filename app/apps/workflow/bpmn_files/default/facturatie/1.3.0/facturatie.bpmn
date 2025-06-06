@@ -149,7 +149,9 @@
             </camunda:validation>
           </camunda:formField>
           <camunda:formField id="form_informatiebijeenkomst_toelichting" label="Vul je naam in en de bevindingen van de eindpresentatie" type="string">
-            <camunda:validation />
+            <camunda:validation>
+              <camunda:constraint name="optional" config="true" />
+            </camunda:validation>
           </camunda:formField>
         </camunda:formData>
       </bpmn:extensionElements>
