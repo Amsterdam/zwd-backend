@@ -57,5 +57,8 @@ class CaseStatusAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
+        "position",
     )
+    list_display_links = ("id",)
+    list_editable = ("position",)
     search_fields = ("name",)
