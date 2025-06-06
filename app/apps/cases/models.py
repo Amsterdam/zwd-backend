@@ -22,12 +22,13 @@ class AdviceType(Enum):
 
 class CaseStatus(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    position = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.name}"
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["position"]
         verbose_name = "Status"
         verbose_name_plural = "Statuses"
 
