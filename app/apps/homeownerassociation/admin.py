@@ -14,6 +14,7 @@ from apps.homeownerassociation.models import (
 @admin.action(description="Update HOA")
 def update_hoa(modeladmin, request, queryset):
     for hoa in queryset:
+        hoa.owners.all().delete()
         hoa.update_hoa_admin(hoa.name)
 
 
