@@ -38,7 +38,7 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
         "created",
         "updated",
     )
-    search_fields = ("id",)
+    search_fields = ("id", "name")
     inlines = [ContactInline]
     actions = [update_hoa]
 
