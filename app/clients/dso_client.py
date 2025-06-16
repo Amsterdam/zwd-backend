@@ -29,9 +29,7 @@ class DsoClient:
 
         # Filter for residential use only
         woon_objecten = [
-            obj
-            for obj in verblijfsobjecten
-            if obj.get("bagGebruiksdoel") == "woonfunctie"
+            obj for obj in verblijfsobjecten if obj.get("eigWoningvoorraad") == "true"
         ]
 
         # Use dict to deduplicate by 'votIdentificatie'
