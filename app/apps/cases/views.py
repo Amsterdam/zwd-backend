@@ -10,7 +10,7 @@ from rest_framework import mixins, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Case, CaseDocument, CaseStatus
+from .models import ActivationTeam, ApplicationType, Case, CaseDocument, CaseStatus
 from .serializers import (
     CaseCreateSerializer,
     CaseDocumentSerializer,
@@ -31,6 +31,7 @@ from apps.advisor.models import Advisor
 from utils.pagination import CustomPagination
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
+from django.db import transaction
 
 
 class CaseFilter(django_filters.FilterSet):
@@ -160,9 +161,20 @@ class CaseViewSet(
         validated_data = serializer.validated_data
         # Prevents exception on case creation
         contacts_data = validated_data.pop("contacts", [])
-        case = Case.objects.create(**validated_data)
-        Contact.process_contacts(case.homeowner_association, contacts_data)
+        activation_team_data = validated_data.pop("activation_team", None)
+
+        with transaction.atomic():
+            case = Case.objects.create(**validated_data)
+            Contact.process_contacts(case.homeowner_association, contacts_data)
+            if (
+                case.application_type == ApplicationType.ACTIVATIONTEAM.value
+                and activation_team_data
+            ):
+                ActivationTeam.objects.create(case=case, **activation_team_data)
+
+        # Start the main workflow for the case
         self.start_workflow(case, request.user.id)
+
         return Response(CaseSerializer(case).data, status=201)
 
     def start_workflow(self, case, user_id):

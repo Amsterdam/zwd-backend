@@ -9,6 +9,15 @@ import os
 from django.core.files.storage import default_storage
 
 
+class ApplicationType(Enum):
+    ADVICE = "Advies"
+    ACTIVATIONTEAM = "Activatieteam"
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+
 class AdviceType(Enum):
     ENERGY_ADVICE = "Energieadvies"
     HBO = "Haalbaarheidsonderzoek"
@@ -33,15 +42,12 @@ class CaseStatus(models.Model):
         verbose_name_plural = "Statuses"
 
 
-def get_upload_path(instance, filename):
-    return os.path.join("uploads", "cases", "%s" % instance.case.id, filename)
-
-
 class Case(ModelEventEmitter):
-    description = models.TextField(null=True, blank=True)
-    advice_type = models.CharField(
-        choices=AdviceType.choices(), default=AdviceType.COURSE.value
+    application_type = models.CharField(
+        choices=ApplicationType.choices(), default=ApplicationType.ADVICE.value
     )
+    advice_type = models.CharField(choices=AdviceType.choices(), blank=True, null=True)
+    description = models.TextField(null=True, blank=True)
     EVENT_TYPE = CaseEvent.TYPE_CASE
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, on_delete=models.CASCADE, related_name="cases", null=True
@@ -73,11 +79,15 @@ class Case(ModelEventEmitter):
 
     @property
     def prefixed_dossier_id(self):
-        if self.advice_type == AdviceType.COURSE.value:
+        if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
+            return f"ACT{self.id}"
+        elif self.advice_type == AdviceType.COURSE.value:
             return f"CUR{self.id}"
         elif self.advice_type == AdviceType.HBO.value:
             return f"HBO{self.id}"
-        return f"EA{self.id}"
+        elif self.advice_type == AdviceType.ENERGY_ADVICE.value:
+            return f"EA{self.id}"
+        return f"{self.id}"
 
     def close_case(self):
         with transaction.atomic():
@@ -89,18 +99,56 @@ class Case(ModelEventEmitter):
         return f"Case: {self.id}"
 
     def __get_event_values__(self):
-        return {
-            "description": self.description,
-            "advice_type": self.advice_type,
-            "author": self.author.__str__(),
+        values = {
+            "application_type": self.application_type,
+            "author": str(self.author) if self.author else None,
             "date_added": self.created,
+            "description": self.description,
         }
+        if self.application_type == ApplicationType.ADVICE.value:
+            values["advice_type"] = self.advice_type
+
+        if hasattr(self, "activation_team"):
+            values["activation_team_type"] = (self.activation_team.type,)
+            values["activation_team_subject"] = self.activation_team.subject
+            values["activation_team_meeting_date"] = self.activation_team.meeting_date
+
+        return values
 
     def __get_case__(self):
         return self
 
     class Meta:
         ordering = ["-id"]
+
+
+class ActivationTeamType(Enum):
+    INFORMATIEBIJEENKOMST = "Informatiebijeenkomst"
+    LEDENVERGADERING = "Ledenvergadering"
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+
+class ActivationTeam(models.Model):
+    case = models.OneToOneField(
+        Case, on_delete=models.CASCADE, related_name="activation_team"
+    )
+    type = models.CharField(
+        choices=ActivationTeamType.choices(),
+        default=ActivationTeamType.INFORMATIEBIJEENKOMST.value,
+    )
+    subject = models.TextField(null=True, blank=True)
+    meeting_date = models.DateField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Activatieteam"
+
+
+def get_upload_path(instance, filename):
+    return os.path.join("uploads", "cases", "%s" % instance.case.id, filename)
 
 
 class CaseDocument(models.Model):

@@ -3,22 +3,37 @@ from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
 )
-from apps.cases.models import Case, CaseDocument, CaseStatus
+from apps.cases.models import (
+    ActivationTeam,
+    ApplicationType,
+    Case,
+    CaseDocument,
+    CaseStatus,
+)
 from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import serializers
 import magic
 import os
 
 
+class ActivationTeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivationTeam
+        fields = ("type", "subject", "meeting_date")
+
+
 class CaseSerializer(serializers.ModelSerializer):
     workflows = CaseWorkflowSerializer(many=True)
     homeowner_association = CaseHomeownerAssociationSerializer()
     status = serializers.SerializerMethodField()
+    activation_team = ActivationTeamSerializer(required=False)
 
     class Meta:
         model = Case
         fields = (
+            "activation_team",
             "advice_type",
+            "application_type",
             "created",
             "description",
             "end_date",
@@ -37,18 +52,33 @@ class CaseSerializer(serializers.ModelSerializer):
 class CaseCreateSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     contacts = ContactSerializer(many=True, required=False)
+    activation_team = ActivationTeamSerializer(required=False)
 
     class Meta:
         model = Case
         fields = (
             "advice_type",
+            "application_type",
             "author",
             "contacts",
             "description",
             "homeowner_association",
             "id",
             "legacy_id",
+            "activation_team",
         )
+
+    def validate(self, data):
+        # advice_type is required when application_type is ADVICE
+        if data.get(
+            "application_type"
+        ) == ApplicationType.ADVICE.value and not data.get("advice_type"):
+            raise serializers.ValidationError(
+                {
+                    "advice_type": "This field is required when application_type is set to ADVICE."
+                }
+            )
+        return data
 
 
 class CaseListSerializer(serializers.ModelSerializer):
