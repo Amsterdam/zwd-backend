@@ -150,13 +150,14 @@ class WorkflowSpecConfigThemeSerializer(serializers.Serializer):
 
 
 class WorkflowSpecConfigThemeTypeSerializer(serializers.Serializer):
+    activatieteam = WorkflowSpecConfigThemeSerializer(required=False)
     beoordeling = WorkflowSpecConfigThemeSerializer(required=False)
-    sub_workflow = WorkflowSpecConfigThemeSerializer(required=False)
-    director = WorkflowSpecConfigThemeSerializer(required=False)
-    facturatie = WorkflowSpecConfigThemeSerializer(required=False)
-    evaluatie = WorkflowSpecConfigThemeSerializer(required=False)
-    cursus = WorkflowSpecConfigThemeSerializer(required=False)
     close_case = WorkflowSpecConfigThemeSerializer(required=False)
+    cursus = WorkflowSpecConfigThemeSerializer(required=False)
+    director = WorkflowSpecConfigThemeSerializer(required=False)
+    evaluatie = WorkflowSpecConfigThemeSerializer(required=False)
+    facturatie = WorkflowSpecConfigThemeSerializer(required=False)
+    sub_workflow = WorkflowSpecConfigThemeSerializer(required=False)
 
     def run_validation(self, data=empty):
         if data is not empty:
@@ -179,7 +180,6 @@ class WorkflowSpecConfigSerializer(serializers.Serializer):
         if data is not empty:
             unknown = set(data) - set(self.fields)
             if unknown:
-                errors = ["Unknown field: {}".format(f) for f in unknown]
                 raise ValueError
 
         return super().run_validation(data)
