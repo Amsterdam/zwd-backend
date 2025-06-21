@@ -80,14 +80,16 @@ class Case(ModelEventEmitter):
     @property
     def prefixed_dossier_id(self):
         if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
-            return f"ACT{self.id}"
-        elif self.advice_type == AdviceType.COURSE.value:
-            return f"CUR{self.id}"
-        elif self.advice_type == AdviceType.HBO.value:
-            return f"HBO{self.id}"
-        elif self.advice_type == AdviceType.ENERGY_ADVICE.value:
-            return f"EA{self.id}"
-        return f"{self.id}"
+            return f"{self.id}ACT"
+
+        if self.advice_type == AdviceType.COURSE.value:
+            return f"{self.id}CUR"
+        if self.advice_type == AdviceType.HBO.value:
+            return f"{self.id}HBO"
+        if self.advice_type == AdviceType.ENERGY_ADVICE.value:
+            return f"{self.id}EA"
+
+        return str(self.id)
 
     def close_case(self):
         with transaction.atomic():
