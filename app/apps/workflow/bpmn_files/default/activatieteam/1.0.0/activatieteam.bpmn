@@ -160,7 +160,7 @@
       <bpmn:incoming>Flow_0sp23oy</bpmn:incoming>
       <bpmn:outgoing>Flow_01qyetz</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="task_send_to_rel" name="Doorrzetten naar REL (Regionaal Energieloket)">
+    <bpmn:userTask id="task_send_to_rel" name="Doorzetten naar REL (Regionaal Energieloket)">
       <bpmn:extensionElements />
       <bpmn:incoming>Flow_1w5rash</bpmn:incoming>
       <bpmn:outgoing>Flow_0oox4op</bpmn:outgoing>
