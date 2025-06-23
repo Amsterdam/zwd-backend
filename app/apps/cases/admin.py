@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from apps.workflow.models import CaseWorkflow
 from apps.workflow.tasks import task_create_main_worflow_for_case, task_start_workflow
-from .models import Case, CaseDocument, CaseStatus
+from .models import ActivationTeam, Case, CaseDocument, CaseStatus
 from django.db import transaction
 
 
@@ -29,6 +29,7 @@ def restart_workflow(modeladmin, request, queryset):
 class CaseAdmin(admin.ModelAdmin):
     list_display = (
         "id",
+        "application_type",
         "advice_type",
         "status",
         "homeowner_association",
@@ -38,10 +39,11 @@ class CaseAdmin(admin.ModelAdmin):
     )
     search_fields = ("id",)
     list_filter = (
-        "created",
-        "end_date",
+        "application_type",
         "advice_type",
         "status",
+        "created",
+        "end_date",
     )
     actions = [restart_workflow]
 
@@ -62,3 +64,10 @@ class CaseStatusAdmin(admin.ModelAdmin):
     list_display_links = ("id",)
     list_editable = ("position",)
     search_fields = ("name",)
+
+
+@admin.register(ActivationTeam)
+class ActivationTeamAdmin(admin.ModelAdmin):
+    list_display = ("id", "case", "type", "meeting_date", "created")
+    search_fields = ("case__id",)
+    list_filter = ("type",)
