@@ -126,9 +126,7 @@ class CaseApiTest(APITestCase):
         )
         url = reverse("cases-list")
         homeowner_association_name_partial = homeowner_association_name[2:8]
-        response = self.client.get(
-            url, {"homeowner_association_name": homeowner_association_name_partial}
-        )
+        response = self.client.get(url, {"search": homeowner_association_name_partial})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["id"], case.id)
