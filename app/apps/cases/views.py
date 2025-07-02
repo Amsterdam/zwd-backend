@@ -10,8 +10,18 @@ from rest_framework import mixins, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ActivationTeam, ApplicationType, Case, CaseDocument, CaseStatus
+from .models import (
+    ActivationTeam,
+    ApplicationType,
+    Case,
+    CaseClose,
+    CaseCloseReason,
+    CaseDocument,
+    CaseStatus,
+)
 from .serializers import (
+    CaseCloseReasonSerializer,
+    CaseCloseSerializer,
     CaseCreateSerializer,
     CaseDocumentSerializer,
     CaseSerializer,
@@ -360,3 +370,27 @@ class CaseStatusViewset(
     def list(self, _, *args, **kwargs):
         names = self.get_queryset().values_list("name", flat=True).distinct()
         return Response(list(names))
+
+
+class CaseCloseViewSet(
+    viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = CaseClose.objects.all()
+    serializer_class = CaseCloseSerializer
+    pagination_class = CustomPagination
+
+    @extend_schema(
+        responses=CaseCloseReasonSerializer,
+        description="Retrieve reasons to close a case",
+    )
+    @action(detail=False, methods=["get"], url_path="reasons")
+    def reasons(self, request, *args, **kwargs):
+        """
+        Endpoint to list all case close reasons.
+        """
+        reasons = CaseCloseReason.objects.all()
+        serializer = CaseCloseReasonSerializer(reasons, many=True)
+        return Response(serializer.data)

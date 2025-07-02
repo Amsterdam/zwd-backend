@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import models, transaction
 from apps.advisor.models import Advisor
 from apps.homeownerassociation.models import HomeownerAssociation
-from apps.events.models import CaseEvent, ModelEventEmitter
+from apps.events.models import CaseEvent, ModelEventEmitter, TaskModelEventEmitter
 from enum import Enum
 import os
 from django.core.files.storage import default_storage
@@ -43,12 +43,18 @@ class CaseStatus(models.Model):
 
 
 class Case(ModelEventEmitter):
+    EVENT_TYPE = CaseEvent.TYPE_CASE
     application_type = models.CharField(
         choices=ApplicationType.choices(), default=ApplicationType.ADVICE.value
     )
     advice_type = models.CharField(choices=AdviceType.choices(), blank=True, null=True)
-    description = models.TextField(null=True, blank=True)
-    EVENT_TYPE = CaseEvent.TYPE_CASE
+    status = models.ForeignKey(
+        to=CaseStatus,
+        related_name="cases_status",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, on_delete=models.CASCADE, related_name="cases", null=True
     )
@@ -69,13 +75,7 @@ class Case(ModelEventEmitter):
         blank=True,
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
-    status = models.ForeignKey(
-        to=CaseStatus,
-        related_name="cases_status",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
+    description = models.TextField(null=True, blank=True)
 
     @property
     def prefixed_dossier_id(self):
@@ -168,3 +168,47 @@ class CaseDocument(models.Model):
 
     class Meta:
         verbose_name = "Document"
+
+
+class CaseCloseReason(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_successful = models.BooleanField()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["name"]
+
+
+class CaseClose(TaskModelEventEmitter):
+    EVENT_TYPE = CaseEvent.TYPE_CASE_CLOSE
+    case = models.ForeignKey(Case, on_delete=models.CASCADE)
+    reason = models.ForeignKey(CaseCloseReason, on_delete=models.PROTECT)
+    description = models.TextField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        related_name="case_close_author",
+        on_delete=models.PROTECT,
+        null=True,
+    )
+
+    def __str__(self):
+        return f"Case: {self.case.id} - {self.reason.name}"
+
+    def __get_event_values__(self):
+        event_values = {
+            "date_added": self.created,
+            "author": str(self.author) if self.author else None,
+            "reason": self.reason.name,
+            "description": self.description,
+        }
+        return event_values
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.case.close_case()
+            self.case.status, _ = CaseStatus.objects.get_or_create(name="Afgesloten")
+            self.case.save()
+            return super().save(*args, **kwargs)

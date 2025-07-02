@@ -6,7 +6,7 @@ from apps.homeownerassociation.views import (
     WijkViewset,
 )
 from apps.address.views import AddressViewset
-from apps.cases.views import CaseStatusViewset, CaseViewSet
+from apps.cases.views import CaseCloseViewSet, CaseStatusViewset, CaseViewSet
 from apps.workflow.views import (
     CaseUserTaskViewSet,
     GenericCompletedTaskViewSet,
@@ -19,7 +19,7 @@ from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
+
 
 router = DefaultRouter()
 router.register(r"cases", CaseViewSet, basename="cases")
@@ -32,8 +32,9 @@ router.register(
 )
 router.register(r"districts", DistrictViewset, basename="district")
 router.register(r"wijken", WijkViewset, basename="wijk")
-router.register(r"case-statuses", CaseStatusViewset, basename="case-status")
 router.register(r"neighborhoods", NeighborhoodViewset, basename="neighborhoods")
+router.register(r"case-statuses", CaseStatusViewset, basename="case-status")
+router.register(r"case-close", CaseCloseViewSet, basename="case-close")
 
 
 @login_required
