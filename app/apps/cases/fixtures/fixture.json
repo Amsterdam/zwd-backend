@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
       "name": "Aanvraag is met succes afgerond",
-      "is_successful": false
+      "is_successful": true
     }
   },
   {
