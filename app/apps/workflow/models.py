@@ -243,6 +243,7 @@ class CaseWorkflow(models.Model):
             "file": "file",
             "advisor": "advisor",
             "date": "date",
+            "close_case": "close_case",
         }
         fields = [
             {

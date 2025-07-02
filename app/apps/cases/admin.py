@@ -3,7 +3,14 @@ from django.contrib import admin
 
 from apps.workflow.models import CaseWorkflow
 from apps.workflow.tasks import task_create_main_worflow_for_case, task_start_workflow
-from .models import ActivationTeam, Case, CaseDocument, CaseStatus
+from .models import (
+    ActivationTeam,
+    Case,
+    CaseClose,
+    CaseCloseReason,
+    CaseDocument,
+    CaseStatus,
+)
 from django.db import transaction
 
 
@@ -71,3 +78,24 @@ class ActivationTeamAdmin(admin.ModelAdmin):
     list_display = ("id", "case", "type", "meeting_date", "created")
     search_fields = ("case__id",)
     list_filter = ("type",)
+
+
+@admin.register(CaseCloseReason)
+class CaseCloseReasonAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "is_successful")
+    search_fields = ("name",)
+    list_filter = ("is_successful",)
+
+
+@admin.register(CaseClose)
+class CaseCloseAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "case",
+        "reason",
+        "case_user_task_id",
+        "created",
+        "author",
+    )
+    search_fields = ("case__id",)
+    list_filter = ("reason",)

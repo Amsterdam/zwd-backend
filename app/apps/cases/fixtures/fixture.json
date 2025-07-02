@@ -1,0 +1,26 @@
+[
+  {
+    "model": "cases.caseclosereason",
+    "pk": 1,
+    "fields": {
+      "name": "Aanvraag is met succes afgerond",
+      "is_successful": false
+    }
+  },
+  {
+    "model": "cases.caseclosereason",
+    "pk": 2,
+    "fields": {
+      "name": "Aanvraag is afgewezen",
+      "is_successful": false
+    }
+  },
+  {
+    "model": "cases.caseclosereason",
+    "pk": 3,
+    "fields": {
+      "name": "Anders, vermeld in toelichting",
+      "is_successful": false
+    }
+  }
+]

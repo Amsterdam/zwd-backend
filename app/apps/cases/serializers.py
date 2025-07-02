@@ -7,6 +7,8 @@ from apps.cases.models import (
     ActivationTeam,
     ApplicationType,
     Case,
+    CaseClose,
+    CaseCloseReason,
     CaseDocument,
     CaseStatus,
 )
@@ -173,3 +175,27 @@ class CaseStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseStatus
         fields = ["name"]
+
+
+class CaseCloseReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CaseCloseReason
+        fields = "__all__"
+
+
+class CaseCloseSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = CaseClose
+        fields = "__all__"
+
+    def validate_case(self, value):
+        """
+        Validate if there is no existing CaseClose for the given case.
+        """
+        if CaseClose.objects.filter(case=value).exists():
+            raise serializers.ValidationError(
+                f"A CaseClose already exists for Case {value.id}."
+            )
+        return value
