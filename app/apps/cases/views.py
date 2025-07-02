@@ -42,6 +42,7 @@ from utils.pagination import CustomPagination
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db import transaction
+from django.db.models import Q
 
 
 class CaseFilter(django_filters.FilterSet):
@@ -66,11 +67,7 @@ class CaseFilter(django_filters.FilterSet):
         method="filter_status",
         to_field_name="name",
     )
-
-    homeowner_association_name = django_filters.CharFilter(
-        field_name="homeowner_association__name",
-        lookup_expr="icontains",
-    )
+    search = django_filters.CharFilter(method="filter_search", label="Search")
 
     def filter_closed_cases(self, queryset, _, value):
         if value:
@@ -104,6 +101,22 @@ class CaseFilter(django_filters.FilterSet):
                 status__in=value,
             )
         return queryset
+
+    def filter_search(self, queryset, _, value):
+        """
+        Filter cases based on a search term that matches either
+        homeowner_association__name or legacy_id or case_id.
+        """
+        try:
+            case_id = int(value)
+        except ValueError:
+            case_id = None
+        print("Filtering cases with value:", value, "and case_id:", case_id)
+        return queryset.filter(
+            Q(homeowner_association__name__icontains=value)
+            | Q(legacy_id__icontains=value)
+            | Q(id=case_id)
+        )
 
 
 class CaseViewSet(
