@@ -87,7 +87,10 @@ class Case(ModelEventEmitter):
         if self.advice_type == AdviceType.HBO.value:
             return f"{self.id}HBO"
         if self.advice_type == AdviceType.ENERGY_ADVICE.value:
-            return f"{self.id}EA"
+            if self.homeowner_association.is_small:
+                return f"{self.id}EAK"
+            else:
+                return f"{self.id}EAG"
 
         return str(self.id)
 
