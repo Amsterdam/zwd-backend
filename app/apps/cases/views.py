@@ -1,4 +1,5 @@
 import mimetypes
+import re
 from apps.advisor.serializers import UpdateCaseAdvisorSerializer
 from apps.homeownerassociation.models import Contact, District, Neighborhood, Wijk
 from apps.events.serializers import CaseEventSerializer
@@ -111,11 +112,19 @@ class CaseFilter(django_filters.FilterSet):
             case_id = int(value)
         except ValueError:
             case_id = None
-        print("Filtering cases with value:", value, "and case_id:", case_id)
+
+        # Regex to parse prefixed_dossier_id (190EAG)
+        match = re.match(r"^(\d+)(ACT|CUR|HBO|EAK|EAG)$", value)
+        if match:
+            case_id_from_prefixed = int(match.group(1))
+        else:
+            case_id_from_prefixed = None
+
         return queryset.filter(
             Q(homeowner_association__name__icontains=value)
             | Q(legacy_id__icontains=value)
             | Q(id=case_id)
+            | Q(id=case_id_from_prefixed)
         )
 
 
