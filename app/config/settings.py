@@ -336,6 +336,7 @@ DSO_CLIENT_SECRET = os.getenv("DSO_CLIENT_SECRET", "default_client_secret")
 DSO_AUTH_URL = os.getenv("DSO_AUTH_URL", "https://default.auth.url")
 DSO_API_URL = os.getenv("DSO_API_URL", "https://default.api.url")
 
+KVK_API_URL = os.getenv("KVK_API_URL", "https://default.api.url")
 
 DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")

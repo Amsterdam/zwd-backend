@@ -68,21 +68,22 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeownerAssociation
         fields = [
-            "id",
-            "name",
+            "beschermd_stadsdorpsgezicht",
             "build_year",
-            "number_of_appartments",
             "contacts",
-            "owners",
             "district",
+            "id",
+            "is_priority_neighborhood",
+            "is_small",
+            "kvk_nummer",
+            "ligt_in_beschermd_gebied",
+            "monument_status",
+            "name",
             "neighborhood",
+            "number_of_appartments",
+            "owners",
             "wijk",
             "zip_code",
-            "is_small",
-            "monument_status",
-            "ligt_in_beschermd_gebied",
-            "beschermd_stadsdorpsgezicht",
-            "is_priority_neighborhood",
         ]
         depth = 1
 
