@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from clients.kvk_client import KvkClient
 from clients.dso_client import DsoClient
 from collections import Counter
 
@@ -85,6 +86,7 @@ class HomeownerAssociation(models.Model):
     monument_status = models.CharField(max_length=255, null=True)
     ligt_in_beschermd_gebied = models.CharField(max_length=255, null=True)
     beschermd_stadsdorpsgezicht = models.CharField(max_length=255, null=True)
+    kvk_nummer = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def is_small(self):
@@ -114,56 +116,69 @@ class HomeownerAssociation(models.Model):
         if existing_hoa:
             return existing_hoa
 
-        distinct_hoa_response = client.get_hoa_by_name(hoa_name)
+        data = self._get_hoa_data(hoa_name)
 
-        district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
-            distinct_hoa_response
-        )
         with transaction.atomic():
             model = HomeownerAssociation.objects.create(
-                name=hoa_name,
-                build_year=distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar"),
-                number_of_appartments=len(distinct_hoa_response),
-                district=district,
-                neighborhood=neighborhood,
-                wijk=wijk,
-                zip_code=distinct_hoa_response[0].get("postcode"),
-                monument_status=distinct_hoa_response[0].get("mntMonumentstatus"),
-                ligt_in_beschermd_gebied=distinct_hoa_response[0].get(
-                    "bsdLigtInBeschermdGebied"
-                ),
-                beschermd_stadsdorpsgezicht=distinct_hoa_response[0].get(
-                    "bsdBeschermdStadsdorpsgezicht"
-                ),
+                name=data["hoa_name"],
+                build_year=data["build_year"],
+                number_of_appartments=data["number_of_appartments"],
+                district=data["district"],
+                neighborhood=data["neighborhood"],
+                wijk=data["wijk"],
+                zip_code=data["zip_code"],
+                monument_status=data["monument_status"],
+                ligt_in_beschermd_gebied=data["ligt_in_beschermd_gebied"],
+                beschermd_stadsdorpsgezicht=data["beschermd_stadsdorpsgezicht"],
+                kvk_nummer=data["kvk_nummer"],
             )
-
-            self._create_ownerships(distinct_hoa_response, model)
+            self._create_ownerships(data["response"], model)
             return model
 
     def update_hoa_admin(self, hoa_name):
+        data = self._get_hoa_data(hoa_name)
+
+        self.build_year = data["build_year"]
+        self.zip_code = data["zip_code"]
+        self.monument_status = data["monument_status"]
+        self.ligt_in_beschermd_gebied = data["ligt_in_beschermd_gebied"]
+        self.beschermd_stadsdorpsgezicht = data["beschermd_stadsdorpsgezicht"]
+        self.number_of_appartments = data["number_of_appartments"]
+        self.district = data["district"]
+        self.neighborhood = data["neighborhood"]
+        self.wijk = data["wijk"]
+        self.kvk_nummer = data["kvk_nummer"]
+
+        self.save()
+        self._create_ownerships(data["response"], self)
+
+    def _get_hoa_data(self, hoa_name):
         client = DsoClient()
         distinct_hoa_response = client.get_hoa_by_name(hoa_name)
         district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
+        kvk_client = KvkClient()
+        kvk_nummer = kvk_client.search_kvk_by_hoa_name(hoa_name)
 
-        self.build_year = distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar")
-        self.zip_code = distinct_hoa_response[0].get("postcode")
-        self.monument_status = distinct_hoa_response[0].get("mntMonumentstatus")
-        self.ligt_in_beschermd_gebied = distinct_hoa_response[0].get(
-            "bsdLigtInBeschermdGebied"
-        )
-        self.beschermd_stadsdorpsgezicht = distinct_hoa_response[0].get(
-            "bsdBeschermdStadsdorpsgezicht"
-        )
-        self.number_of_appartments = len(distinct_hoa_response)
-        self.district = district
-        self.neighborhood = neighborhood
-        self.wijk = wijk
-
-        self.save()
-
-        self._create_ownerships(distinct_hoa_response, self)
+        return {
+            "beschermd_stadsdorpsgezicht": distinct_hoa_response[0].get(
+                "bsdBeschermdStadsdorpsgezicht"
+            ),
+            "build_year": distinct_hoa_response[0].get("pndOorspronkelijkBouwjaar"),
+            "district": district,
+            "hoa_name": hoa_name,
+            "kvk_nummer": kvk_nummer,
+            "ligt_in_beschermd_gebied": distinct_hoa_response[0].get(
+                "bsdLigtInBeschermdGebied"
+            ),
+            "monument_status": distinct_hoa_response[0].get("mntMonumentstatus"),
+            "neighborhood": neighborhood,
+            "number_of_appartments": len(distinct_hoa_response),
+            "response": distinct_hoa_response,
+            "wijk": wijk,
+            "zip_code": distinct_hoa_response[0].get("postcode"),
+        }
 
     def _get_district_and_neighborhood_and_wijk(self, distinct_hoa_response):
         district, created = District.objects.get_or_create(

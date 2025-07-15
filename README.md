@@ -1,5 +1,6 @@
 # Zaken Woningkwaliteit Duurzaamheid (ZWD)
-TODO
+
+De afdeling Woningkwaliteit en Duurzaamheid heeft als doel om de woningkwaliteit en duurzaamheid in Amsterdam te monitoren en te verbeteren. Om dit doel te bereiken, ondersteunen zij de Verenigingen van Eigenaren (vve’s), particulieren buiten vve’s, woningcorporaties, en vastgoedprofessionals. Door middel van dit zaaksysteem worden alle processen gestuurd en gemonitord.
 
 ## Prerequisites
 
@@ -35,8 +36,6 @@ DSO_CLIENT_SECRET=<key>
 DSO_AUTH_URL=<key>
 DSO_API_URL=<key>
 ```
-
-
 
 ## Swagger
 
