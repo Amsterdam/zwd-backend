@@ -5,7 +5,7 @@ from apps.homeownerassociation.views import (
     NeighborhoodViewset,
     WijkViewset,
 )
-from apps.address.views import AddressViewset
+from apps.address.views import AddressViewSet
 from apps.cases.views import CaseCloseViewSet, CaseStatusViewset, CaseViewSet
 from apps.workflow.views import (
     CaseUserTaskViewSet,
@@ -26,7 +26,7 @@ router.register(r"cases", CaseViewSet, basename="cases")
 router.register(r"generic-tasks", GenericCompletedTaskViewSet, basename="generictasks")
 router.register(r"tasks", CaseUserTaskViewSet, basename="tasks")
 router.register(r"bpmn-models", BpmnViewSet, basename="bpmn-models")
-router.register(r"address", AddressViewset, basename="address")
+router.register(r"address", AddressViewSet, basename="address")
 router.register(
     r"homeowner-association", HomeOwnerAssociationView, basename="homeownerassociation"
 )
