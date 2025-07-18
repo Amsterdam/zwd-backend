@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import (
     ActivationTeam,
+    AdviceType,
     ApplicationType,
     Case,
     CaseClose,
@@ -47,6 +48,14 @@ from django.db.models import Q
 
 
 class CaseFilter(django_filters.FilterSet):
+    advice_type = django_filters.ChoiceFilter(
+        field_name="advice_type",
+        choices=AdviceType.choices(),
+    )
+    application_type = django_filters.ChoiceFilter(
+        field_name="application_type",
+        choices=ApplicationType.choices(),
+    )
     closed = django_filters.BooleanFilter(method="filter_closed_cases")
     district = django_filters.ModelMultipleChoiceFilter(
         queryset=District.objects.all(),
