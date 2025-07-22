@@ -152,14 +152,18 @@ class HomeownerAssociation(models.Model):
         self.save()
         self._create_ownerships(data["response"], self)
 
+    def update_kvk_nummer(self, hoa_name):
+        kvk_nummer = self._get_kvk_nummer(hoa_name)
+        self.kvk_nummer = kvk_nummer
+        self.save()
+
     def _get_hoa_data(self, hoa_name):
         client = DsoClient()
         distinct_hoa_response = client.get_hoa_by_name(hoa_name)
         district, neighborhood, wijk = self._get_district_and_neighborhood_and_wijk(
             distinct_hoa_response
         )
-        kvk_client = KvkClient()
-        kvk_nummer = kvk_client.search_kvk_by_hoa_name(hoa_name)
+        kvk_nummer = self._get_kvk_nummer(hoa_name)
 
         return {
             "beschermd_stadsdorpsgezicht": distinct_hoa_response[0].get(
@@ -179,6 +183,10 @@ class HomeownerAssociation(models.Model):
             "wijk": wijk,
             "zip_code": distinct_hoa_response[0].get("postcode"),
         }
+
+    def _get_kvk_nummer(self, hoa_name):
+        kvk_client = KvkClient()
+        return kvk_client.search_kvk_by_hoa_name(hoa_name)
 
     def _get_district_and_neighborhood_and_wijk(self, distinct_hoa_response):
         district, created = District.objects.get_or_create(
