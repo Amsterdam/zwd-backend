@@ -18,6 +18,15 @@ def update_hoa(modeladmin, request, queryset):
         hoa.update_hoa_admin(hoa.name)
 
 
+@admin.action(description="Update kvk-nummer")
+def update_kvk_number(modeladmin, request, queryset):
+    for hoa in queryset:
+        hoa.update_kvk_nummer(hoa.name)
+    modeladmin.message_user(
+        request, f"{queryset.count()} kvk-nummers successfully updated."
+    )
+
+
 class ContactInline(admin.TabularInline):
     model = (
         Contact.homeowner_associations.through
@@ -36,12 +45,13 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
         "name",
         "build_year",
         "number_of_appartments",
+        "kvk_nummer",
         "created",
         "updated",
     )
     search_fields = ("id", "name")
     inlines = [ContactInline]
-    actions = [update_hoa]
+    actions = [update_hoa, update_kvk_number]
 
 
 @admin.register(Contact)
