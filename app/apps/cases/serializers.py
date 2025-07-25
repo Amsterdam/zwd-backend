@@ -104,44 +104,79 @@ class CaseListSerializer(serializers.ModelSerializer):
         return obj.status.name if obj.status else None
 
 
+EXTENSION_TO_MIME = {
+    ".pdf": ["application/pdf"],
+    ".docx": [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ],
+    ".doc": ["application/msword"],
+    ".xlsx": ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+    ".xls": ["application/vnd.ms-excel"],
+    ".txt": ["text/plain"],
+    ".csv": ["text/csv", "text/plain", "application/csv"],
+    ".png": ["image/png"],
+    ".jpeg": ["image/jpeg"],
+    ".jpg": ["image/jpeg"],
+    ".msg": ["application/vnd.ms-outlook", "application/msoutlook"],
+}
+
+# File types that do NOT have magic bytes and should be skipped in magic byte validation
+# .msg has old Microsoft Outlook format with specific magic bytes and a newer format without magic bytes
+MAGIC_BYTES_EXCEPTIONS = [".csv", ".txt", ".msg"]
+
+# Magic byte patterns per file type
+MAGIC_BYTES = {
+    b"%PDF-": [".pdf"],
+    b"\x50\x4B\x03\x04": [".docx", ".xlsx", ".zip"],
+    b"\xD0\xCF\x11\xE0": [".doc", ".xls", ".msg"],
+    b"\x89PNG\r\n\x1a\n": [".png"],
+    b"\xFF\xD8\xFF": [".jpeg", ".jpg"],
+}
+
+
+def detect_magic_extension(file_header: bytes):
+    return next(
+        (exts for magic, exts in MAGIC_BYTES.items() if file_header.startswith(magic)),
+        None,
+    )
+
+
 class CaseDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseDocument
         fields = ("id", "case", "document", "name", "created")
 
     def validate_document(self, value):
+        # Validatefile extension
         ext = os.path.splitext(value.name)[1].lower()
-        if ext not in [
-            ".csv",
-            ".doc",
-            ".docx",
-            ".jpeg",
-            ".jpg",
-            ".msg",
-            ".pdf",
-            ".png",
-            ".txt",
-            ".xls",
-            ".xlsx",
-        ]:
+        if ext not in EXTENSION_TO_MIME:
             raise serializers.ValidationError("File extension not allowed")
 
+        # Detect real MIME type
         mime = magic.Magic(mime=True)
         file_mime_type = mime.from_buffer(value.read(2048))
         value.seek(0)
-        if file_mime_type not in [
-            "application/CDFV2",
-            "application/csv",
-            "application/msoutlook",
-            "application/pdf",
-            "application/vnd.ms-outlook",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "image/jpeg",
-            "image/png",
-            "text/plain",
-        ]:
-            raise serializers.ValidationError("File type not allowed")
+
+        allowed_mimes = EXTENSION_TO_MIME.get(ext)
+        if file_mime_type not in allowed_mimes:
+            raise serializers.ValidationError("MIME-type does not match file extension")
+
+        # Check magic bytes
+        header = value.read(16)
+        value.seek(0)
+
+        magic_exts = detect_magic_extension(header)
+        if magic_exts is None:
+            if ext in MAGIC_BYTES_EXCEPTIONS:
+                return value
+            raise serializers.ValidationError(
+                "File type could not be verified based on magic bytes"
+            )
+
+        if ext not in magic_exts:
+            raise serializers.ValidationError(
+                "Magic bytes do not match the file extension"
+            )
 
         return value
 
