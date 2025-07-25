@@ -133,9 +133,10 @@ class CaseApiTest(APITestCase):
 
     def test_create_document_success(self):
         url = reverse("cases-create-document")
+        fake_pdf = b"%PDF-1.4\n%Fake PDF content"
         document_data = {
             "document": SimpleUploadedFile(
-                "test_document.pdf", b"file_content", content_type="application/pdf"
+                "test_document.pdf", fake_pdf, content_type="application/pdf"
             ),
             "case": self.case,
             "name": "document_name",
