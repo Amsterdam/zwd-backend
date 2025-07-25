@@ -133,9 +133,10 @@ class CaseApiTest(APITestCase):
 
     def test_create_document_success(self):
         url = reverse("cases-create-document")
+        fake_pdf = b"%PDF-1.4\n%Fake PDF content"
         document_data = {
             "document": SimpleUploadedFile(
-                "test_document.pdf", b"file_content", content_type="application/pdf"
+                "test_document.pdf", fake_pdf, content_type="application/pdf"
             ),
             "case": self.case,
             "name": "document_name",
@@ -385,14 +386,18 @@ class CaseApiTest(APITestCase):
 
     def _create_sample_document(self):
         url = reverse("cases-create-document")
+        fake_pdf = b"%PDF-1.4\n%Fake PDF content"
         document_data = {
             "document": SimpleUploadedFile(
-                "test_document.pdf", b"file_content", content_type="application/pdf"
+                "test_document.pdf", fake_pdf, content_type="application/pdf"
             ),
             "case": self.case,
             "name": "document_name",
         }
         response = self.client.post(url, data=document_data, format="multipart")
+        self.assertEqual(
+            response.status_code, status.HTTP_201_CREATED, response.content
+        )
         return response.data
 
     # Django test create a test db, celery is unaware of that db so mock celery methods

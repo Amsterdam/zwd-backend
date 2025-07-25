@@ -239,12 +239,16 @@ class CaseUserTaskApiTests(APITestCase):
         case, case_user_task = self._create_case_and_task()
 
         url = reverse("generictasks-complete-file-task")
+
+        # Geldige PDF-header
+        fake_pdf = b"%PDF-1.4\n%Fake PDF content"
+
         data = {
             "case_user_task_id": case_user_task.id,
             "case": case.id,
             "name": "test_document",
             "document": SimpleUploadedFile(
-                "test_document.pdf", b"file_content", content_type="application/pdf"
+                "test_document.pdf", fake_pdf, content_type="application/pdf"
             ),
         }
         response = self.client.post(url, data=data, format="multipart")
