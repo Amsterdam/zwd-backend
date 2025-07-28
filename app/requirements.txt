@@ -30,3 +30,5 @@ azure-storage-blob==12.24.1
 python-magic==0.4.27
 watchdog==6.0.0
 django-filter==25.1
+
+whitenoise==6.9.0
