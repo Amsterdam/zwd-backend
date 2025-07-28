@@ -16,4 +16,6 @@ from whitenoise import WhiteNoise
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 django_asgi_app = get_asgi_application()
-application = WhiteNoise(django_asgi_app, mimetypes={".svg": "image/svg+xml"})
+application = WhiteNoise(
+    django_asgi_app, mimetypes={".svg": "image/svg+xml"}, add_headers=True
+)
