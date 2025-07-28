@@ -36,16 +36,15 @@ def restart_workflow(modeladmin, request, queryset):
 class CaseAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "application_type",
+        "legacy_id",
         "advice_type",
         "status",
-        "created",
         "homeowner_association",
+        "created",
         "updated",
         "end_date",
     )
-    list_editable = ("created",)
-    search_fields = ("id",)
+    search_fields = ("id", "legacy_id")
     list_filter = (
         "application_type",
         "advice_type",
