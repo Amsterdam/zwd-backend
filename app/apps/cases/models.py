@@ -64,7 +64,7 @@ class Case(ModelEventEmitter):
         on_delete=models.PROTECT,
         null=True,
     )
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(auto_now=True)
     end_date = models.DateField(null=True, blank=True)
     advisor = models.ForeignKey(

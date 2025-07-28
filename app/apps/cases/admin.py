@@ -39,11 +39,12 @@ class CaseAdmin(admin.ModelAdmin):
         "application_type",
         "advice_type",
         "status",
-        "homeowner_association",
         "created",
+        "homeowner_association",
         "updated",
         "end_date",
     )
+    list_editable = ("created",)
     search_fields = ("id",)
     list_filter = (
         "application_type",
