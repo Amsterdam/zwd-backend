@@ -146,9 +146,9 @@ class CaseFilter(django_filters.FilterSet):
         Filter cases based on the 'is_small' property of the HomeownerAssociation.
         """
         if value is True:
-            return queryset.filter(homeowner_association__number_of_appartments__lte=12)
+            return queryset.filter(homeowner_association__number_of_apartments__lte=12)
         if value is False:
-            return queryset.filter(homeowner_association__number_of_appartments__gt=12)
+            return queryset.filter(homeowner_association__number_of_apartments__gt=12)
         return queryset
 
 

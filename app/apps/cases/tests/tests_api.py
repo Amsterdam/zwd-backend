@@ -43,7 +43,7 @@ class CaseApiTest(APITestCase):
         district = baker.make("District", name=district_name)
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=13,
+            number_of_apartments=13,
             district=district,
             name="ABC",
         )
@@ -62,7 +62,7 @@ class CaseApiTest(APITestCase):
         wijk_name = "Wijk B"
         wijk = baker.make("Wijk", name=wijk_name)
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=20, wijk=wijk, name="ABC"
+            HomeownerAssociation, number_of_apartments=20, wijk=wijk, name="ABC"
         )
         case = baker.make(
             Case,
@@ -80,7 +80,7 @@ class CaseApiTest(APITestCase):
         neighborhood = baker.make(Neighborhood, name=neighborhood_name)
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=20,
+            number_of_apartments=20,
             neighborhood=neighborhood,
             name="ABC",
         )
@@ -98,7 +98,7 @@ class CaseApiTest(APITestCase):
     def test_retrieve_cases_filter_by_status(self):
         case_status = baker.make(CaseStatus, name="Closed")
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13, name="ABC"
+            HomeownerAssociation, number_of_apartments=13, name="ABC"
         )
         case = baker.make(
             Case,
@@ -116,7 +116,7 @@ class CaseApiTest(APITestCase):
         homeowner_association_name = "Homeowner Association A"
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=13,
+            number_of_apartments=13,
             name=homeowner_association_name,
         )
         case = baker.make(
@@ -217,7 +217,7 @@ class CaseApiTest(APITestCase):
 
     def test_update_document_name(self):
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13
+            HomeownerAssociation, number_of_apartments=13
         )
         case = baker.make(Case, homeowner_association=homeowner_association)
         case_document = baker.make(CaseDocument, case=case, name="old_name")
@@ -257,7 +257,7 @@ class CaseApiTest(APITestCase):
     def test_get_advisors_hbo_success(self):
         advisor_name = "Advisor_hbo"
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13
+            HomeownerAssociation, number_of_apartments=13
         )
         case = baker.make(
             Case,
@@ -277,7 +277,7 @@ class CaseApiTest(APITestCase):
     def test_get_advisors_ea_success(self):
         advisor_name = "Advisor_ea"
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13
+            HomeownerAssociation, number_of_apartments=13
         )
         case = baker.make(
             Case,
@@ -299,7 +299,7 @@ class CaseApiTest(APITestCase):
     def test_get_advisors_small_hoa_ea_success(self):
         advisor_name = "Advisor_small"
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=11
+            HomeownerAssociation, number_of_apartments=11
         )
         case = baker.make(
             Case,
@@ -320,7 +320,7 @@ class CaseApiTest(APITestCase):
     def test_get_advisors_small_hoa_hbo_success(self):
         advisor_name = "Advisor_small"
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=11
+            HomeownerAssociation, number_of_apartments=11
         )
         case = baker.make(
             Case,
@@ -354,7 +354,7 @@ class CaseApiTest(APITestCase):
 
     def test_processes_closed_cases(self):
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13
+            HomeownerAssociation, number_of_apartments=13
         )
         case = baker.make(
             Case,

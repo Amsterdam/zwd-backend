@@ -26,7 +26,7 @@ class HomeownerAssociationModelTest(TestCase):
         self.assertIsInstance(result, HomeownerAssociation)
         self.assertEqual(result.name, "New HOA")
         self.assertEqual(result.build_year, 2010)
-        self.assertEqual(result.number_of_appartments, 1)
+        self.assertEqual(result.number_of_apartments, 1)
         mock_client.get_hoa_name_by_bag_id.assert_called_once_with("some_bag_id")
         mock_client.get_hoa_by_name.assert_called_once_with("New HOA")
 
@@ -73,19 +73,19 @@ class HomeownerAssociationModelTest(TestCase):
 
         picobello = owners.filter(name="Corpo1").first()
         self.assertEqual(picobello.type, "Corporatie")
-        self.assertEqual(picobello.number_of_appartments, 2)
+        self.assertEqual(picobello.number_of_apartments, 2)
 
         john_doe = owners.filter(name="John Doe").first()
         self.assertEqual(john_doe.type, "Particulier")
-        self.assertEqual(john_doe.number_of_appartments, 1)
+        self.assertEqual(john_doe.number_of_apartments, 1)
 
         jane_smith = owners.filter(name="Jane Smith").first()
         self.assertEqual(jane_smith.type, "Particulier")
-        self.assertEqual(jane_smith.number_of_appartments, 1)
+        self.assertEqual(jane_smith.number_of_apartments, 1)
 
         another_corp = owners.filter(name="AnotherCorp").first()
         self.assertEqual(another_corp.type, "Corporatie")
-        self.assertEqual(another_corp.number_of_appartments, 1)
+        self.assertEqual(another_corp.number_of_apartments, 1)
 
     @patch("apps.homeownerassociation.models.DsoClient")
     def test_get_or_create_hoa_by_bag_id_creates_district_and_neighbordhood(
@@ -111,29 +111,29 @@ class HomeownerAssociationModelTest(TestCase):
     def test_is_small(
         self,
     ):
-        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        hoa = baker.make(HomeownerAssociation, number_of_apartments=12)
         self.assertTrue(hoa.is_small)
-        hoa = baker.make(HomeownerAssociation, number_of_appartments=13)
+        hoa = baker.make(HomeownerAssociation, number_of_apartments=13)
         self.assertFalse(hoa.is_small)
 
     def test_has_major_shareholder(self):
-        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        hoa = baker.make(HomeownerAssociation, number_of_apartments=12)
         baker.make(
-            Owner, homeowner_association=hoa, number_of_appartments=3, type="Corporatie"
+            Owner, homeowner_association=hoa, number_of_apartments=3, type="Corporatie"
         )
         self.assertTrue(hoa.has_major_shareholder)
 
-        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        hoa = baker.make(HomeownerAssociation, number_of_apartments=12)
         baker.make(
-            Owner, homeowner_association=hoa, number_of_appartments=2, type="Corporatie"
+            Owner, homeowner_association=hoa, number_of_apartments=2, type="Corporatie"
         )
         self.assertFalse(hoa.has_major_shareholder)
 
-        hoa = baker.make(HomeownerAssociation, number_of_appartments=12)
+        hoa = baker.make(HomeownerAssociation, number_of_apartments=12)
         baker.make(
             Owner,
             homeowner_association=hoa,
-            number_of_appartments=8,
+            number_of_apartments=8,
             type="Natuurlijk persoon",
         )
         self.assertFalse(hoa.has_major_shareholder)

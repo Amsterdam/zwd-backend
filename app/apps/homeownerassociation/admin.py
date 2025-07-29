@@ -44,7 +44,7 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
         "id",
         "name",
         "build_year",
-        "number_of_appartments",
+        "number_of_apartments",
         "kvk_nummer",
         "created",
         "updated",
@@ -67,13 +67,13 @@ class OwnerAdmin(admin.ModelAdmin):
         "get_homeowner_association_name",
         "type",
         "name",
-        "number_of_appartments",
+        "number_of_apartments",
     )
     search_fields = (
         "id",
         "type",
         "name",
-        "number_of_appartments",
+        "number_of_apartments",
         "homeowner_association__name",
     )
 
