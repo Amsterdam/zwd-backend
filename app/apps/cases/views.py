@@ -80,6 +80,9 @@ class CaseFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method="filter_search", label="Search")
     created_range = django_filters.DateFromToRangeFilter(field_name="created")
     end_date_range = django_filters.DateFromToRangeFilter(field_name="end_date")
+    is_small_hoa = django_filters.BooleanFilter(
+        method="filter_is_small_hoa", label="HOA has <= 12 apartments"
+    )
 
     def filter_closed_cases(self, queryset, _, value):
         if value:
@@ -137,6 +140,16 @@ class CaseFilter(django_filters.FilterSet):
             | Q(id=case_id)
             | Q(id=case_id_from_prefixed)
         )
+
+    def filter_is_small_hoa(self, queryset, _, value):
+        """
+        Filter cases based on the 'is_small' property of the HomeownerAssociation.
+        """
+        if value is True:
+            return queryset.filter(homeowner_association__number_of_apartments__lte=12)
+        if value is False:
+            return queryset.filter(homeowner_association__number_of_apartments__gt=12)
+        return queryset
 
 
 class CaseViewSet(

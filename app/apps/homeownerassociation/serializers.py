@@ -37,7 +37,7 @@ class OwnerSerializer(serializers.ModelSerializer):
         fields = [
             "type",
             "name",
-            "number_of_appartments",
+            "number_of_apartments",
         ]
         depth = 1
 
@@ -80,7 +80,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "monument_status",
             "name",
             "neighborhood",
-            "number_of_appartments",
+            "number_of_apartments",
             "owners",
             "wijk",
             "zip_code",

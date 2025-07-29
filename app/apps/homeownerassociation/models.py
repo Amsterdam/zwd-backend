@@ -61,7 +61,7 @@ class PriorityZipCode(models.Model):
 class HomeownerAssociation(models.Model):
     name = models.CharField(max_length=255, unique=True)
     build_year = models.IntegerField()
-    number_of_appartments = models.IntegerField()
+    number_of_apartments = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     zip_code = models.CharField(max_length=255, null=True)
@@ -90,13 +90,13 @@ class HomeownerAssociation(models.Model):
 
     @property
     def is_small(self):
-        return self.number_of_appartments <= 12
+        return self.number_of_apartments <= 12
 
     @property
     def has_major_shareholder(self):
         for owner in self.owners.all():
             if (
-                owner.number_of_appartments / self.number_of_appartments >= 0.25
+                owner.number_of_apartments / self.number_of_apartments >= 0.25
                 and owner.type != "Natuurlijk persoon"
             ):
                 return True
@@ -122,7 +122,7 @@ class HomeownerAssociation(models.Model):
             model = HomeownerAssociation.objects.create(
                 name=data["hoa_name"],
                 build_year=data["build_year"],
-                number_of_appartments=data["number_of_appartments"],
+                number_of_apartments=data["number_of_apartments"],
                 district=data["district"],
                 neighborhood=data["neighborhood"],
                 wijk=data["wijk"],
@@ -143,7 +143,7 @@ class HomeownerAssociation(models.Model):
         self.monument_status = data["monument_status"]
         self.ligt_in_beschermd_gebied = data["ligt_in_beschermd_gebied"]
         self.beschermd_stadsdorpsgezicht = data["beschermd_stadsdorpsgezicht"]
-        self.number_of_appartments = data["number_of_appartments"]
+        self.number_of_apartments = data["number_of_apartments"]
         self.district = data["district"]
         self.neighborhood = data["neighborhood"]
         self.wijk = data["wijk"]
@@ -178,7 +178,7 @@ class HomeownerAssociation(models.Model):
             ),
             "monument_status": distinct_hoa_response[0].get("mntMonumentstatus"),
             "neighborhood": neighborhood,
-            "number_of_appartments": len(distinct_hoa_response),
+            "number_of_apartments": len(distinct_hoa_response),
             "response": distinct_hoa_response,
             "wijk": wijk,
             "zip_code": distinct_hoa_response[0].get("postcode"),
@@ -214,11 +214,11 @@ class HomeownerAssociation(models.Model):
                 type=owner_type if owner_type is not None else "Onbekend",
                 name=owner_name if owner_name is not None else "Onbekend",
                 homeowner_association=hoa_obj,
-                number_of_appartments=count,
+                number_of_apartments=count,
             )
 
             if not created:
-                owner.number_of_appartments = count
+                owner.number_of_apartments = count
                 owner.save()
 
 
@@ -262,7 +262,7 @@ class Contact(models.Model):
 class Owner(models.Model):
     type = models.CharField(max_length=255)
     name = models.CharField(max_length=255, null=True)
-    number_of_appartments = models.IntegerField()
+    number_of_apartments = models.IntegerField()
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, related_name="owners", on_delete=models.DO_NOTHING
     )

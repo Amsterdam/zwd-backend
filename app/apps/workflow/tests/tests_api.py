@@ -53,7 +53,7 @@ class CaseUserTaskApiTests(APITestCase):
         baker.make(District, name="other district")
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=13,
+            number_of_apartments=13,
             district=district,
             name="ABC",
         )
@@ -90,7 +90,7 @@ class CaseUserTaskApiTests(APITestCase):
         baker.make(Wijk, name="Other name")
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=13,
+            number_of_apartments=13,
             wijk=wijk,
             name="ABC",
         )
@@ -128,7 +128,7 @@ class CaseUserTaskApiTests(APITestCase):
         baker.make(Neighborhood, name="Other name")
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=13,
+            number_of_apartments=13,
             neighborhood=neighborhood,
             name="ABC",
         )
@@ -163,7 +163,7 @@ class CaseUserTaskApiTests(APITestCase):
         url = reverse("tasks-list")
         case_status = baker.make(CaseStatus, name="Closed")
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13, name="ABC"
+            HomeownerAssociation, number_of_apartments=13, name="ABC"
         )
         case = baker.make(
             Case,
@@ -197,7 +197,7 @@ class CaseUserTaskApiTests(APITestCase):
         homeowner_association_name = "HOA for task test"
         homeowner_association = baker.make(
             HomeownerAssociation,
-            number_of_appartments=13,
+            number_of_apartments=13,
             name=homeowner_association_name,
         )
         case = baker.make(
@@ -371,7 +371,7 @@ class CaseUserTaskApiTests(APITestCase):
     @patch("apps.cases.views.CaseViewSet.start_workflow")
     def _create_case(self, mock_start_workflow):
         hoa = HomeownerAssociation.objects.create(
-            name="HOA", number_of_appartments=12, build_year=2010
+            name="HOA", number_of_apartments=12, build_year=2010
         )
         mock_start_workflow.return_value = "task_start_workflow: completed"
         url = reverse("cases-list")

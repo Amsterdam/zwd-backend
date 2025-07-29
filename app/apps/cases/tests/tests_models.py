@@ -18,7 +18,7 @@ class CaseModelTest(TestCase):
 
     def test_close_case(self):
         homeowner_association = baker.make(
-            HomeownerAssociation, number_of_appartments=13
+            HomeownerAssociation, number_of_apartments=13
         )
         case = baker.make(
             Case,
