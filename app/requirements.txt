@@ -23,7 +23,7 @@ mozilla-django-oidc==4.0.1
 spiffworkflow==3.1.1
 debugpy==1.8.14
 azure-monitor-opentelemetry==1.6.13
-model-bakery==1.18.2
+model-bakery==1.20.5
 djangorestframework-simplejwt==5.5.0
 django-storages==1.14.6
 azure-storage-blob==12.24.1
