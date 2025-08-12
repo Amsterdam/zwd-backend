@@ -12,6 +12,7 @@ from apps.workflow.views import (
     GenericCompletedTaskViewSet,
     BpmnViewSet,
 )
+from apps.advisor.views import AdvisorViewset
 from django.conf.urls import include
 from django.contrib import admin
 from django.http import HttpResponse
@@ -35,6 +36,7 @@ router.register(r"wijken", WijkViewset, basename="wijk")
 router.register(r"neighborhoods", NeighborhoodViewset, basename="neighborhoods")
 router.register(r"case-statuses", CaseStatusViewset, basename="case-status")
 router.register(r"case-close", CaseCloseViewSet, basename="case-close")
+router.register(r"advisors", AdvisorViewset, basename="advisors")
 
 
 @login_required
