@@ -1,4 +1,5 @@
 services:
+
   zwd-backend:
     build: app
     hostname: zwd-backend
@@ -77,9 +78,6 @@ services:
       - zwd_network
     restart: on-failure
 
-
-
-
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     hostname: azurite
@@ -90,6 +88,7 @@ services:
     networks:
       - zwd_network
     command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck
+
 networks:
   zwd_network:
     external: true
