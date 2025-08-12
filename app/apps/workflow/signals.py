@@ -4,6 +4,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .utils import get_latest_version_from_config
 from django.utils import timezone
+from django.db import transaction
 
 
 @receiver(pre_save, sender=CaseWorkflow, dispatch_uid="case_workflow_pre_save")
@@ -41,4 +42,9 @@ def case_workflow_pre_save(sender, instance, **kwargs):
     dispatch_uid="update_case_updated_timestamp_on_task_complete",
 )
 def update_case_updated_timestamp_on_task_complete(sender, instance, created, **kwargs):
-    Case.objects.filter(id=instance.case_id).update(updated=timezone.now())
+    if created:
+        transaction.on_commit(
+            lambda: Case.objects.filter(id=instance.case_id).update(
+                updated=timezone.now()
+            )
+        )
