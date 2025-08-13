@@ -104,6 +104,31 @@ class CaseListSerializer(serializers.ModelSerializer):
         return obj.status.name if obj.status else None
 
 
+class MijnAmsterdamCaseListSerializer(serializers.ModelSerializer):
+    homeowner_association = CaseHomeownerAssociationSerializer()
+    status = serializers.SerializerMethodField()
+    activation_team = ActivationTeamSerializer(required=False)
+
+    class Meta:
+        model = Case
+        fields = (
+            "activation_team",
+            "advice_type",
+            "application_type",
+            "created",
+            "end_date",
+            "homeowner_association",
+            "id",
+            "legacy_id",
+            "prefixed_dossier_id",
+            "status",
+            "updated",
+        )
+
+    def get_status(self, obj):
+        return obj.status.name if obj.status else None
+
+
 EXTENSION_TO_MIME = {
     ".pdf": ["application/pdf"],
     ".docx": [
