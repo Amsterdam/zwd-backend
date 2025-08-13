@@ -77,6 +77,10 @@ class CaseFilter(django_filters.FilterSet):
         method="filter_status",
         to_field_name="name",
     )
+    advisor = django_filters.ModelMultipleChoiceFilter(
+        queryset=Advisor.objects.all(),
+        method="filter_advisor",
+    )
     search = django_filters.CharFilter(method="filter_search", label="Search")
     created_range = django_filters.DateFromToRangeFilter(field_name="created")
     end_date_range = django_filters.DateFromToRangeFilter(field_name="end_date")
@@ -114,6 +118,13 @@ class CaseFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(
                 status__in=value,
+            )
+        return queryset
+
+    def filter_advisor(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                advisor__in=value,
             )
         return queryset
 

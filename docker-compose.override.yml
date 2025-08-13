@@ -1,4 +1,5 @@
 services:
+
   zwd-backend:
     environment:
       - LOCAL_DEVELOPMENT_AUTHENTICATION=True
