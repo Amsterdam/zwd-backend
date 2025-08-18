@@ -21,7 +21,7 @@ docker network create zwd_network
 docker-compose -f docker-compose.local.yml build
 ```
 
-### Starting backend
+### Starting the backend
 
 Run the following to start the backend:
 
@@ -37,6 +37,13 @@ Run the following command to either create the user, or make the existing one a 
 
 ```bash
 sh bin/setup_superuser.sh <email>
+```
+
+### Using local development authentication
+To run the project with local Django authentication instead of OpenID Connect (OIDC), create a `.local.env` file with:
+
+```bash
+LOCAL_DEVELOPMENT_AUTHENTICATION=False
 ```
 
 ### Django admin
