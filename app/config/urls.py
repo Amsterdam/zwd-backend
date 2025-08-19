@@ -64,6 +64,6 @@ urlpatterns = [
     ),
     path(
         ".well-known/security.txt",
-        lambda: redirect("https://www.amsterdam.nl/security.txt"),
+        lambda: redirect("https://www.amsterdam.nl/.well-known/security.txt"),
     ),
 ]
