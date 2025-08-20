@@ -20,6 +20,7 @@ from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from django.contrib.auth.decorators import login_required
+from django.views.generic import RedirectView
 
 
 router = DefaultRouter()
@@ -64,6 +65,6 @@ urlpatterns = [
     ),
     path(
         ".well-known/security.txt",
-        lambda: redirect("https://www.amsterdam.nl/.well-known/security.txt"),
+        RedirectView.as_view(url="https://www.amsterdam.nl/.well-known/security.txt"),
     ),
 ]
