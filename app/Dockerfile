@@ -6,14 +6,16 @@ RUN apt-get install libpq-dev -y
 RUN apt-get install gcc -y
 RUN apt install libmagic1 -y
 RUN pip install --upgrade pip
-RUN pip install uwsgi
 RUN pip install setuptools
+RUN pip install poetry
+ENV POETRY_VIRTUALENVS_CREATE=false
 WORKDIR /app
 
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r /app/requirements.txt
-COPY . /app/
+COPY pyproject.toml poetry.lock /app/
 
+RUN poetry install --no-interaction --no-ansi --no-root --with dev
+
+COPY . /app/
 
 RUN chmod +x /app/celery.sh
 

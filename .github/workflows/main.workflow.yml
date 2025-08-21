@@ -27,7 +27,6 @@ jobs:
     - name: Run Tests
       run: docker compose exec -T zwd-backend python manage.py test /app/apps
 
-
     - if: ${{ failure() }}
       name: "ON FAILURE: Which containers were running while failing?"
       run: docker ps -a
