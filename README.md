@@ -62,6 +62,23 @@ DSO_AUTH_URL=<key>
 DSO_API_URL=<key>
 ```
 
+### Dependency management (uv)
+
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency resolution and virtual environments. Dependencies are defined in `app/pyproject.toml` and installed versions are pinned via a `uv.lock` lockfile.
+
+To list outdated packages, run this inside the container:
+
+```bash
+uv pip list --outdated
+```
+
+To upgrade packages based on version constraint (e.g. updating all minor/patch versions), run:
+
+```bash
+uv lock --upgrade
+uv sync --active
+```
+
 ## Swagger
 
 http://localhost:8081/api/schema/swagger/
