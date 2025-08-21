@@ -40,7 +40,7 @@ sh bin/setup_superuser.sh <email>
 ```
 
 ### Using local development authentication
-To run the project with local Django authentication instead of OpenID Connect (OIDC), create a `.local.env` file with:
+To run the project with local Django authentication instead of OpenID Connect (OIDC), create a `.env.local` file with:
 
 ```bash
 LOCAL_DEVELOPMENT_AUTHENTICATION=False
@@ -53,7 +53,7 @@ Visit the Admin at http://localhost:8081/admin/
 
 ### DSO API
 
-If you want to make use of the DSO API, the following vars need to be set in the `.local.env` file:
+If you want to make use of the DSO API, the following vars need to be set in the `.env.local` file:
 
 ```bash
 DSO_API_URL=<url>
