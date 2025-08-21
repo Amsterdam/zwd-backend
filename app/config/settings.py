@@ -352,15 +352,22 @@ LOGIN_URL = "/oidc/authenticate/"
 if DEBUG is False and "makemigrations" not in sys.argv:
     AZURE_TOKEN_CREDENTIAL = WorkloadIdentityCredential()
 
-if DEBUG:
+# In local development we ensure the Azurite container exists, but skip
+# this during tests to avoid side effects on import and race conditions in CI.
+if DEBUG and "test" not in sys.argv and AZURE_CONNECTION_STRING and AZURE_CONTAINER:
     from azure.storage.blob import BlobServiceClient
+    from azure.core.exceptions import ResourceExistsError
 
     blob_service_client = BlobServiceClient.from_connection_string(
         AZURE_CONNECTION_STRING
     )
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
-    if container_client.exists():
-        print(f"Container '{AZURE_CONTAINER}' already exists, skipping creation.")
-    else:
-        blob_service_client.create_container(AZURE_CONTAINER)
-        print(f"Container '{AZURE_CONTAINER}' created successfully.")
+    try:
+        if container_client.exists():
+            print(f"Container '{AZURE_CONTAINER}' already exists, skipping creation.")
+        else:
+            blob_service_client.create_container(AZURE_CONTAINER)
+            print(f"Container '{AZURE_CONTAINER}' created successfully.")
+    except ResourceExistsError:
+        # Another process may have created the container between exists() and create()
+        print(f"Container '{AZURE_CONTAINER}' already exists (caught during create).")
