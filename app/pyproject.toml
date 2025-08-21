@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Zaken Woningkwaliteit Duurzaamheid (ZWD) backend"
 authors = [{ name = "Gemeente Amsterdam", email = "datapunt@amsterdam.nl" }]
 readme = "../README.md"
-package-mode = false
 requires-python = "~=3.13"
 packages = [{ include = "apps" }]
 
@@ -24,11 +23,13 @@ dependencies = [
     "djangorestframework (~=3.15)",
     "djangorestframework-simplejwt (~=5.5)",
     "drf-spectacular (~=0.27)",
+    "flake8 (~=7.0)",
     "inflection (~=0.5)",
     "jsonschema (~=4.24)",
     "jsonschema-specifications (~=2024.10)",
     "model-bakery (~=1.18)",
     "mozilla-django-oidc (~=4.0)",
+    "pre-commit (~=3.0)",
     "psycopg2-binary (~=2.9)",
     "python-magic (~=0.4)",
     "redis (~=6.3)",
@@ -36,20 +37,12 @@ dependencies = [
     "rpds-py (~=0.26)",
     "spiffworkflow (~=3.1)",
     "uritemplate (~=4.1)",
-    "uwsgi (~=2.0)",
     "watchdog (~=6.0)",
 ]
 
-[project.group.dev.dependencies]
-pre-commit = "~=3.0"
-flake8 = "~=7.0"
-
-[project.scripts]
-manage = "manage:main"
+[tool.poetry]
+package-mode = false
 
 [build-system]
-requires = ["poetry-core~=1.9"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[virtualenvs]
-create = false
