@@ -80,12 +80,7 @@ name_of_apps is the model you would like to change like: cases, events, workflow
 You can use the `---empty` flag to create a custom migration.
 
 ## Dependency management & upgrading
-
-This project uses [Poetry](https://python-poetry.org/docs/cli/) for dependency management. To use it, go inside the container:
-
-```sh
-docker-compose -f docker-compose.local.yml exec zwd-backend bash
-```
+This project uses [Poetry](https://python-poetry.org/docs/cli/) for dependency management. You can either manage this locally on your CLI, or do it inside the backend container.
 
 To check for outdated dependencies, run:
 
@@ -93,19 +88,22 @@ To check for outdated dependencies, run:
 poetry show --outdated
 ```
 
-To upgrade to version constraints (e.g. minor or bug versions) and create a new lockfile, run:
+To upgrade all packages to their latests version constraints and and create a new lockfile, run:
 
 
 ```sh
 poetry update
 ```
 
-To upgrade major a version, run:
+> Note: this means that when `~=1.10` is specified, the package will upgrade to `1.x.x`, but will not upgrade to `2.x.x`.
+
+To upgrade individual packages to major versions, run:
 
 ```sh
 poetry add <package>@latest
 ```
 
+> Note: always read changelogs for breaking changes.
 
 ## Adding pre-commit hooks
 

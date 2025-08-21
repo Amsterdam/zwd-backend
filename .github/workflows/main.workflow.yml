@@ -13,7 +13,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        python-version: 3.13
     - name: Install setuptools
       run: python3 -m pip install setuptools
     - name: Linting
