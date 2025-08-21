@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bullseye
+FROM python:3.13-slim-trixie
 LABEL maintainer="datapunt@amsterdam.nl"
 
 RUN apt-get update \
