@@ -1302,7 +1302,7 @@ requires-dist = [
     { name = "azure-storage-blob", specifier = "~=12.24" },
     { name = "celery", specifier = "~=5.5" },
     { name = "debugpy", specifier = "~=1.8" },
-    { name = "django", specifier = "~=5.0" },
+    { name = "django", specifier = "~=5.2" },
     { name = "django-celery-beat", specifier = "~=2.7" },
     { name = "django-celery-results", specifier = "~=2.5" },
     { name = "django-cors-headers", specifier = "~=4.7" },

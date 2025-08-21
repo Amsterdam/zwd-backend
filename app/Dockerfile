@@ -13,18 +13,18 @@ RUN apt-get update \
 WORKDIR /app
 
 ENV UV_INSTALL_DIR=/root/.local/bin
+ENV UV_LINK_MODE=copy
 ENV PATH="${UV_INSTALL_DIR}:$PATH"
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-COPY pyproject.toml uv.lock /app/
-
-RUN uv venv "$VIRTUAL_ENV" \
-    && uv sync --frozen --no-install-project
-
 COPY . /app/
+
+# Export dependencies to a requirements.txt file so we prevent from having
+# to use a uv venv, and having to use `uv --active` for every python command.
+# This is a workaround for the fact that uv doesn't support installing
+# dependencies into the system interpreter.
+RUN uv export --frozen --format requirements-txt > /tmp/req.txt
+RUN uv pip install --system -r /tmp/req.txt
 
 RUN chmod +x /app/celery.sh
 
