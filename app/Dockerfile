@@ -9,7 +9,11 @@ RUN apt-get update && apt-get install -y \
   libpq-dev \
   gcc \
   libmagic1 \
-  tzdata
+  tzdata \
+  wget \
+  curl \
+  netcat-openbsd \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip setuptools uwsgi
 RUN pip install "poetry==$POETRY_VERSION"
