@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
   libpq-dev \
   gcc \
   libmagic1 \
+  media-types \
   tzdata \
   wget \
   curl \
