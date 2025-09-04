@@ -13,7 +13,7 @@ referencing==0.36.2
 rpds-py==0.26.0
 uritemplate==4.1.1
 
-celery==5.5.1
+celery==5.5.3
 django_celery_results==2.5.1
 django-celery-beat==2.7.0
 
