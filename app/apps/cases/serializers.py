@@ -1,3 +1,4 @@
+import logging
 from apps.workflow.models import WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
@@ -16,6 +17,8 @@ from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import serializers
 import magic
 import os
+
+logger = logging.getLogger(__name__)
 
 
 class ActivationTeamSerializer(serializers.ModelSerializer):
@@ -194,8 +197,10 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
             value.seek(0)
 
             magic_exts = detect_magic_extension(header)
+            logger.error(f"-------- >>> magic_exts: {magic_exts}, ext: {ext}")
         except Exception as e:
             print("-------- >>> File validation error:", str(e))
+            logger.error(f"File validation error: {str(e)}")
             raise serializers.ValidationError(f"File validation error: {str(e)}")
         if magic_exts is None:
             if ext in MAGIC_BYTES_EXCEPTIONS:
