@@ -15,7 +15,7 @@ from os.path import join
 from pathlib import Path
 import socket
 from .azure_settings import Azure
-from azure.identity import WorkloadIdentityCredential
+from azure.identity import WorkloadIdentityCredential, DefaultAzureCredential
 import sys
 
 azure = Azure()
@@ -338,11 +338,23 @@ DSO_API_URL = os.getenv("DSO_API_URL", "https://default.api.url")
 
 KVK_API_URL = os.getenv("KVK_API_URL", "https://default.api.url")
 
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "token_credential": DefaultAzureCredential(),
+            "account_name": AZURE_ACCOUNT_NAME,
+            "azure_container": AZURE_CONTAINER,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 LOGOUT_URL_NAME = "oidc_logout"
 LOGIN_URL = "/oidc/authenticate/"
