@@ -15,7 +15,7 @@ from os.path import join
 from pathlib import Path
 import socket
 from .azure_settings import Azure
-from azure.identity import WorkloadIdentityCredential
+from azure.identity import WorkloadIdentityCredential, DefaultAzureCredential
 import sys
 
 azure = Azure()
@@ -338,11 +338,23 @@ DSO_API_URL = os.getenv("DSO_API_URL", "https://default.api.url")
 
 KVK_API_URL = os.getenv("KVK_API_URL", "https://default.api.url")
 
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "token_credential": DefaultAzureCredential(),
+            "account_name": AZURE_ACCOUNT_NAME,
+            "azure_container": AZURE_CONTAINER,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 LOGOUT_URL_NAME = "oidc_logout"
 LOGIN_URL = "/oidc/authenticate/"
@@ -352,15 +364,22 @@ LOGIN_URL = "/oidc/authenticate/"
 if DEBUG is False and "makemigrations" not in sys.argv:
     AZURE_TOKEN_CREDENTIAL = WorkloadIdentityCredential()
 
-if DEBUG:
+# In local development we ensure the Azurite container exists, but skip
+# this during tests to avoid side effects on import and race conditions in CI.
+if DEBUG and "test" not in sys.argv and AZURE_CONNECTION_STRING and AZURE_CONTAINER:
     from azure.storage.blob import BlobServiceClient
+    from azure.core.exceptions import ResourceExistsError
 
     blob_service_client = BlobServiceClient.from_connection_string(
         AZURE_CONNECTION_STRING
     )
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
-    if container_client.exists():
-        print(f"Container '{AZURE_CONTAINER}' already exists, skipping creation.")
-    else:
-        blob_service_client.create_container(AZURE_CONTAINER)
-        print(f"Container '{AZURE_CONTAINER}' created successfully.")
+    try:
+        if container_client.exists():
+            print(f"Container '{AZURE_CONTAINER}' already exists, skipping creation.")
+        else:
+            blob_service_client.create_container(AZURE_CONTAINER)
+            print(f"Container '{AZURE_CONTAINER}' created successfully.")
+    except ResourceExistsError:
+        # Another process may have created the container between exists() and create()
+        print(f"Container '{AZURE_CONTAINER}' already exists (caught during create).")

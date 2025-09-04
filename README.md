@@ -79,6 +79,32 @@ python manage.py migrate
 name_of_apps is the model you would like to change like: cases, events, workflow or schedules.
 You can use the `---empty` flag to create a custom migration.
 
+## Dependency management & upgrading
+This project uses [Poetry](https://python-poetry.org/docs/cli/) for dependency management. You can either manage this locally on your CLI, or do it inside the backend container.
+
+To check for outdated dependencies, run:
+
+```sh
+poetry show --outdated
+```
+
+To upgrade all packages to their latests version constraints and and create a new lockfile, run:
+
+
+```sh
+poetry update
+```
+
+> Note: this means that when `~=1.10` is specified, the package will upgrade to `1.x.x`, but will not upgrade to `2.x.x`.
+
+To upgrade individual packages to major versions, run:
+
+```sh
+poetry add <package>@latest
+```
+
+> Note: always read changelogs for breaking changes.
+
 ## Adding pre-commit hooks
 
 You can add pre-commit hooks for checking and cleaning up your changes:

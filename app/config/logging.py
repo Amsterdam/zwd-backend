@@ -16,6 +16,9 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 
 def start_logging():
+
+    MONITOR_SERVICE_NAME = "zwd-backend"
+
     LOGGING_HANDLERS: dict[str, dict[str, Any]] = {
         "console": {
             "class": "logging.StreamHandler",
@@ -27,6 +30,7 @@ def start_logging():
     ]
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
     APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
         "APPLICATIONINSIGHTS_CONNECTION_STRING"
     )
@@ -42,7 +46,6 @@ def start_logging():
         ):
             span.set_attributes({"django.user.name": request.user.username})
 
-    MONITOR_SERVICE_NAME = "zwd-backend"
     resource: Resource = Resource.create({"service.name": MONITOR_SERVICE_NAME})
 
     tracer_provider: TracerProvider = TracerProvider(resource=resource)

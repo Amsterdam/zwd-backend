@@ -9,11 +9,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        python-version: 3.13
     - name: Install setuptools
       run: python3 -m pip install setuptools
     - name: Linting
@@ -26,7 +26,6 @@ jobs:
       run: docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
     - name: Run Tests
       run: docker compose exec -T zwd-backend python manage.py test /app/apps
-
 
     - if: ${{ failure() }}
       name: "ON FAILURE: Which containers were running while failing?"
