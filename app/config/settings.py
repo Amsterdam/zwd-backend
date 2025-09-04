@@ -349,7 +349,7 @@ LOGIN_URL = "/oidc/authenticate/"
 
 
 # Do not attempt WorkloadIdentityCredential when adding migrations to prevent an exception
-if DEBUG is False and "makemigrations" not in sys.argv:
+if DEBUG:
     AZURE_TOKEN_CREDENTIAL = WorkloadIdentityCredential()
 
 # In local development we ensure the Azurite container exists, but skip
