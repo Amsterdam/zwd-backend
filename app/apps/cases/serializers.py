@@ -173,24 +173,30 @@ class CaseDocumentSerializer(serializers.ModelSerializer):
 
     def validate_document(self, value):
         # Validatefile extension
-        ext = os.path.splitext(value.name)[1].lower()
-        if ext not in EXTENSION_TO_MIME:
-            raise serializers.ValidationError("File extension not allowed")
+        try:
+            ext = os.path.splitext(value.name)[1].lower()
+            if ext not in EXTENSION_TO_MIME:
+                raise serializers.ValidationError("File extension not allowed")
 
-        # Detect real MIME type
-        mime = magic.Magic(mime=True)
-        file_mime_type = mime.from_buffer(value.read(2048))
-        value.seek(0)
+            # Detect real MIME type
+            mime = magic.Magic(mime=True)
+            file_mime_type = mime.from_buffer(value.read(2048))
+            value.seek(0)
 
-        allowed_mimes = EXTENSION_TO_MIME.get(ext)
-        if file_mime_type not in allowed_mimes:
-            raise serializers.ValidationError("MIME-type does not match file extension")
+            allowed_mimes = EXTENSION_TO_MIME.get(ext)
+            if file_mime_type not in allowed_mimes:
+                raise serializers.ValidationError(
+                    "MIME-type does not match file extension"
+                )
 
-        # Check magic bytes
-        header = value.read(16)
-        value.seek(0)
+            # Check magic bytes
+            header = value.read(16)
+            value.seek(0)
 
-        magic_exts = detect_magic_extension(header)
+            magic_exts = detect_magic_extension(header)
+        except Exception as e:
+            print("-------- >>> File validation error:", str(e))
+            raise serializers.ValidationError(f"File validation error: {str(e)}")
         if magic_exts is None:
             if ext in MAGIC_BYTES_EXCEPTIONS:
                 return value
