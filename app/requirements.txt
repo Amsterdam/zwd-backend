@@ -22,7 +22,7 @@ azure-identity==1.23.1
 mozilla-django-oidc==4.0.1
 spiffworkflow==3.1.1
 debugpy==1.8.14
-azure-monitor-opentelemetry==1.6.13
+azure-monitor-opentelemetry==1.7.0
 model-bakery==1.18.2
 djangorestframework-simplejwt==5.5.0
 django-storages==1.14.6
