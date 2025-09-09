@@ -76,9 +76,11 @@ class Case(ModelEventEmitter):
     )
     legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     description = models.TextField(null=True, blank=True)
+    prefixed_dossier_id = models.CharField(
+        max_length=255, unique=True, null=True, blank=True
+    )
 
-    @property
-    def prefixed_dossier_id(self):
+    def _compute_prefixed_dossier_id(self):
         if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
             return f"{self.id}ACT"
 
@@ -87,12 +89,20 @@ class Case(ModelEventEmitter):
         if self.advice_type == AdviceType.HBO.value:
             return f"{self.id}HBO"
         if self.advice_type == AdviceType.ENERGY_ADVICE.value:
-            if self.homeowner_association.is_small:
+            if self.homeowner_association and self.homeowner_association.is_small:
                 return f"{self.id}EAK"
             else:
                 return f"{self.id}EAG"
 
         return str(self.id)
+
+    def save(self, *args, **kwargs):
+        is_create = self.pk is None
+        result = super().save(*args, **kwargs)
+        if is_create and not self.prefixed_dossier_id:
+            self.prefixed_dossier_id = self._compute_prefixed_dossier_id()
+            super(Case, self).save(update_fields=["prefixed_dossier_id"])
+        return result
 
     def close_case(self):
         with transaction.atomic():
