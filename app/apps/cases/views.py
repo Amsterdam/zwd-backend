@@ -139,7 +139,7 @@ class CaseFilter(django_filters.FilterSet):
             case_id = None
 
         # Regex to parse prefixed_dossier_id (190EAG)
-        match = re.match(r"^(\d+)(ACT|CUR|HBO|EAK|EAG)$", value)
+        match = re.match(r"^(\d+)(ACT|CUR|HBO|EAK|EAG)$", value.upper())
         if match:
             case_id_from_prefixed = int(match.group(1))
         else:
