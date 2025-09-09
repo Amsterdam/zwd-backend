@@ -55,6 +55,10 @@ class Case(ModelEventEmitter):
         null=True,
         blank=True,
     )
+    prefixed_dossier_id = models.CharField(
+        max_length=255, unique=True, null=True, blank=True
+    )
+    legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, on_delete=models.CASCADE, related_name="cases", null=True
     )
@@ -64,9 +68,6 @@ class Case(ModelEventEmitter):
         on_delete=models.PROTECT,
         null=True,
     )
-    created = models.DateTimeField(default=timezone.now)
-    updated = models.DateTimeField(auto_now=True)
-    end_date = models.DateField(null=True, blank=True)
     advisor = models.ForeignKey(
         to=Advisor,
         related_name="case_advisor",
@@ -74,11 +75,10 @@ class Case(ModelEventEmitter):
         null=True,
         blank=True,
     )
-    legacy_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    created = models.DateTimeField(default=timezone.now)
+    updated = models.DateTimeField(auto_now=True)
+    end_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    prefixed_dossier_id = models.CharField(
-        max_length=255, unique=True, null=True, blank=True
-    )
 
     def _compute_prefixed_dossier_id(self):
         if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
