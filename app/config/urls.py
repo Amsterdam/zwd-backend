@@ -49,6 +49,11 @@ def ok(request):
     return HttpResponse("OK", status=200)
 
 
+admin.site.site_header = "Zaken Woningkwaliteit en Duurzaamheid"
+admin.site.site_title = "Administration"
+admin.site.index_title = "ZWD"
+
+
 urlpatterns = [
     path("startup/", ok),
     path("", ok),
