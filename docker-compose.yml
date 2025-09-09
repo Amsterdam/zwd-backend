@@ -18,6 +18,7 @@ services:
     image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
     container_name: zwd_celery_worker
     hostname: zwd_celery_worker
+    entrypoint: /app/deploy/docker-entrypoint.celery.sh
     command: bash -c '/app/celery.sh'
     depends_on:
       - zwd-backend
