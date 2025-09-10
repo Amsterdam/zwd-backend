@@ -59,6 +59,8 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         to_field_name="name",
     )
 
+    name = django_filters.CharFilter(field_name="name", lookup_expr="exact")
+
     homeowner_association_name = django_filters.CharFilter(
         field_name="case__homeowner_association__name",
         lookup_expr="icontains",
@@ -108,6 +110,19 @@ class CaseUserTaskViewSet(
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     ordering_fields = ["id", "created", "name", "homeowner_association_name"]
     filterset_class = CaseUserTaskFilter
+
+    @action(detail=False, url_path="names", methods=["get"])
+    def list_task_names(self, request):
+        """
+        Return distinct open task names for dropdown filtering.
+        """
+        names = (
+            self.get_queryset()
+            .values_list("name", flat=True)
+            .distinct()
+            .order_by("name")
+        )
+        return Response(list(names), status=200)
 
 
 class GenericCompletedTaskViewSet(viewsets.GenericViewSet):
