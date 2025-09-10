@@ -14,7 +14,14 @@ RUN apt-get update && apt-get install -y \
   wget \
   curl \
   netcat-openbsd \
+  locales \
   && rm -rf /var/lib/apt/lists/*
+
+# Set UTF-8 configuration
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 RUN pip install --upgrade pip setuptools uwsgi
 RUN pip install "poetry==$POETRY_VERSION"
