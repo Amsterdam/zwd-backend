@@ -1,7 +1,8 @@
 import logging
 import django_filters
 from rest_framework import status
-from apps.cases.models import CaseStatus
+from apps.advisor.models import Advisor
+from apps.cases.models import CaseStatus, AdviceType, ApplicationType
 from apps.homeownerassociation.models import District, Neighborhood, Wijk
 from utils.pagination import CustomPagination
 from apps.cases.serializers import CaseDocumentWithTaskSerializer
@@ -46,25 +47,37 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         method="filter_wijk",
         to_field_name="name",
     )
-
     neighborhood = django_filters.ModelMultipleChoiceFilter(
         queryset=Neighborhood.objects.all(),
         method="filter_neighborhood",
         to_field_name="name",
     )
-
     status = django_filters.ModelMultipleChoiceFilter(
         queryset=CaseStatus.objects.all(),
         method="filter_status",
         to_field_name="name",
     )
-
     name = django_filters.CharFilter(field_name="name", lookup_expr="exact")
-
     homeowner_association_name = django_filters.CharFilter(
         field_name="case__homeowner_association__name",
         lookup_expr="icontains",
     )
+    is_small_hoa = django_filters.BooleanFilter(
+        method="filter_is_small_hoa", label="HOA has <= 12 apartments"
+    )
+    advice_type = django_filters.ChoiceFilter(
+        field_name="case__advice_type",
+        choices=AdviceType.choices(),
+    )
+    advisor = django_filters.ModelMultipleChoiceFilter(
+        queryset=Advisor.objects.all(),
+        method="filter_advisor",
+    )
+    application_type = django_filters.ChoiceFilter(
+        field_name="case__application_type",
+        choices=ApplicationType.choices(),
+    )
+    created_range = django_filters.DateFromToRangeFilter(field_name="case__created")
 
     def filter_district(self, queryset, _, value):
         if value:
@@ -92,6 +105,22 @@ class CaseUserTaskFilter(django_filters.FilterSet):
             return queryset.filter(
                 case__status__in=value,
             )
+        return queryset
+
+    def filter_is_small_hoa(self, queryset, _, value):
+        if value is True:
+            return queryset.filter(
+                case__homeowner_association__number_of_apartments__lte=12
+            )
+        if value is False:
+            return queryset.filter(
+                case__homeowner_association__number_of_apartments__gt=12
+            )
+        return queryset
+
+    def filter_advisor(self, queryset, _, value):
+        if value:
+            return queryset.filter(case__advisor__in=value)
         return queryset
 
 
