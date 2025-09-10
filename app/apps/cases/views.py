@@ -1,5 +1,4 @@
 import mimetypes
-import re
 from apps.advisor.serializers import UpdateCaseAdvisorSerializer
 from apps.homeownerassociation.models import Contact, District, Neighborhood, Wijk
 from apps.events.serializers import CaseEventSerializer
@@ -131,25 +130,18 @@ class CaseFilter(django_filters.FilterSet):
     def filter_search(self, queryset, _, value):
         """
         Filter cases based on a search term that matches either
-        homeowner_association__name or legacy_id or case_id.
+        homeowner_association__name, legacy_id, id or prefixed_dossier_id.
         """
         try:
             case_id = int(value)
         except ValueError:
             case_id = None
 
-        # Regex to parse prefixed_dossier_id (190EAG)
-        match = re.match(r"^(\d+)(ACT|CUR|HBO|EAK|EAG)$", value.upper())
-        if match:
-            case_id_from_prefixed = int(match.group(1))
-        else:
-            case_id_from_prefixed = None
-
         return queryset.filter(
             Q(homeowner_association__name__icontains=value)
             | Q(legacy_id__icontains=value)
             | Q(id=case_id)
-            | Q(id=case_id_from_prefixed)
+            | Q(prefixed_dossier_id__iexact=value)
         )
 
     def filter_is_small_hoa(self, queryset, _, value):
