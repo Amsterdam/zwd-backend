@@ -30,7 +30,7 @@ from .serializers import (
     GenericCompletedTaskSerializer,
 )
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import F
+from django.db.models import F, Q
 
 
 logger = logging.getLogger(__name__)
@@ -58,10 +58,6 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         to_field_name="name",
     )
     name = django_filters.CharFilter(field_name="name", lookup_expr="exact")
-    homeowner_association_name = django_filters.CharFilter(
-        field_name="case__homeowner_association__name",
-        lookup_expr="icontains",
-    )
     is_small_hoa = django_filters.BooleanFilter(
         method="filter_is_small_hoa", label="HOA has <= 12 apartments"
     )
@@ -78,6 +74,7 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         choices=ApplicationType.choices(),
     )
     created_range = django_filters.DateFromToRangeFilter(field_name="case__created")
+    search = django_filters.CharFilter(method="filter_search", label="Search")
 
     def filter_district(self, queryset, _, value):
         if value:
@@ -122,6 +119,22 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         if value:
             return queryset.filter(case__advisor__in=value)
         return queryset
+
+    def filter_search(self, queryset, _, value):
+        """
+        Filter tasks based on a search term that matches either
+        case__homeowner_association__name, case id or case prefixed_dossier_id.
+        """
+        try:
+            case_id = int(value)
+        except (TypeError, ValueError):
+            case_id = None
+
+        return queryset.filter(
+            Q(case__homeowner_association__name__icontains=value)
+            | Q(case__id=case_id)
+            | Q(case__prefixed_dossier_id__iexact=value)
+        )
 
 
 class CaseUserTaskViewSet(

@@ -278,6 +278,72 @@ class CaseUserTaskApiTests(APITestCase):
         self.assertEqual(response.data["count"], 1)
         self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
 
+    def test_search_task_by_case_id(self):
+        url = reverse("tasks-list")
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_apartments=13,
+            name="HOA for case id search",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        response = self.client.get(url, {"search": str(case.id)})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
+    def test_search_task_by_prefixed_dossier_id(self):
+        url = reverse("tasks-list")
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_apartments=13,
+            name="HOA for dossier id search",
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            advice_type=AdviceType.ENERGY_ADVICE.value,
+        )
+        workflow = baker.make(
+            CaseWorkflow, case=case, completed=False, workflow_type="sub_workflow"
+        )
+        case_user_task = baker.make(
+            CaseUserTask,
+            case=case,
+            task_name="task1",
+            completed=False,
+            task_id=uuid.uuid4(),
+            due_date="2021-01-01",
+            initiated_by=get_test_user(),
+            requires_review=False,
+            workflow=workflow,
+        )
+
+        # Refresh case to ensure prefixed_dossier_id is computed
+        case.refresh_from_db()
+        response = self.client.get(url, {"search": case.prefixed_dossier_id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["id"], case_user_task.id)
+
     @patch("apps.workflow.views.complete_generic_user_task_and_create_new_user_tasks")
     def test_complete_file_task(
         self, complete_generic_user_task_and_create_new_user_tasks
