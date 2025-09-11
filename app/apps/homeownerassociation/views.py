@@ -3,6 +3,7 @@ from rest_framework import viewsets, mixins
 from clients.dso_client import DsoClient
 from .models import District, HomeownerAssociation, Neighborhood, Wijk
 from .serializers import (
+    ApartmentSerializer,
     DistrictSerializer,
     HomeownerAssociationSearchSerializer,
     HomeownerAssociationSerializer,
@@ -30,6 +31,8 @@ class HomeOwnerAssociationView(
     def get_serializer_class(self):
         if self.action == "cases":
             return CaseListSerializer
+        if self.action == "apartments":
+            return ApartmentSerializer
         return super().get_serializer_class()
 
     @action(detail=True, methods=["get"])
@@ -37,6 +40,29 @@ class HomeOwnerAssociationView(
         hoa = self.get_object()
         cases = Case.objects.filter(homeowner_association=hoa)
         serializer = CaseListSerializer(cases, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def apartments(self, request, pk=None):
+        hoa = self.get_object()
+        dso_client = DsoClient()
+        apartments = dso_client.get_hoa_by_name(hoa.name)
+        data_filtered = [
+            {
+                "straatnaam": a.get("adres"),
+                "huisnummer": a.get("huisnummer"),
+                "huisletter": a.get("huisletter"),
+                "huisnummertoevoeging": a.get("huisnummertoevoeging"),
+                "postcode": a.get("postcode"),
+                "woonplaats": a.get("woonplaats"),
+                "adresseerbaarobject_id": a.get("votIdentificatie"),
+                "nummeraanduiding_id": a.get("bagNagId"),
+                "eigenaar_type": a.get("eigCategorieEigenaar"),
+                "eigenaar_naam": a.get("brkStatutaireNaam"),
+            }
+            for a in apartments
+        ]
+        serializer = ApartmentSerializer(data_filtered, many=True)
         return Response(serializer.data)
 
     @action(

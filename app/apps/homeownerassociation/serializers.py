@@ -104,3 +104,16 @@ class ContactSerializer(serializers.ModelSerializer):
 class HomeownerAssociationSearchSerializer(serializers.Serializer):
     brkVveStatutaireNaam = serializers.CharField()
     votIdentificatie = serializers.CharField()
+
+
+class ApartmentSerializer(serializers.Serializer):
+    straatnaam = serializers.CharField(allow_null=True, required=False)
+    huisnummer = serializers.IntegerField(allow_null=True, required=False)
+    huisletter = serializers.CharField(allow_null=True, required=False)
+    huisnummertoevoeging = serializers.CharField(allow_null=True, required=False)
+    postcode = serializers.CharField(allow_null=True, required=False)
+    woonplaats = serializers.CharField(allow_null=True, required=False)
+    adresseerbaarobject_id = serializers.CharField(allow_null=True, required=False)
+    nummeraanduiding_id = serializers.CharField(allow_null=True, required=False)
+    eigenaar_type = serializers.CharField(allow_null=True, required=False)
+    eigenaar_naam = serializers.CharField(allow_null=True, required=False)
