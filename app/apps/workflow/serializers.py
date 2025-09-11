@@ -47,6 +47,7 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
 class CaseUserTaskListSerializer(serializers.ModelSerializer):
     case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
     homeowner_association = serializers.SerializerMethodField()
+    prefixed_dossier_id = serializers.SerializerMethodField()
 
     def get_homeowner_association(self, obj):
         return (
@@ -55,6 +56,9 @@ class CaseUserTaskListSerializer(serializers.ModelSerializer):
             else None
         )
 
+    def get_prefixed_dossier_id(self, obj):
+        return getattr(obj.case, "prefixed_dossier_id", None)
+
     class Meta:
         model = CaseUserTask
         fields = (
@@ -62,6 +66,7 @@ class CaseUserTaskListSerializer(serializers.ModelSerializer):
             "name",
             "case",
             "homeowner_association",
+            "prefixed_dossier_id",
             "created",
         )
 
