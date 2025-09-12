@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from django.core import management
 from model_bakery import baker
+from unittest.mock import patch, MagicMock
 from apps.cases.models import Case
 from utils.test_utils import get_authenticated_client
 from apps.homeownerassociation.models import (
@@ -117,3 +118,110 @@ class HomeownerAssociationTest(APITestCase):
 
         with self.assertRaises(Contact.DoesNotExist):
             Contact.objects.get(id=contact.id)
+
+    @patch("apps.homeownerassociation.views.DsoClient")
+    def test_apartments_returns_mapped_fields(self, dso_client_cls):
+        """Test that apartments endpoint correctly maps DSO client response fields."""
+        hoa = baker.make(HomeownerAssociation, name="VvE Test")
+
+        # Mock the DSO client instance
+        dso_client = MagicMock()
+        dso_client.get_hoa_by_name.return_value = [
+            {
+                "adres": "Keizersgracht",
+                "huisnummer": 1,
+                "huisletter": "A",
+                "huisnummertoevoeging": "III",
+                "postcode": "1015AB",
+                "woonplaats": "Amsterdam",
+                "votIdentificatie": "VOT-123",
+                "bagNagId": "NAG-456",
+                "eigCategorieEigenaar": "Onderneming",
+                "brkStatutaireNaam": "Veel Geld BV",
+            }
+        ]
+        dso_client_cls.return_value = dso_client
+
+        url = reverse("homeownerassociation-apartments", args=[hoa.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        apartment_data = response.data[0]
+
+        # Verify field mapping
+        self.assertEqual(apartment_data["straatnaam"], "Keizersgracht")
+        self.assertEqual(apartment_data["huisnummer"], 1)
+        self.assertEqual(apartment_data["huisletter"], "A")
+        self.assertEqual(apartment_data["huisnummertoevoeging"], "III")
+        self.assertEqual(apartment_data["postcode"], "1015AB")
+        self.assertEqual(apartment_data["woonplaats"], "Amsterdam")
+        self.assertEqual(apartment_data["adresseerbaarobject_id"], "VOT-123")
+        self.assertEqual(apartment_data["nummeraanduiding_id"], "NAG-456")
+        self.assertEqual(apartment_data["eigenaar_type"], "Onderneming")
+        self.assertEqual(apartment_data["eigenaar_naam"], "Veel Geld BV")
+
+        # Verify DSO client was called with HOA name
+        dso_client.get_hoa_by_name.assert_called_once_with(hoa.name)
+
+    @patch("apps.homeownerassociation.views.DsoClient")
+    def test_apartments_handles_empty_response(self, dso_client_cls):
+        """Test that apartments endpoint handles empty DSO client response."""
+        hoa = baker.make(HomeownerAssociation, name="VvE Empty")
+
+        # Mock empty response
+        dso_client = MagicMock()
+        dso_client.get_hoa_by_name.return_value = []
+        dso_client_cls.return_value = dso_client
+
+        url = reverse("homeownerassociation-apartments", args=[hoa.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+        dso_client.get_hoa_by_name.assert_called_once_with(hoa.name)
+
+    @patch("apps.homeownerassociation.views.DsoClient")
+    def test_apartments_handles_missing_fields(self, dso_client_cls):
+        """Test that apartments endpoint handles missing or null fields gracefully."""
+        hoa = baker.make(HomeownerAssociation, name="VvE Incomplete")
+
+        # Mock response with missing/null fields
+        dso_client = MagicMock()
+        dso_client.get_hoa_by_name.return_value = [
+            {
+                "adres": "Prinsengracht",
+                "huisnummer": None,
+                "postcode": "1016AB",
+                "votIdentificatie": "VOT-789",
+                # Missing huisletter, huisnummertoevoeging, woonplaats, bagNagId, eigCategorieEigenaar, brkStatutaireNaam
+            }
+        ]
+        dso_client_cls.return_value = dso_client
+
+        url = reverse("homeownerassociation-apartments", args=[hoa.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        apartment_data = response.data[0]
+
+        # Verify present fields
+        self.assertEqual(apartment_data["straatnaam"], "Prinsengracht")
+        self.assertEqual(apartment_data["postcode"], "1016AB")
+        self.assertEqual(apartment_data["adresseerbaarobject_id"], "VOT-789")
+
+        # Verify missing fields are handled (None values)
+        self.assertIsNone(apartment_data["huisnummer"])
+        self.assertIsNone(apartment_data["huisletter"])
+        self.assertIsNone(apartment_data["huisnummertoevoeging"])
+        self.assertIsNone(apartment_data["woonplaats"])
+        self.assertIsNone(apartment_data["nummeraanduiding_id"])
+        self.assertIsNone(apartment_data["eigenaar_type"])
+        self.assertIsNone(apartment_data["eigenaar_naam"])
+
+    def test_apartments_requires_valid_hoa_id(self):
+        """Test that apartments endpoint returns 404 for non-existent HOA."""
+        url = reverse("homeownerassociation-apartments", args=[9999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
