@@ -42,6 +42,7 @@ class CaseAdmin(admin.ModelAdmin):
         "homeowner_association",
         "created",
         "updated",
+        "request_date",
         "end_date",
     )
     search_fields = ("id", "legacy_id")
@@ -50,6 +51,8 @@ class CaseAdmin(admin.ModelAdmin):
         "advice_type",
         "status",
         "created",
+        "updated",
+        "request_date",
         "end_date",
     )
     actions = [restart_workflow]
