@@ -77,6 +77,7 @@ class Case(ModelEventEmitter):
     )
     created = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(auto_now=True)
+    request_date = models.DateField(default=timezone.now)
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
