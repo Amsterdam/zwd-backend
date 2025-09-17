@@ -405,7 +405,10 @@ class CaseApiTest(APITestCase):
     def _create_case(self, mock_start_workflow):
         mock_start_workflow.return_value = "task_start_workflow: completed"
         url = reverse("cases-list")
-        data = {"description": "Test case description"}
+        data = {
+            "description": "Test case description",
+            "request_date": timezone.now().date().isoformat(),
+        }
 
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

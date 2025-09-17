@@ -17,6 +17,8 @@ from rest_framework import serializers
 import magic
 import os
 
+from apps.advisor.serializers import CaseAdvisorSerializer
+
 
 class ActivationTeamSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,6 +31,7 @@ class CaseSerializer(serializers.ModelSerializer):
     homeowner_association = CaseHomeownerAssociationSerializer()
     status = serializers.SerializerMethodField()
     activation_team = ActivationTeamSerializer(required=False)
+    advisor = CaseAdvisorSerializer(read_only=True)
 
     class Meta:
         model = Case
@@ -43,6 +46,8 @@ class CaseSerializer(serializers.ModelSerializer):
             "id",
             "legacy_id",
             "prefixed_dossier_id",
+            "request_date",
+            "advisor",
             "status",
             "workflows",
         )
@@ -59,6 +64,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = (
+            "activation_team",
             "advice_type",
             "application_type",
             "author",
@@ -67,7 +73,7 @@ class CaseCreateSerializer(serializers.ModelSerializer):
             "homeowner_association",
             "id",
             "legacy_id",
-            "activation_team",
+            "request_date",
         )
 
     def validate(self, data):
@@ -96,6 +102,7 @@ class CaseListSerializer(serializers.ModelSerializer):
             "id",
             "legacy_id",
             "prefixed_dossier_id",
+            "request_date",
             "status",
             "updated",
         )
@@ -121,6 +128,7 @@ class MijnAmsterdamCaseListSerializer(serializers.ModelSerializer):
             "id",
             "legacy_id",
             "prefixed_dossier_id",
+            "request_date",
             "status",
             "updated",
         )

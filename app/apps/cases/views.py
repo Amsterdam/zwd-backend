@@ -81,7 +81,7 @@ class CaseFilter(django_filters.FilterSet):
         method="filter_advisor",
     )
     search = django_filters.CharFilter(method="filter_search", label="Search")
-    created_range = django_filters.DateFromToRangeFilter(field_name="created")
+    request_date_range = django_filters.DateFromToRangeFilter(field_name="request_date")
     end_date_range = django_filters.DateFromToRangeFilter(field_name="end_date")
     is_small_hoa = django_filters.BooleanFilter(
         method="filter_is_small_hoa", label="HOA has <= 12 apartments"
@@ -169,7 +169,7 @@ class CaseViewSet(
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
     ordering_fields = [
         "id",
-        "created",
+        "request_date",
         "updated",
         "homeowner_association__name",
         "legacy_id",

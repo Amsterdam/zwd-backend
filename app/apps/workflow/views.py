@@ -73,7 +73,9 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         field_name="case__application_type",
         choices=ApplicationType.choices(),
     )
-    created_range = django_filters.DateFromToRangeFilter(field_name="case__created")
+    request_date_range = django_filters.DateFromToRangeFilter(
+        field_name="case__request_date"
+    )
     search = django_filters.CharFilter(method="filter_search", label="Search")
 
     def filter_district(self, queryset, _, value):

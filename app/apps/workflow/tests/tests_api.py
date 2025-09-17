@@ -20,6 +20,8 @@ import uuid
 from django.core.files.uploadedfile import SimpleUploadedFile
 from model_bakery import baker
 from apps.cases.models import ApplicationType
+from django.utils import timezone
+from datetime import timedelta
 
 
 class CaseUserTaskApiTests(APITestCase):
@@ -223,21 +225,21 @@ class CaseUserTaskApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
 
-    def test_retrieve_tasks_filter_created_range(self):
+    def test_retrieve_tasks_filter_request_date_range(self):
         url = reverse("tasks-list")
-        # Create two cases with different created dates
+        # Create two cases with different request_date values
         case_old, _ = self._make_case_task()
         case_new, _ = self._make_case_task()
 
-        # adjust created dates to be deterministically apart
-        case_old.created = case_old.created.replace(year=case_old.created.year - 1)
-        case_old.save(update_fields=["created"])
-        case_new.created = case_new.created.replace(year=case_new.created.year)
-        case_new.save(update_fields=["created"])
+        # adjust request_date dates to be deterministically apart
+        case_old.request_date = timezone.now().date() - timedelta(days=365)
+        case_old.save(update_fields=["request_date"])
+        case_new.request_date = timezone.now().date()
+        case_new.save(update_fields=["request_date"])
 
-        # created_range uses DateFromToRangeFilter on case__created
-        date_from = case_new.created.date().isoformat()
-        response = self.client.get(url, {"created_range_after": date_from})
+        # request_date_range uses DateFromToRangeFilter on case__request_date
+        date_from = case_new.request_date.isoformat()
+        response = self.client.get(url, {"request_date_range_after": date_from})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 1)
 
@@ -490,7 +492,11 @@ class CaseUserTaskApiTests(APITestCase):
         )
         mock_start_workflow.return_value = "task_start_workflow: completed"
         url = reverse("cases-list")
-        data = {"description": "Test case description", "homeowner_association": hoa.id}
+        data = {
+            "description": "Test case description",
+            "homeowner_association": hoa.id,
+            "request_date": "2024-01-01",
+        }
 
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
