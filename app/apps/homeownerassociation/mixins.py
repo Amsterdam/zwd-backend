@@ -2,7 +2,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from apps.homeownerassociation.models import HomeownerAssociation, Contact
 from apps.homeownerassociation.serializers import HomeownerAssociationSerializer
-from .serializers import ContactSerializer
+from .serializers import ContactSerializer, ContactWriteSerializer
 from rest_framework import status
 
 
@@ -34,11 +34,14 @@ class ContactMixin:
                 {"detail": "At least one contact is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        Contact.process_contacts(hoa, contacts_data)
+
+        serializer = ContactWriteSerializer(data=contacts_data, many=True)
+        serializer.is_valid(raise_exception=True)
+
+        Contact.process_contacts(hoa, serializer.validated_data)
+
         return Response(
-            {
-                "detail": "Contacts created or updated successfully",
-            },
+            {"detail": "Contacts created or updated successfully"},
             status=status.HTTP_200_OK,
         )
 
