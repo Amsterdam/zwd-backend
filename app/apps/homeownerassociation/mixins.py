@@ -36,17 +36,22 @@ class ContactMixin:
             )
         Contact.process_contacts(hoa, contacts_data)
         return Response(
-            {"detail": "Contacts added successfully"}, status=status.HTTP_201_CREATED
+            {
+                "detail": "Contacts created or updated successfully",
+            },
+            status=status.HTTP_200_OK,
         )
 
     @action(
         detail=True,
         url_path="contacts",
-        methods=["get", "put"],
+        methods=["get", "post", "put"],
     )
     def contacts(self, request, pk=None):
         if request.method == "GET":
             return self.get_hoa_contacts(request, pk)
+        elif request.method == "POST":
+            return self.create_or_update_hoa_contacts(request, pk)
         elif request.method == "PUT":
             return self.create_or_update_hoa_contacts(request, pk)
 
