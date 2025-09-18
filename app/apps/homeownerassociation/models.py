@@ -235,18 +235,23 @@ class Contact(models.Model):
         return self.email
 
     def process_contacts(homeowner_association, contacts):
+        """
+        Creates or updates contacts based on optional id.
+        This means contacts can be created even if the email address already exists for another contact.
+        This way we're not implicitly updating existing contacts (e.g. during case creation), and leave it
+        up to the user to update or remove potential duplicates.
+        """
         for contact in contacts:
-            email = contact.get("email")
-            if not email:
-                continue
+            id = contact.get("id")
             contact_data = {
                 "fullname": contact.get("fullname"),
-                "email": email,
+                "email": contact.get("email"),
                 "phone": contact.get("phone"),
                 "role": contact.get("role"),
             }
             existing_contact, created = Contact.objects.get_or_create(
-                email=email, defaults=contact_data
+                id=id,
+                defaults=contact_data,
             )
             if not created:
                 for key, value in contact_data.items():

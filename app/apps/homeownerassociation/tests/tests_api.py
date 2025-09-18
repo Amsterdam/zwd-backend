@@ -78,13 +78,22 @@ class HomeownerAssociationTest(APITestCase):
                 "fullname": "Jane Smith",
                 "email": "jane@example.com",
                 "phone": "0987654321",
-                "role": "President",
+                "role": "Secretary",
             },
         ]
         url = reverse("homeownerassociation-contacts", args=[hoa.id])
         response = self.client.put(url, {"contacts": contact_data}, format="json")
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data["detail"], "Contacts added successfully")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data["detail"], "Contacts created or updated successfully"
+        )
+
+        # Verify contacts were created with correct data via GET
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(len(get_response.data), 2)
+        contact_names = {contact["fullname"] for contact in get_response.data}
+        self.assertSetEqual(contact_names, {"John Doe", "Jane Smith"})
 
     def test_put_hoa_contacts_with_empty_data(self):
         hoa = baker.make("homeownerassociation.HomeownerAssociation")
@@ -92,6 +101,113 @@ class HomeownerAssociationTest(APITestCase):
         response = self.client.put(url, {"contacts": []}, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["detail"], "At least one contact is required")
+
+    def test_put_hoa_contacts_update_existing(self):
+        """Test that PUT can update existing contacts."""
+        hoa = baker.make("homeownerassociation.HomeownerAssociation")
+        existing_contact = baker.make(
+            Contact, fullname="Old Name", email="old@example.com"
+        )
+        existing_contact.homeowner_associations.add(hoa)
+
+        contact_data = [
+            {
+                "id": existing_contact.id,
+                "fullname": "New Name",
+                "email": "new@example.com",
+                "phone": "1234567890",
+                "role": "President",
+            }
+        ]
+        url = reverse("homeownerassociation-contacts", args=[hoa.id])
+        response = self.client.put(url, {"contacts": contact_data}, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        # Verify the contact was updated
+        updated_contact = Contact.objects.get(id=existing_contact.id)
+        self.assertEqual(updated_contact.fullname, "New Name")
+        self.assertEqual(updated_contact.email, "new@example.com")
+
+    def test_put_hoa_contacts_nonexistent_id(self):
+        """Test that PUT returns error for non-existent contact ID."""
+        hoa = baker.make("homeownerassociation.HomeownerAssociation")
+
+        contact_data = [
+            {
+                "id": 99999,
+                "fullname": "John Doe",
+                "email": "john@example.com",
+                "phone": "1234567890",
+                "role": "President",
+            }
+        ]
+        url = reverse("homeownerassociation-contacts", args=[hoa.id])
+        response = self.client.put(url, {"contacts": contact_data}, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data["detail"], "Contacts created or updated successfully"
+        )
+
+        # Verify a contact was created and associated with the HOA
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(len(get_response.data), 1)
+        created = get_response.data[0]
+        self.assertEqual(created["fullname"], "John Doe")
+        self.assertEqual(created["email"], "john@example.com")
+        self.assertEqual(created["phone"], "1234567890")
+        self.assertEqual(created["role"], "President")
+
+    def test_post_hoa_contacts_validation_required_fields(self):
+        """Test that POST contacts validates required fields."""
+        hoa = baker.make("homeownerassociation.HomeownerAssociation")
+
+        # Test missing fullname
+        contact_data = [
+            {
+                "email": "john@example.com",
+                "phone": "1234567890",
+                "role": "President",
+            }
+        ]
+        url = reverse("homeownerassociation-contacts", args=[hoa.id])
+        response = self.client.post(url, {"contacts": contact_data}, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("fullname", str(response.data))
+
+    def test_post_hoa_contacts_validation_email_format(self):
+        """Test that POST contacts validates email format."""
+        hoa = baker.make("homeownerassociation.HomeownerAssociation")
+
+        contact_data = [
+            {
+                "fullname": "John Doe",
+                "email": "invalid-email",
+                "phone": "1234567890",
+                "role": "President",
+            }
+        ]
+        url = reverse("homeownerassociation-contacts", args=[hoa.id])
+        response = self.client.post(url, {"contacts": contact_data}, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("email", str(response.data))
+
+    def test_post_hoa_contacts_validation_blank_fields(self):
+        """Test that POST contacts validates against blank fields."""
+        hoa = baker.make("homeownerassociation.HomeownerAssociation")
+
+        contact_data = [
+            {
+                "fullname": "",
+                "email": "john@example.com",
+                "phone": "1234567890",
+                "role": "President",
+            }
+        ]
+        url = reverse("homeownerassociation-contacts", args=[hoa.id])
+        response = self.client.post(url, {"contacts": contact_data}, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("fullname", str(response.data))
 
     def test_delete_contact_shared_not_deleted(self):
         hoa1 = baker.make(HomeownerAssociation)

@@ -101,6 +101,18 @@ class ContactSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class ContactWriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+    email = serializers.EmailField(required=True)
+    phone = serializers.CharField(required=True, allow_blank=False, max_length=20)
+    fullname = serializers.CharField(required=True, allow_blank=False, max_length=255)
+    role = serializers.CharField(required=True, allow_blank=False, max_length=255)
+
+    class Meta:
+        model = Contact
+        fields = ["id", "fullname", "email", "phone", "role"]
+
+
 class HomeownerAssociationSearchSerializer(serializers.Serializer):
     brkVveStatutaireNaam = serializers.CharField()
     votIdentificatie = serializers.CharField()
