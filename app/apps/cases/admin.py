@@ -8,6 +8,7 @@ from .models import (
     Case,
     CaseClose,
     CaseCloseReason,
+    CaseCommunicationNote,
     CaseDocument,
     CaseStatus,
 )
@@ -56,6 +57,17 @@ class CaseAdmin(admin.ModelAdmin):
         "end_date",
     )
     actions = [restart_workflow]
+
+
+@admin.register(CaseCommunicationNote)
+class CaseCommunicationNoteAdmin(admin.ModelAdmin):
+    list_display = ("id", "case", "note", "author_name", "date", "created", "updated")
+    search_fields = (
+        "case__id",
+        "note",
+        "author_name",
+    )
+    exclude = ("author",)
 
 
 @admin.register(CaseDocument)
