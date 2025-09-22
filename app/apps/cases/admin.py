@@ -62,7 +62,11 @@ class CaseAdmin(admin.ModelAdmin):
 @admin.register(CaseCommunicationNote)
 class CaseCommunicationNoteAdmin(admin.ModelAdmin):
     list_display = ("id", "case", "note", "author_name", "date", "created", "updated")
-    search_fields = ("case__id",)
+    search_fields = (
+        "case__id",
+        "note",
+        "author_name",
+    )
     exclude = ("author",)
 
 
