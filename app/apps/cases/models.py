@@ -80,6 +80,7 @@ class Case(ModelEventEmitter):
     request_date = models.DateField(default=timezone.now)
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    communication_note = models.TextField(null=True, blank=True)
 
     def _compute_prefixed_dossier_id(self):
         if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
