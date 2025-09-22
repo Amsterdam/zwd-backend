@@ -26,6 +26,9 @@ def custom_exception_handler(exc, context):
         )
 
     if response is not None:
-        response.data["status_code"] = response.status_code
+        # Only append status_code when the response data is a mapping.
+        # DRF may return lists for "many=True" serializer validation errors.
+        if isinstance(response.data, dict):
+            response.data["status_code"] = response.status_code
 
     return response
