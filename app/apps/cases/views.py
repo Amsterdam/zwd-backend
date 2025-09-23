@@ -282,7 +282,13 @@ class CaseViewSet(
         responses={201: CaseCommunicationNoteSerializer},
         description="Create a communication note for a case",
     )
-    @action(detail=True, methods=["get", "post"], url_path="communication-notes")
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="communication-notes",
+        filter_backends=[],
+        pagination_class=None,
+    )
     def communication_notes(self, request, pk=None):
         case = self.get_object()
 
