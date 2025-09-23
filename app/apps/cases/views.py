@@ -272,14 +272,23 @@ class CaseViewSet(
         return Response(serializer.data)
 
     @extend_schema(
-        request=CaseCommunicationNoteCreateSerializer,
-        responses={
-            200: CaseCommunicationNoteSerializer(many=True),
-            201: CaseCommunicationNoteSerializer,
-        },
-        description="List or create communication notes for a case",
+        methods=["get"],
+        responses={200: CaseCommunicationNoteSerializer(many=True)},
+        description="List communication notes for a case",
     )
-    @action(detail=True, methods=["get", "post"], url_path="communication-notes")
+    @extend_schema(
+        methods=["post"],
+        request=CaseCommunicationNoteCreateSerializer,
+        responses={201: CaseCommunicationNoteSerializer},
+        description="Create a communication note for a case",
+    )
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="communication-notes",
+        filter_backends=[],
+        pagination_class=None,
+    )
     def communication_notes(self, request, pk=None):
         case = self.get_object()
 
@@ -300,9 +309,15 @@ class CaseViewSet(
         )
 
     @extend_schema(
+        methods=["patch"],
         request=CaseCommunicationNoteUpdateSerializer,
-        responses={200: CaseCommunicationNoteSerializer, 204: OpenApiTypes.NONE},
-        description="Update or delete a communication note",
+        responses={200: CaseCommunicationNoteSerializer},
+        description="Update a communication note",
+    )
+    @extend_schema(
+        methods=["delete"],
+        responses={204: None},
+        description="Delete a communication note",
     )
     @action(
         detail=True,
