@@ -15,6 +15,17 @@ from .models import (
 from django.db import transaction
 
 
+@admin.action(description="Fix request_date from created")
+def fix_request_date(modeladmin, request, queryset):
+    updated_count = 0
+    for case in queryset.iterator():
+        if case.request_date != case.created.date():
+            case.request_date = case.created.date()
+            case.save()
+            updated_count += 1
+    modeladmin.message_user(request, f"Updated request_date for {updated_count} cases.")
+
+
 @admin.action(description="Restart main workflow and delete existing workflows")
 def restart_workflow(modeladmin, request, queryset):
     for case in queryset:
@@ -56,7 +67,7 @@ class CaseAdmin(admin.ModelAdmin):
         "request_date",
         "end_date",
     )
-    actions = [restart_workflow]
+    actions = [restart_workflow, fix_request_date]
 
 
 @admin.register(CaseCommunicationNote)
