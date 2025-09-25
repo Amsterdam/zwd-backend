@@ -38,19 +38,34 @@ class HomeownerAssociationTest(APITestCase):
 
     def test_retrieve_districts(self):
         url = reverse("district-list")
-        district = baker.make(District, name="Test District")
+
+        district_included = baker.make(District, name="Included District")
+        hoa_with_case = baker.make(
+            HomeownerAssociation,
+            district=district_included,
+        )
+        baker.make(Case, homeowner_association=hoa_with_case)
+        baker.make(District, name="Excluded District")
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), District.objects.count())
-        self.assertEqual(response.data[0], district.name)
+        self.assertIn(district_included.name, response.data)
+        self.assertNotIn("Excluded District", response.data)
 
     def test_retrieve_wijken(self):
         url = reverse("wijk-list")
-        wijk = baker.make(Wijk, name="Test wijk")
+        wijk_included = baker.make(Wijk, name="Included Wijk")
+        hoa_with_case = baker.make(
+            HomeownerAssociation,
+            wijk=wijk_included,
+        )
+        baker.make(Case, homeowner_association=hoa_with_case)
+        baker.make(Wijk, name="Excluded Wijk")
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), Wijk.objects.count())
-        self.assertEqual(response.data[0], wijk.name)
+        self.assertIn(wijk_included.name, response.data)
+        self.assertNotIn("Excluded Wijk", response.data)
 
     def test_get_hoa_contacts(self):
         hoa = baker.make(HomeownerAssociation)
