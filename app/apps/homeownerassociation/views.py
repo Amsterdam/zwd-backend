@@ -109,8 +109,13 @@ class DistrictViewset(
     queryset = District.objects.all()
     serializer_class = DistrictSerializer
 
+    def get_case_filtered_queryset(self):
+        return District.objects.filter(homeowner_associations__cases__isnull=False)
+
     def list(self, _, *args, **kwargs):
-        names = self.get_queryset().values_list("name", flat=True).distinct()
+        names = (
+            self.get_case_filtered_queryset().values_list("name", flat=True).distinct()
+        )
         return Response(list(names))
 
 
@@ -122,8 +127,13 @@ class WijkViewset(
     queryset = Wijk.objects.all()
     serializer_class = WijkSerializer
 
+    def get_case_filtered_queryset(self):
+        return Wijk.objects.filter(homeowner_associations__cases__isnull=False)
+
     def list(self, _, *args, **kwargs):
-        names = self.get_queryset().values_list("name", flat=True).distinct()
+        names = (
+            self.get_case_filtered_queryset().values_list("name", flat=True).distinct()
+        )
         return Response(list(names))
 
 
@@ -135,6 +145,11 @@ class NeighborhoodViewset(
     queryset = Neighborhood.objects.all()
     serializer_class = NeighborhoodSerializer
 
+    def get_case_filtered_queryset(self):
+        return Neighborhood.objects.filter(homeowner_associations__cases__isnull=False)
+
     def list(self, _, *args, **kwargs):
-        names = self.get_queryset().values_list("name", flat=True).distinct()
+        names = (
+            self.get_case_filtered_queryset().values_list("name", flat=True).distinct()
+        )
         return Response(list(names))
