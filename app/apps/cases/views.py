@@ -30,6 +30,7 @@ from .serializers import (
     CaseSerializer,
     CaseListSerializer,
     CaseStatusSerializer,
+    ExpandedCaseListSerializer,
     StartWorkflowSerializer,
     CaseDocumentNameUpdateSerializer,
     CaseCommunicationNoteSerializer,
@@ -188,6 +189,10 @@ class CaseViewSet(
             return CaseDocumentSerializer
         elif self.action == "create":
             return CaseCreateSerializer
+        elif (
+            self.action == "list" and self.request.query_params.get("expand") == "true"
+        ):
+            return ExpandedCaseListSerializer
         elif self.action == "list":
             return CaseListSerializer
         elif self.action == "events":
@@ -205,6 +210,13 @@ class CaseViewSet(
                 location=OpenApiParameter.QUERY,
                 required=False,
                 many=True,
+            ),
+            OpenApiParameter(
+                name="expand",
+                type=OpenApiTypes.BOOL,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="If true, includes all nested properties in the response.",
             ),
         ],
     )

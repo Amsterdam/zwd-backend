@@ -2,6 +2,7 @@ from apps.workflow.models import WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
+    HomeownerAssociationSerializer,
 )
 from apps.cases.models import (
     ActivationTeam,
@@ -114,6 +115,18 @@ class CaseListSerializer(serializers.ModelSerializer):
             "status",
             "updated",
         )
+
+    def get_status(self, obj):
+        return obj.status.name if obj.status else None
+
+
+class ExpandedCaseListSerializer(serializers.ModelSerializer):
+    homeowner_association = HomeownerAssociationSerializer()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Case
+        fields = "__all__"
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None

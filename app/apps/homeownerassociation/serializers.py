@@ -70,7 +70,6 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
         fields = [
             "beschermd_stadsdorpsgezicht",
             "build_year",
-            "contacts",
             "district",
             "id",
             "is_priority_neighborhood",
