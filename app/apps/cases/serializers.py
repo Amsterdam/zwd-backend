@@ -123,6 +123,7 @@ class CaseListSerializer(serializers.ModelSerializer):
 class ExpandedCaseListSerializer(serializers.ModelSerializer):
     homeowner_association = HomeownerAssociationSerializer()
     status = serializers.SerializerMethodField()
+    advisor = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -130,6 +131,9 @@ class ExpandedCaseListSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None
+
+    def get_advisor(self, obj):
+        return obj.advisor.name if obj.advisor else None
 
 
 class MijnAmsterdamCaseListSerializer(serializers.ModelSerializer):
