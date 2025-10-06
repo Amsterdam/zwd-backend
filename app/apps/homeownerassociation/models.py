@@ -1,4 +1,5 @@
 from django.db import models, transaction
+from django.conf import settings
 from clients.kvk_client import KvkClient
 from clients.dso_client import DsoClient
 from collections import Counter
@@ -272,3 +273,52 @@ class Owner(models.Model):
     homeowner_association = models.ForeignKey(
         HomeownerAssociation, related_name="owners", on_delete=models.DO_NOTHING
     )
+
+
+class HomeownerAssociationCommunicationNote(models.Model):
+    homeowner_association = models.ForeignKey(
+        HomeownerAssociation,
+        on_delete=models.CASCADE,
+        related_name="communication_notes",
+    )
+    note = models.TextField()
+    author = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        related_name="homeownerassociation_communication_note_author",
+        on_delete=models.PROTECT,
+        null=True,
+    )
+    author_name = models.CharField(max_length=255, blank=True)
+    date = models.DateTimeField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return (
+            f"HomeownerAssociationCommunicationNote: hoa={self.homeowner_association_id} "
+            + f"by={self.author_name or (str(self.author.get_full_name().strip()) if self.author else 'Unknown')}"
+        )
+
+    def save(self, *args, **kwargs):
+        is_create = self.pk is None
+
+        # On create populate `author_name` from `author` if not explicitly provided
+        if is_create and not self.author_name and self.author:
+            self.author_name = str(self.author.get_full_name().strip())
+
+        result = super().save(*args, **kwargs)
+
+        # On create ensure `date` defaults to `created`
+        if is_create and self.date is None and self.created is not None:
+            self.date = self.created
+            super(HomeownerAssociationCommunicationNote, self).save(
+                update_fields=["date"]
+            )
+
+        return result
+
+    class Meta:
+        db_table = "homeownerassociation_communicationnote"
+        ordering = ["-date"]
+        verbose_name = "Communication note"
+        verbose_name_plural = "Communication notes"

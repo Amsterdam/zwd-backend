@@ -18,7 +18,6 @@ from .models import (
     CaseClose,
     CaseCloseReason,
     CaseDocument,
-    CaseCommunicationNote,
     CaseStatus,
 )
 from .serializers import (
@@ -32,9 +31,6 @@ from .serializers import (
     ExpandedCaseListSerializer,
     StartWorkflowSerializer,
     CaseDocumentNameUpdateSerializer,
-    CaseCommunicationNoteSerializer,
-    CaseCommunicationNoteCreateSerializer,
-    CaseCommunicationNoteUpdateSerializer,
 )
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
@@ -277,74 +273,6 @@ class CaseViewSet(
         case = self.get_object()
         serializer = CaseDocumentSerializer(case.documents, many=True)
         return Response(serializer.data)
-
-    @extend_schema(
-        methods=["get"],
-        responses={200: CaseCommunicationNoteSerializer(many=True)},
-        description="List communication notes for a case",
-    )
-    @extend_schema(
-        methods=["post"],
-        request=CaseCommunicationNoteCreateSerializer,
-        responses={201: CaseCommunicationNoteSerializer},
-        description="Create a communication note for a case",
-    )
-    @action(
-        detail=True,
-        methods=["get", "post"],
-        url_path="communication-notes",
-        filter_backends=[],
-        pagination_class=None,
-    )
-    def communication_notes(self, request, pk=None):
-        case = self.get_object()
-
-        if request.method == "GET":
-            notes = CaseCommunicationNote.objects.filter(case=case).order_by("-date")
-            serializer = CaseCommunicationNoteSerializer(notes, many=True)
-            return Response(serializer.data)
-
-        serializer = CaseCommunicationNoteCreateSerializer(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        note = CaseCommunicationNote.objects.create(
-            case=case, **serializer.validated_data
-        )
-        return Response(
-            CaseCommunicationNoteSerializer(note).data, status=status.HTTP_201_CREATED
-        )
-
-    @extend_schema(
-        methods=["patch"],
-        request=CaseCommunicationNoteUpdateSerializer,
-        responses={200: CaseCommunicationNoteSerializer},
-        description="Update a communication note",
-    )
-    @extend_schema(
-        methods=["delete"],
-        responses={204: None},
-        description="Delete a communication note",
-    )
-    @action(
-        detail=True,
-        methods=["patch", "delete"],
-        url_path="communication-notes/(?P<note_id>[^/.]+)",
-    )
-    def communication_note_detail(self, request, pk=None, note_id=None):
-        case = self.get_object()
-        note = get_object_or_404(CaseCommunicationNote, case=case, id=note_id)
-
-        if request.method == "PATCH":
-            serializer = CaseCommunicationNoteUpdateSerializer(
-                note, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(CaseCommunicationNoteSerializer(note).data)
-
-        note.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True, methods=["get"], url_path="documents/download/(?P<doc_id>[^/.]+)"

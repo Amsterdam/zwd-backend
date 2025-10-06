@@ -3,6 +3,7 @@ from django.contrib import admin
 from apps.homeownerassociation.models import (
     HomeownerAssociation,
     Contact,
+    HomeownerAssociationCommunicationNote,
     Neighborhood,
     Owner,
     District,
@@ -103,3 +104,23 @@ class WijkAdmin(admin.ModelAdmin):
 class PriorityZipCodeAdmin(admin.ModelAdmin):
     list_display = ("id", "zip_code")
     search_fields = ("id", "zip_code")
+
+
+@admin.register(HomeownerAssociationCommunicationNote)
+class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "homeowner_association",
+        "note",
+        "author_name",
+        "date",
+        "created",
+        "updated",
+    )
+    search_fields = (
+        "homeowner_association__id",
+        "homeowner_association__name",
+        "note",
+        "author_name",
+    )
+    exclude = ("author",)

@@ -1,10 +1,19 @@
 from rest_framework import viewsets, mixins
 
 from clients.dso_client import DsoClient
-from .models import District, HomeownerAssociation, Neighborhood, Wijk
+from .models import (
+    District,
+    HomeownerAssociationCommunicationNote,
+    HomeownerAssociation,
+    Neighborhood,
+    Wijk,
+)
 from .serializers import (
     ApartmentSerializer,
     DistrictSerializer,
+    HomeownerAssociationCommunicationNoteCreateSerializer,
+    HomeownerAssociationCommunicationNoteSerializer,
+    HomeownerAssociationCommunicationNoteUpdateSerializer,
     HomeownerAssociationUpdateSerializer,
     HomeownerAssociationSearchSerializer,
     HomeownerAssociationSerializer,
@@ -18,6 +27,8 @@ from apps.cases.serializers import CaseListSerializer
 from rest_framework import status
 from apps.homeownerassociation.models import PriorityZipCode
 from .mixins import ContactMixin
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 
 
 class HomeOwnerAssociationView(
@@ -86,6 +97,81 @@ class HomeOwnerAssociationView(
             {"message": f"Zip code {zip_code} has been added to priority zip codes"},
             status=status.HTTP_201_CREATED,
         )
+
+    @extend_schema(
+        methods=["get"],
+        responses={200: HomeownerAssociationCommunicationNoteSerializer(many=True)},
+        description="List communication notes for a homeowner association",
+    )
+    @extend_schema(
+        methods=["post"],
+        request=HomeownerAssociationCommunicationNoteCreateSerializer,
+        responses={201: HomeownerAssociationCommunicationNoteSerializer},
+        description="Create a communication note for a homeowner association",
+    )
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="communication-notes",
+        filter_backends=[],
+        pagination_class=None,
+    )
+    def communication_notes(self, request, pk=None):
+        hoa = self.get_object()
+
+        if request.method == "GET":
+            notes = HomeownerAssociationCommunicationNote.objects.filter(
+                homeowner_association=hoa
+            ).order_by("-date")
+            serializer = HomeownerAssociationCommunicationNoteSerializer(
+                notes, many=True
+            )
+            return Response(serializer.data)
+
+        serializer = HomeownerAssociationCommunicationNoteCreateSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        note = HomeownerAssociationCommunicationNote.objects.create(
+            homeowner_association=hoa, **serializer.validated_data
+        )
+        return Response(
+            HomeownerAssociationCommunicationNoteSerializer(note).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(
+        methods=["patch"],
+        request=HomeownerAssociationCommunicationNoteUpdateSerializer,
+        responses={200: HomeownerAssociationCommunicationNoteSerializer},
+        description="Update a communication note",
+    )
+    @extend_schema(
+        methods=["delete"],
+        responses={204: None},
+        description="Delete a communication note",
+    )
+    @action(
+        detail=True,
+        methods=["patch", "delete"],
+        url_path="communication-notes/(?P<note_id>[^/.]+)",
+    )
+    def communication_note_detail(self, request, pk=None, note_id=None):
+        hoa = self.get_object()
+        note = get_object_or_404(
+            HomeownerAssociationCommunicationNote, homeowner_association=hoa, id=note_id
+        )
+
+        if request.method == "PATCH":
+            serializer = HomeownerAssociationCommunicationNoteUpdateSerializer(
+                note, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(HomeownerAssociationCommunicationNoteSerializer(note).data)
+
+        note.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
