@@ -2,7 +2,7 @@ from apps.workflow.models import WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
-    HomeownerAssociationSerializer,
+    HomeownerAssociationWithoutContactsSerializer,
 )
 from apps.cases.models import (
     ActivationTeam,
@@ -114,7 +114,7 @@ class CaseListSerializer(serializers.ModelSerializer):
 
 
 class ExpandedCaseListSerializer(serializers.ModelSerializer):
-    homeowner_association = HomeownerAssociationSerializer()
+    homeowner_association = HomeownerAssociationWithoutContactsSerializer()
     status = serializers.SerializerMethodField()
     advisor = serializers.SerializerMethodField()
 

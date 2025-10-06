@@ -89,6 +89,15 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class HomeownerAssociationWithoutContactsSerializer(HomeownerAssociationSerializer):
+    class Meta(HomeownerAssociationSerializer.Meta):
+        fields = [
+            field
+            for field in HomeownerAssociationSerializer.Meta.fields
+            if field != "contacts"
+        ]
+
+
 class CaseHomeownerAssociationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeownerAssociation
