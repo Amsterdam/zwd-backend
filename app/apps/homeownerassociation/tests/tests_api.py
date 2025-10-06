@@ -9,6 +9,7 @@ from apps.homeownerassociation.models import (
     Contact,
     District,
     HomeownerAssociation,
+    HomeownerAssociationCommunicationNote,
     Wijk,
 )
 
@@ -472,3 +473,120 @@ class HomeownerAssociationTest(APITestCase):
         # Verify no changes were made
         hoa.refresh_from_db()
         self.assertEqual(hoa.annotation, "Original annotation")
+
+    def test_retrieve_communication_notes_success(self):
+        """Test retrieving communication notes for a homeowner association."""
+        hoa = baker.make(HomeownerAssociation)
+        older = baker.make(
+            HomeownerAssociationCommunicationNote,
+            homeowner_association=hoa,
+            note="older",
+            date=self._get_timezone_now() - self._get_timezone_delta(days=2),
+        )
+        middle = baker.make(
+            HomeownerAssociationCommunicationNote,
+            homeowner_association=hoa,
+            note="middle",
+            date=self._get_timezone_now() - self._get_timezone_delta(days=1),
+        )
+        newest = baker.make(
+            HomeownerAssociationCommunicationNote,
+            homeowner_association=hoa,
+            note="newest",
+            date=self._get_timezone_now(),
+        )
+        url = reverse("homeownerassociation-communication-notes", args=[hoa.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        returned_ids = [item["id"] for item in response.data]
+        self.assertEqual(returned_ids, [newest.id, middle.id, older.id])
+
+    def test_retrieve_communication_notes_empty(self):
+        """Test retrieving communication notes when none exist."""
+        hoa = baker.make(HomeownerAssociation)
+        url = reverse("homeownerassociation-communication-notes", args=[hoa.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_create_communication_note_success(self):
+        """Test creating a communication note for a homeowner association."""
+        hoa = baker.make(HomeownerAssociation)
+        url = reverse("homeownerassociation-communication-notes", args=[hoa.id])
+        data = {"note": "Initial note", "author_name": "Alice"}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("id", response.data)
+        self.assertEqual(response.data["note"], "Initial note")
+        self.assertEqual(response.data["author_name"], "Alice")
+        self.assertEqual(
+            HomeownerAssociationCommunicationNote.objects.filter(
+                homeowner_association=hoa
+            ).count(),
+            1,
+        )
+
+    def test_create_communication_note_invalid(self):
+        """Test creating a communication note with invalid data."""
+        hoa = baker.make(HomeownerAssociation)
+        url = reverse("homeownerassociation-communication-notes", args=[hoa.id])
+        response = self.client.post(url, {"author_name": "Bob"}, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_communication_note_success(self):
+        """Test updating a communication note for a homeowner association."""
+        hoa = baker.make(HomeownerAssociation)
+        note = baker.make(
+            HomeownerAssociationCommunicationNote,
+            homeowner_association=hoa,
+            note="Old",
+            author_name="A",
+        )
+        url = reverse(
+            "homeownerassociation-communication-note-detail", args=[hoa.id, note.id]
+        )
+        data = {"note": "New text", "author_name": "Alice"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, 200)
+        note.refresh_from_db()
+        self.assertEqual(note.note, "New text")
+        self.assertEqual(note.author_name, "Alice")
+
+    def test_delete_communication_note_success(self):
+        """Test deleting a communication note for a homeowner association."""
+        hoa = baker.make(HomeownerAssociation)
+        note = baker.make(
+            HomeownerAssociationCommunicationNote,
+            homeowner_association=hoa,
+            note="To delete",
+            author_name="A",
+        )
+        url = reverse(
+            "homeownerassociation-communication-note-detail", args=[hoa.id, note.id]
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(
+            HomeownerAssociationCommunicationNote.objects.filter(id=note.id).count(), 0
+        )
+
+    def test_delete_communication_note_not_found(self):
+        """Test deleting a non-existent communication note."""
+        hoa = baker.make(HomeownerAssociation)
+        url = reverse(
+            "homeownerassociation-communication-note-detail", args=[hoa.id, 999]
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 404)
+
+    def _get_timezone_now(self):
+        """Helper method to get current timezone-aware datetime."""
+        from django.utils import timezone
+
+        return timezone.now()
+
+    def _get_timezone_delta(self, **kwargs):
+        """Helper method to create timezone-aware timedelta."""
+        from django.utils import timezone
+
+        return timezone.timedelta(**kwargs)

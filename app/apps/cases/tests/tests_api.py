@@ -11,7 +11,6 @@ from apps.cases.models import (
     Case,
     CaseDocument,
     CaseStatus,
-    CaseCommunicationNote,
 )
 from apps.homeownerassociation.models import HomeownerAssociation, Neighborhood
 from utils.test_utils import get_authenticated_client, get_unauthenticated_client
@@ -389,80 +388,6 @@ class CaseApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)
         self.assertEqual(response.data[0], case_status.name)
-
-    def test_retrieve_communication_notes_success(self):
-        older = baker.make(
-            CaseCommunicationNote,
-            case_id=self.case,
-            note="older",
-            date=timezone.now() - timezone.timedelta(days=2),
-        )
-        middle = baker.make(
-            CaseCommunicationNote,
-            case_id=self.case,
-            note="middle",
-            date=timezone.now() - timezone.timedelta(days=1),
-        )
-        newest = baker.make(
-            CaseCommunicationNote,
-            case_id=self.case,
-            note="newest",
-            date=timezone.now(),
-        )
-        url = reverse("cases-communication-notes", args=[self.case])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        returned_ids = [item["id"] for item in response.data]
-        self.assertEqual(returned_ids, [newest.id, middle.id, older.id])
-
-    def test_retrieve_communication_notes_empty(self):
-        url = reverse("cases-communication-notes", args=[self.case])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, [])
-
-    def test_create_communication_note_success(self):
-        url = reverse("cases-communication-notes", args=[self.case])
-        data = {"note": "Initial note", "author_name": "Alice"}
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn("id", response.data)
-        self.assertEqual(response.data["note"], "Initial note")
-        self.assertEqual(response.data["author_name"], "Alice")
-        self.assertEqual(
-            CaseCommunicationNote.objects.filter(case_id=self.case).count(), 1
-        )
-
-    def test_create_communication_note_invalid(self):
-        url = reverse("cases-communication-notes", args=[self.case])
-        response = self.client.post(url, {"author_name": "Bob"}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_update_communication_note_success(self):
-        note = baker.make(
-            CaseCommunicationNote, case_id=self.case, note="Old", author_name="A"
-        )
-        url = reverse("cases-communication-note-detail", args=[self.case, note.id])
-        data = {"note": "New text", "author_name": "Alice"}
-        response = self.client.patch(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        note.refresh_from_db()
-        self.assertEqual(note.note, "New text")
-        self.assertEqual(note.author_name, "Alice")
-
-    def test_delete_communication_note_success(self):
-        note = baker.make(
-            CaseCommunicationNote, case_id=self.case, note="To delete", author_name="A"
-        )
-        url = reverse("cases-communication-note-detail", args=[self.case, note.id])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(CaseCommunicationNote.objects.filter(id=note.id).count(), 0)
-
-    def test_delete_communication_note_not_found(self):
-        url = reverse("cases-communication-note-detail", args=[self.case, 999])
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def _create_sample_document(self):
         url = reverse("cases-create-document")
