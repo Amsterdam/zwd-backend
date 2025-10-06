@@ -42,7 +42,6 @@ class CaseSerializer(serializers.ModelSerializer):
             "advice_type",
             "application_type",
             "created",
-            "communication_note",
             "description",
             "end_date",
             "homeowner_association",
@@ -57,12 +56,6 @@ class CaseSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None
-
-
-class CaseUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Case
-        fields = ["communication_note"]
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):

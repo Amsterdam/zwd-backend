@@ -26,7 +26,6 @@ from .serializers import (
     CaseCloseSerializer,
     CaseCreateSerializer,
     CaseDocumentSerializer,
-    CaseUpdateSerializer,
     CaseSerializer,
     CaseListSerializer,
     CaseStatusSerializer,
@@ -168,7 +167,6 @@ class CaseViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    mixins.UpdateModelMixin,
 ):
     queryset = Case.objects.all().prefetch_related("homeowner_association")
     serializer_class = CaseSerializer
@@ -197,9 +195,6 @@ class CaseViewSet(
             return CaseListSerializer
         elif self.action == "events":
             return CaseEventSerializer
-        elif self.action in ["partial_update", "update"]:
-            return CaseUpdateSerializer
-
         return CaseSerializer
 
     @extend_schema(

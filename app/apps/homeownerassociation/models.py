@@ -87,6 +87,7 @@ class HomeownerAssociation(models.Model):
     ligt_in_beschermd_gebied = models.CharField(max_length=255, null=True)
     beschermd_stadsdorpsgezicht = models.CharField(max_length=255, null=True)
     kvk_nummer = models.CharField(max_length=255, null=True, blank=True)
+    annotation = models.TextField(null=True, blank=True)
 
     @property
     def is_small(self):

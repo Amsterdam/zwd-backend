@@ -68,8 +68,10 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeownerAssociation
         fields = [
+            "annotation",
             "beschermd_stadsdorpsgezicht",
             "build_year",
+            "contacts",
             "district",
             "id",
             "is_priority_neighborhood",
@@ -115,6 +117,12 @@ class ContactWriteSerializer(serializers.ModelSerializer):
 class HomeownerAssociationSearchSerializer(serializers.Serializer):
     brkVveStatutaireNaam = serializers.CharField()
     votIdentificatie = serializers.CharField()
+
+
+class HomeownerAssociationUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomeownerAssociation
+        fields = ["annotation"]
 
 
 class ApartmentSerializer(serializers.Serializer):

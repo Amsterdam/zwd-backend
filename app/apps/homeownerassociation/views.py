@@ -5,6 +5,7 @@ from .models import District, HomeownerAssociation, Neighborhood, Wijk
 from .serializers import (
     ApartmentSerializer,
     DistrictSerializer,
+    HomeownerAssociationUpdateSerializer,
     HomeownerAssociationSearchSerializer,
     HomeownerAssociationSerializer,
     NeighborhoodSerializer,
@@ -23,6 +24,7 @@ class HomeOwnerAssociationView(
     viewsets.GenericViewSet,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
     ContactMixin,
 ):
     queryset = HomeownerAssociation.objects.all()
@@ -33,6 +35,8 @@ class HomeOwnerAssociationView(
             return CaseListSerializer
         if self.action == "apartments":
             return ApartmentSerializer
+        if self.action in ["update", "partial_update"]:
+            return HomeownerAssociationUpdateSerializer
         return super().get_serializer_class()
 
     @action(detail=True, methods=["get"])
