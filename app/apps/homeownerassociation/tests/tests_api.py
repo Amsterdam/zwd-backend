@@ -356,3 +356,119 @@ class HomeownerAssociationTest(APITestCase):
         url = reverse("homeownerassociation-apartments", args=[9999])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+    def test_patch_hoa_annotation_success(self):
+        """Test that PATCH successfully updates only the annotation field."""
+        hoa = baker.make(
+            HomeownerAssociation,
+            name="Test HOA",
+            annotation="Original annotation",
+            build_year=2010,
+            number_of_apartments=10,
+        )
+
+        url = reverse("homeownerassociation-detail", args=[hoa.id])
+        new_annotation = "Updated annotation via PATCH"
+        response = self.client.patch(url, {"annotation": new_annotation}, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        # Verify the annotation was updated
+        hoa.refresh_from_db()
+        self.assertEqual(hoa.annotation, new_annotation)
+
+        # Verify other fields were not affected
+        self.assertEqual(hoa.name, "Test HOA")
+        self.assertEqual(hoa.build_year, 2010)
+        self.assertEqual(hoa.number_of_apartments, 10)
+
+    def test_patch_hoa_annotation_only_allows_annotation_field(self):
+        """Test that PATCH only allows updating the annotation field and ignores other fields."""
+        hoa = baker.make(
+            HomeownerAssociation,
+            name="Test HOA",
+            annotation="Original annotation",
+            build_year=2010,
+            number_of_apartments=10,
+        )
+
+        url = reverse("homeownerassociation-detail", args=[hoa.id])
+        response = self.client.patch(
+            url,
+            {
+                "annotation": "Updated annotation",
+                "name": "Should not update",
+                "build_year": 2020,
+                "number_of_apartments": 20,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Verify only annotation was updated
+        hoa.refresh_from_db()
+        self.assertEqual(hoa.annotation, "Updated annotation")
+        self.assertEqual(hoa.name, "Test HOA")  # Should remain unchanged
+        self.assertEqual(hoa.build_year, 2010)  # Should remain unchanged
+        self.assertEqual(hoa.number_of_apartments, 10)  # Should remain unchanged
+
+    def test_patch_hoa_annotation_with_empty_string(self):
+        """Test that PATCH allows updating annotation to empty string."""
+        hoa = baker.make(
+            HomeownerAssociation,
+            name="Test HOA",
+            annotation="Original annotation",
+        )
+
+        url = reverse("homeownerassociation-detail", args=[hoa.id])
+        response = self.client.patch(url, {"annotation": ""}, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        # Verify the annotation was cleared
+        hoa.refresh_from_db()
+        self.assertEqual(hoa.annotation, "")
+
+    def test_patch_hoa_annotation_with_null_value(self):
+        """Test that PATCH allows updating annotation to null."""
+        hoa = baker.make(
+            HomeownerAssociation,
+            name="Test HOA",
+            annotation="Original annotation",
+        )
+
+        url = reverse("homeownerassociation-detail", args=[hoa.id])
+        response = self.client.patch(url, {"annotation": None}, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        # Verify the annotation was set to null
+        hoa.refresh_from_db()
+        self.assertIsNone(hoa.annotation)
+
+    def test_patch_hoa_annotation_nonexistent_hoa(self):
+        """Test that PATCH returns 404 for non-existent HOA."""
+        url = reverse("homeownerassociation-detail", args=[9999])
+        response = self.client.patch(
+            url, {"annotation": "New annotation"}, format="json"
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_patch_hoa_annotation_without_annotation_field(self):
+        """Test that PATCH with empty data still works (no fields to update)."""
+        hoa = baker.make(
+            HomeownerAssociation,
+            name="Test HOA",
+            annotation="Original annotation",
+        )
+
+        url = reverse("homeownerassociation-detail", args=[hoa.id])
+        response = self.client.patch(url, {}, format="json")
+
+        self.assertEqual(response.status_code, 200)
+
+        # Verify no changes were made
+        hoa.refresh_from_db()
+        self.assertEqual(hoa.annotation, "Original annotation")
