@@ -2,7 +2,7 @@ from apps.workflow.models import WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
-    HomeownerAssociationSerializer,
+    HomeownerAssociationWithoutContactsSerializer,
 )
 from apps.cases.models import (
     ActivationTeam,
@@ -11,7 +11,6 @@ from apps.cases.models import (
     CaseClose,
     CaseCloseReason,
     CaseDocument,
-    CaseCommunicationNote,
     CaseStatus,
 )
 from apps.workflow.serializers import CaseWorkflowSerializer
@@ -42,7 +41,6 @@ class CaseSerializer(serializers.ModelSerializer):
             "advice_type",
             "application_type",
             "created",
-            "communication_note",
             "description",
             "end_date",
             "homeowner_association",
@@ -57,12 +55,6 @@ class CaseSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None
-
-
-class CaseUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Case
-        fields = ["communication_note"]
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):
@@ -121,7 +113,7 @@ class CaseListSerializer(serializers.ModelSerializer):
 
 
 class ExpandedCaseListSerializer(serializers.ModelSerializer):
-    homeowner_association = HomeownerAssociationSerializer()
+    homeowner_association = HomeownerAssociationWithoutContactsSerializer()
     status = serializers.SerializerMethodField()
     advisor = serializers.SerializerMethodField()
 
@@ -292,46 +284,3 @@ class CaseCloseSerializer(serializers.ModelSerializer):
                 f"A CaseClose already exists for Case {value.id}."
             )
         return value
-
-
-class CaseCommunicationNoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CaseCommunicationNote
-        fields = (
-            "id",
-            "note",
-            "author_name",
-            "date",
-        )
-        read_only_fields = (
-            "id",
-            "case",
-            "author",
-            "created",
-            "updated",
-        )
-
-
-class CaseCommunicationNoteCreateSerializer(serializers.ModelSerializer):
-    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    class Meta:
-        model = CaseCommunicationNote
-        fields = (
-            "id",
-            "note",
-            "author",
-            "author_name",
-            "date",
-        )
-        read_only_fields = ("id", "author")
-
-
-class CaseCommunicationNoteUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CaseCommunicationNote
-        fields = (
-            "note",
-            "author_name",
-            "date",
-        )

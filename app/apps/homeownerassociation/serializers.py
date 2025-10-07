@@ -1,6 +1,7 @@
 from apps.homeownerassociation.models import (
     Contact,
     District,
+    HomeownerAssociationCommunicationNote,
     HomeownerAssociation,
     Neighborhood,
     Owner,
@@ -68,8 +69,10 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeownerAssociation
         fields = [
+            "annotation",
             "beschermd_stadsdorpsgezicht",
             "build_year",
+            "contacts",
             "district",
             "id",
             "is_priority_neighborhood",
@@ -85,6 +88,15 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "zip_code",
         ]
         depth = 1
+
+
+class HomeownerAssociationWithoutContactsSerializer(HomeownerAssociationSerializer):
+    class Meta(HomeownerAssociationSerializer.Meta):
+        fields = [
+            field
+            for field in HomeownerAssociationSerializer.Meta.fields
+            if field != "contacts"
+        ]
 
 
 class CaseHomeownerAssociationSerializer(serializers.ModelSerializer):
@@ -117,6 +129,12 @@ class HomeownerAssociationSearchSerializer(serializers.Serializer):
     votIdentificatie = serializers.CharField()
 
 
+class HomeownerAssociationUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomeownerAssociation
+        fields = ["annotation"]
+
+
 class ApartmentSerializer(serializers.Serializer):
     straatnaam = serializers.CharField(allow_null=True, required=False)
     huisnummer = serializers.IntegerField(allow_null=True, required=False)
@@ -128,3 +146,50 @@ class ApartmentSerializer(serializers.Serializer):
     nummeraanduiding_id = serializers.CharField(allow_null=True, required=False)
     eigenaar_type = serializers.CharField(allow_null=True, required=False)
     eigenaar_naam = serializers.CharField(allow_null=True, required=False)
+
+
+class HomeownerAssociationCommunicationNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomeownerAssociationCommunicationNote
+        fields = (
+            "id",
+            "note",
+            "author_name",
+            "date",
+        )
+        read_only_fields = (
+            "id",
+            "homeowner_association",
+            "author",
+            "created",
+            "updated",
+        )
+
+
+class HomeownerAssociationCommunicationNoteCreateSerializer(
+    serializers.ModelSerializer
+):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = HomeownerAssociationCommunicationNote
+        fields = (
+            "id",
+            "note",
+            "author",
+            "author_name",
+            "date",
+        )
+        read_only_fields = ("id", "author")
+
+
+class HomeownerAssociationCommunicationNoteUpdateSerializer(
+    serializers.ModelSerializer
+):
+    class Meta:
+        model = HomeownerAssociationCommunicationNote
+        fields = (
+            "note",
+            "author_name",
+            "date",
+        )

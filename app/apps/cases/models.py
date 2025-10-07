@@ -80,7 +80,6 @@ class Case(ModelEventEmitter):
     request_date = models.DateField(default=timezone.now)
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    communication_note = models.TextField(null=True, blank=True)
 
     def _compute_prefixed_dossier_id(self):
         if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
@@ -227,47 +226,3 @@ class CaseClose(TaskModelEventEmitter):
             self.case.status, _ = CaseStatus.objects.get_or_create(name="Afgesloten")
             self.case.save()
             return super().save(*args, **kwargs)
-
-
-class CaseCommunicationNote(models.Model):
-    case = models.ForeignKey(
-        Case, on_delete=models.CASCADE, related_name="communication_notes"
-    )
-    note = models.TextField()
-    author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL,
-        related_name="communication_note_author",
-        on_delete=models.PROTECT,
-        null=True,
-    )
-    author_name = models.CharField(max_length=255, blank=True)
-    date = models.DateTimeField(null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return (
-            f"CaseCommunicationNote: case={self.case_id} "
-            + f"by={self.author_name or (str(self.author.get_full_name().strip()) if self.author else 'Unknown')}"
-        )
-
-    def save(self, *args, **kwargs):
-        is_create = self.pk is None
-
-        # On create populate `author_name` from `author` if not explicitly provided
-        if is_create and not self.author_name and self.author:
-            self.author_name = str(self.author.get_full_name().strip())
-
-        result = super().save(*args, **kwargs)
-
-        # On create ensure `date` defaults to `created`
-        if is_create and self.date is None and self.created is not None:
-            self.date = self.created
-            super(CaseCommunicationNote, self).save(update_fields=["date"])  # type: ignore
-
-        return result
-
-    class Meta:
-        ordering = ["-date"]
-        verbose_name = "Communication note"
-        verbose_name_plural = "Communication notes"
