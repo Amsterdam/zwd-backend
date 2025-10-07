@@ -107,8 +107,8 @@
     <bpmn:sequenceFlow id="Flow_1ptqejq" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_beoordeling" />
     <bpmn:sequenceFlow id="Flow_1qqjv57" sourceRef="script_start_workflow_beoordeling" targetRef="resume_after_beoordeling" />
     <bpmn:sequenceFlow id="Flow_0bmrgy5" name="Advies&#10;" sourceRef="Gateway_0rudoxb" targetRef="Gateway_0ubmmog" />
-    <bpmn:sequenceFlow id="Flow_1w3jnnu" name="Cursus adviestype" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_cursus">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">advice_type.get("value") == "Cursus"</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_1w3jnnu" name="Cursus aanvraagtype" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_cursus">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">application_type.get("value") == "Cursus"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1kj6g1g" sourceRef="script_start_workflow_cursus" targetRef="resume_after_cursus" />
     <bpmn:sequenceFlow id="Flow_1sm3r6m" sourceRef="resume_after_beoordeling" targetRef="Gateway_0avyplu" />

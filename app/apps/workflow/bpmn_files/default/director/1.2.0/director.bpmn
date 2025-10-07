@@ -51,8 +51,8 @@
       <bpmn:outgoing>Flow_1kj6g1g</bpmn:outgoing>
       <bpmn:script>start_workflow("cursus")</bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:sequenceFlow id="Flow_1w3jnnu" name="Cursus adviestype" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_cursus">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">advice_type.get("value") == "Cursus"</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_1w3jnnu" name="Cursus aanvraagtype" sourceRef="Gateway_0ubmmog" targetRef="script_start_workflow_cursus">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">application_type.get("value") == "Cursus"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:intermediateCatchEvent id="resume_after_beoordeling" name="resume_after_beoordeling">
       <bpmn:incoming>Flow_1qqjv57</bpmn:incoming>
