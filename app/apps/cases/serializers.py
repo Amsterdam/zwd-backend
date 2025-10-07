@@ -78,7 +78,8 @@ class CaseCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        # advice_type is required when application_type is ADVICE
+
+        # The `advice_type` field is required when `application_type` is ADVICE
         if data.get(
             "application_type"
         ) == ApplicationType.ADVICE.value and not data.get("advice_type"):
@@ -87,6 +88,18 @@ class CaseCreateSerializer(serializers.ModelSerializer):
                     "advice_type": "This field is required when application_type is set to ADVICE."
                 }
             )
+
+        # The `advice_type` field should NOT be set when `application_type` is COURSE or ACTIVATIONTEAM
+        if data.get("application_type") in [
+            ApplicationType.COURSE.value,
+            ApplicationType.ACTIVATIONTEAM.value,
+        ] and data.get("advice_type"):
+            raise serializers.ValidationError(
+                {
+                    "advice_type": "This field should not be set for COURSE or ACTIVATIONTEAM application types."
+                }
+            )
+
         return data
 
 
