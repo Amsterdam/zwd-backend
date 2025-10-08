@@ -48,6 +48,7 @@ class CaseAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "legacy_id",
+        "application_type",
         "advice_type",
         "status",
         "homeowner_association",
