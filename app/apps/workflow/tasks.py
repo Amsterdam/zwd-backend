@@ -2,6 +2,7 @@ import celery
 from apps.cases.models import Case
 from celery.utils.log import get_task_logger
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = get_task_logger(__name__)
 
@@ -103,6 +104,11 @@ def task_script_wait(self, workflow_id, message, extra_data={}):
 def task_complete_user_task_and_create_new_user_tasks(self, task_id, data={}):
     from apps.workflow.models import CaseUserTask
 
-    task = CaseUserTask.objects.get(id=task_id, completed=False)
+    try:
+        task = CaseUserTask.objects.get(id=task_id, completed=False)
+    except ObjectDoesNotExist:
+        logger.error(f"CaseUserTask with id {task_id} not found or already completed.")
+        return f"CaseUserTask with id {task_id} not found or already completed."
+
     task.workflow.complete_user_task_and_create_new_user_tasks(task.task_id, data)
     return f"task_complete_user_task_and_create_new_user_tasks: complete task with name '{task.task_name}' for workflow with id '{task.workflow.id}', is completed"
