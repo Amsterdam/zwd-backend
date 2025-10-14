@@ -29,8 +29,6 @@ def start_logging():
         "console",
     ]
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-
     APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
         "APPLICATIONINSIGHTS_CONNECTION_STRING"
     )
