@@ -100,9 +100,12 @@ class HomeownerAssociationWithoutContactsSerializer(HomeownerAssociationSerializ
 
 
 class CaseHomeownerAssociationSerializer(serializers.ModelSerializer):
+    district = serializers.CharField(source="district.name", read_only=True)
+    neighborhood = serializers.CharField(source="neighborhood.name", read_only=True)
+
     class Meta:
         model = HomeownerAssociation
-        fields = ["id", "name"]
+        fields = ["id", "name", "district", "neighborhood", "number_of_apartments"]
 
 
 class ContactSerializer(serializers.ModelSerializer):
