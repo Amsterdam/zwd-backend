@@ -106,10 +106,14 @@ class CaseCreateSerializer(serializers.ModelSerializer):
 class CaseListSerializer(serializers.ModelSerializer):
     homeowner_association = CaseHomeownerAssociationSerializer()
     status = serializers.SerializerMethodField()
+    advisor = serializers.StringRelatedField()
 
     class Meta:
         model = Case
         fields = (
+            "advice_type",
+            "advisor",
+            "application_type",
             "created",
             "end_date",
             "homeowner_association",
