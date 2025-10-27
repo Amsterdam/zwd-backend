@@ -45,19 +45,13 @@ class CaseUserTaskSerializer(serializers.ModelSerializer):
 
 
 class CaseUserTaskListSerializer(serializers.ModelSerializer):
-    case = serializers.PrimaryKeyRelatedField(queryset=Case.objects.all())
-    homeowner_association = serializers.SerializerMethodField()
-    prefixed_dossier_id = serializers.SerializerMethodField()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def get_homeowner_association(self, obj):
-        return (
-            obj.case.homeowner_association.name
-            if obj.case.homeowner_association
-            else None
-        )
+        # Lazy import to avoid circular dependency
+        from apps.cases.serializers import CaseListSerializer
 
-    def get_prefixed_dossier_id(self, obj):
-        return getattr(obj.case, "prefixed_dossier_id", None)
+        self.fields["case"] = CaseListSerializer()
 
     class Meta:
         model = CaseUserTask
@@ -65,8 +59,6 @@ class CaseUserTaskListSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "case",
-            "homeowner_association",
-            "prefixed_dossier_id",
             "created",
         )
 
