@@ -13,10 +13,16 @@ class Command(BaseCommand):
             action="store_true",
             help="Run in dry-run mode (validate but do not save data)",
         )
+        parser.add_argument(
+            "--skip-hoa-api",
+            action="store_true",
+            help="Skip fetching HOA data from the DSO API",
+        )
 
     def handle(self, *args, **options):
         csv_file = options["file"]
         dry_run = options["dry_run"]
+        skip_hoa_api = options["skip_hoa_api"]
 
         # Validate file exists
         if not os.path.exists(csv_file):
@@ -26,7 +32,7 @@ class Command(BaseCommand):
             raise CommandError(f"Path is not a file: {csv_file}")
 
         # Create importer and run import
-        importer = ContactImporter(dry_run=dry_run)
+        importer = ContactImporter(dry_run=dry_run, skip_hoa_api=skip_hoa_api)
 
         if dry_run:
             self.stdout.write(
