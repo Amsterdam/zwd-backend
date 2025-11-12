@@ -8,6 +8,12 @@ from .base import BaseImporter
 class ContactImporter(BaseImporter):
     """Importer for contact CSV files"""
 
+    COLUMNS_REQUIRED = [
+        "ZWD",
+        "Statutaire Naam",
+        "Mailadres",
+    ]
+
     COLUMN_MAPPING = {
         "case_prefixed_dossier_id": "ZWD",
         "hoa_vestigingsnummer": "Vnummer",  # Unused
@@ -18,7 +24,7 @@ class ContactImporter(BaseImporter):
     }
 
     def __init__(self, dry_run: bool = False, skip_hoa_api: bool = False):
-        super().__init__(list(self.COLUMN_MAPPING.values()), dry_run=dry_run)
+        super().__init__(self.COLUMNS_REQUIRED, dry_run=dry_run)
         self.skip_hoa_api = skip_hoa_api
 
     def _find_homeowner_association(
@@ -183,30 +189,24 @@ class ContactImporter(BaseImporter):
             return False
 
         # Get fullname
-        fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip()
-        if not fullname:
-            self._add_error(
-                row_number,
-                self.COLUMN_MAPPING["contact_fullname"],
-                "Contact person name is required",
-            )
-            return False
+        fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
 
         # Get `is_active` from `Gestopt` field
         gestopt = row.get(self.COLUMN_MAPPING["contact_is_active"], "").strip()
         is_active = self._parse_is_active(gestopt)
 
         # Find `HomeownerAssociation`
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
         hoa = self._find_homeowner_association(row, row_number)
         if not hoa:
             self._add_error(
                 row_number,
                 None,
-                "Could not find homeowner association. Check ZWD and Statutaire Naam values.",
+                f"Could not find homeowner association for '{hoa_name}'",
             )
             return False
 
-        # Set defaults, since these are not in the CSV
+        # Set defaults, since these are not in the CSV or optional
         role = "Geïmporteerd contact"
         phone = ""
 
@@ -223,7 +223,9 @@ class ContactImporter(BaseImporter):
 
                     if contact:
                         # Update existing contact
-                        contact.fullname = fullname
+                        contact.fullname = (
+                            fullname or contact.fullname
+                        )  # Full name is optional, so fall back to existing if present
                         contact.phone = (
                             contact.phone or phone
                         )  # Leave as is, if present
