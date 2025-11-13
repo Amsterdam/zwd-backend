@@ -66,13 +66,13 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(
                     f"Import completed with {result.failed} error(s). "
-                    f"{result.successful} contact(s) imported successfully."
+                    f"{result.successful} contacts imported successfully."
                 )
             )
         elif result.successful > 0:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Successfully imported {result.successful} contact(s)."
+                    f"Successfully imported {result.successful} contacts."
                 )
             )
         else:

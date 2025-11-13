@@ -11,8 +11,6 @@ class ImportError(Exception):
 
 
 class RowError:
-    """Represents an error for a specific row"""
-
     def __init__(self, row_number: int, field: Optional[str], message: str):
         self.row_number = row_number
         self.field = field
@@ -25,8 +23,6 @@ class RowError:
 
 
 class ImportResult:
-    """Results of an import operation"""
-
     def __init__(self):
         self.total_rows = 0
         self.successful = 0
@@ -34,6 +30,7 @@ class ImportResult:
         self.skipped = 0
         self.errors: List[RowError] = []
         self.warnings: List[str] = []
+        self.messages: List[str] = []
 
     def add_error(self, row_number: int, field: Optional[str], message: str):
         """Add an error to the result"""
@@ -41,8 +38,12 @@ class ImportResult:
         self.failed += 1
 
     def add_warning(self, message: str):
-        """Add a warning to the result"""
+        """Add a warning to the result (concerning but not fatal)"""
         self.warnings.append(message)
+
+    def add_message(self, message: str):
+        """Add an informational message to the result"""
+        self.messages.append(message)
 
     def __str__(self):
         return (
@@ -52,15 +53,9 @@ class ImportResult:
 
 
 class BaseImporter(ABC):
-    """Base class for CSV importers"""
-
     def __init__(self, required_columns: List[str], dry_run: bool = False):
         """
         Initialize the importer
-
-        Args:
-            required_columns: List of required column names in the CSV
-            dry_run: If True, don't actually save data, just validate
         """
         self.required_columns = required_columns
         self.dry_run = dry_run
@@ -69,13 +64,7 @@ class BaseImporter(ABC):
 
     def _detect_encoding(self, file_path: str) -> str:
         """
-        Detect file encoding, trying UTF-8 first, then Windows-1252
-
-        Args:
-            file_path: Path to the CSV file
-
-        Returns:
-            Detected encoding string
+        Detect file encoding, trying UTF-8 first, then Windows-1252.
         """
         encodings = ["utf-8-sig", "utf-8", "windows-1252", "latin-1"]
 
@@ -92,13 +81,7 @@ class BaseImporter(ABC):
 
     def _detect_delimiter(self, first_line: str) -> str:
         """
-        Detect CSV delimiter by checking the first line
-
-        Args:
-            first_line: First line of the CSV file (header line)
-
-        Returns:
-            Detected delimiter (',' or ';')
+        Detect CSV delimiter by checking the first line (semicolon or comma).
         """
         # Count semicolons and commas in the first line
         semicolon_count = first_line.count(";")
@@ -112,15 +95,7 @@ class BaseImporter(ABC):
     def _read_csv(self, file_path: str) -> Tuple[List[str], List[Dict[str, str]]]:
         """
         Read and parse CSV file
-
-        Args:
-            file_path: Path to the CSV file
-
-        Returns:
-            Tuple of (headers, rows) where rows is a list of dictionaries
-
-        Raises:
-            ImportError: If file cannot be read or is invalid
+        We strip whitespace from all keys and values, and handle None values to avoid errors.
         """
         encoding = self._detect_encoding(file_path)
 
@@ -172,13 +147,7 @@ class BaseImporter(ABC):
 
     def _validate_headers(self, headers: List[str]) -> None:
         """
-        Validate that all required columns are present
-
-        Args:
-            headers: List of header names from CSV
-
-        Raises:
-            ImportError: If required columns are missing
+        Validate that all required columns are present.
         """
         missing_columns = []
         for col in self.required_columns:
@@ -191,35 +160,9 @@ class BaseImporter(ABC):
                 f"Found columns: {', '.join(headers)}"
             )
 
-    def _normalize_email(self, email: str) -> str:
-        """
-        Normalize email address by removing angle brackets if present
-
-        Args:
-            email: Email address string (may have < > around it)
-
-        Returns:
-            Cleaned email address
-        """
-        if not email:
-            return email
-
-        email = email.strip()
-        # Remove angle brackets if present
-        if email.startswith("<") and email.endswith(">"):
-            email = email[1:-1].strip()
-
-        return email
-
     def _validate_email(self, email: str) -> bool:
         """
-        Validate email format using Django's EmailValidator
-
-        Args:
-            email: Email address to validate
-
-        Returns:
-            True if valid, False otherwise
+        Validate email format using Django's EmailValidator.
         """
         if not email:
             return False
@@ -232,25 +175,17 @@ class BaseImporter(ABC):
 
     def import_file(self, file_path: str) -> ImportResult:
         """
-        Main import method that processes the CSV file
-
-        Args:
-            file_path: Path to the CSV file
-
-        Returns:
-            ImportResult with statistics and errors
+        Main import method that processes the CSV file and returns a result object.
         """
         try:
-            # Read and parse CSV
             headers, rows = self._read_csv(file_path)
-
-            # Validate headers
             self._validate_headers(headers)
 
             # Process each row
             self.result.total_rows = len(rows)
 
-            for idx, row in enumerate(rows, start=2):  # Start at 2 (row 1 is header)
+            # Loop over rows, and start at 2 (since row 1 is the header)
+            for idx, row in enumerate(rows, start=2):
                 try:
                     if self._process_row(row, idx):
                         self.result.successful += 1
@@ -267,23 +202,14 @@ class BaseImporter(ABC):
     @abstractmethod
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
         """
-        Process a single row from the CSV
-
-        Args:
-            row: Dictionary of column name -> value
-            row_number: Row number (for error reporting)
-
-        Returns:
-            True if row was processed successfully, False if skipped
-
-        Raises:
-            Exception: If there's an error processing the row
+        Abstract method to process a single row from the CSV and return a boolean indicating if the row was processed successfully.
         """
 
     def _add_error(self, row_number: int, field: Optional[str], message: str):
-        """Helper to add an error"""
         self.result.add_error(row_number, field, message)
 
     def _add_warning(self, message: str):
-        """Helper to add a warning"""
         self.result.add_warning(message)
+
+    def _add_message(self, message: str):
+        self.result.add_message(message)
