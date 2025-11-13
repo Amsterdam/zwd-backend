@@ -1,7 +1,7 @@
 import csv
 import io
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 
@@ -24,6 +24,7 @@ class RowError:
 
 class ImportResult:
     def __init__(self):
+        self.failed_rows: Set[int] = set()
         self.total_rows = 0
         self.successful = 0
         self.failed = 0
@@ -35,7 +36,9 @@ class ImportResult:
     def add_error(self, row_number: int, field: Optional[str], message: str):
         """Add an error to the result"""
         self.errors.append(RowError(row_number, field, message))
-        self.failed += 1
+        if row_number not in self.failed_rows:
+            self.failed_rows.add(row_number)
+            self.failed += 1
 
     def add_warning(self, message: str):
         """Add a warning to the result (concerning but not fatal)"""
@@ -177,6 +180,8 @@ class BaseImporter(ABC):
         """
         Main import method that processes the CSV file and returns a result object.
         """
+        self.result = ImportResult()
+
         try:
             headers, rows = self._read_csv(file_path)
             self._validate_headers(headers)
@@ -187,10 +192,15 @@ class BaseImporter(ABC):
             # Loop over rows, and start at 2 (since row 1 is the header)
             for idx, row in enumerate(rows, start=2):
                 try:
-                    if self._process_row(row, idx):
+                    errors_before = len(self.result.errors)
+                    processed = self._process_row(row, idx)
+                    errors_after = len(self.result.errors)
+
+                    if processed:
                         self.result.successful += 1
                     else:
-                        self.result.skipped += 1
+                        if errors_after == errors_before:
+                            self.result.skipped += 1
                 except Exception as e:
                     self.result.add_error(idx, None, str(e))
 
