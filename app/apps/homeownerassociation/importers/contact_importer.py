@@ -33,16 +33,10 @@ class ContactImporter(BaseImporter):
     ) -> Optional[HomeownerAssociation]:
         """
         Find HomeownerAssociation using:
+
         1. `ZWD` (case prefixed_dossier_id, e.g. "123EAK")
         2. `Vnummer` (case legacy_id, e.g. "V12345")
         3. `Statutaire Naam` (exact match, e.g. "Vereniging van Eigenaars van X")
-
-        Args:
-            row: CSV row data
-            row_number: Row number for error reporting
-
-        Returns:
-            HomeownerAssociation instance or None if not found
         """
         prefixed_dossier_id = row.get(
             self.COLUMN_MAPPING["case_prefixed_dossier_id"], ""
@@ -118,7 +112,7 @@ class ContactImporter(BaseImporter):
                             # Create ownerships from the API response
                             temp_hoa._create_ownerships(data["response"], hoa)
 
-                        self._add_warning(
+                        self._add_message(
                             f"Row {row_number}: Created new HOA '{hoa_name}' from external API"
                         )
                         return hoa
@@ -139,7 +133,7 @@ class ContactImporter(BaseImporter):
                             temp_hoa = HomeownerAssociation()
                             data = temp_hoa._get_hoa_data(hoa_name)
                             if data.get("response"):
-                                self._add_warning(
+                                self._add_message(
                                     f"Row {row_number}: [DRY RUN] Would create new HOA '{hoa_name}' from external API"
                                 )
                             else:
@@ -161,33 +155,17 @@ class ContactImporter(BaseImporter):
 
     def _parse_is_active(self, gestopt_value: str) -> bool:
         """
-        Parse `Gestopt` field to boolean
-
-        Args:
-            gestopt_value: Value from 'Gestopt' column
-
-        Returns:
-            True if active (Gestopt = "Nee") or unset/empty, False if stopped (Gestopt = "Ja")
+        Parse `Gestopt` field to boolean.
         """
         gestopt = gestopt_value.strip().lower()
         return gestopt != "ja"
 
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
         """
-        Process a single contact row
-
-        Args:
-            row: Dictionary of column name -> value
-            row_number: Row number (for error reporting)
-
-        Returns:
-            True if row was processed successfully, False if skipped
+        Process a single contact row and return a boolean indicating if the row was processed successfully.
         """
-        # Extract and validate fields
-        email_raw = row.get(self.COLUMN_MAPPING["contact_email"], "").strip()
-        email = self._normalize_email(email_raw)
+        email = row.get(self.COLUMN_MAPPING["contact_email"], "").strip()
 
-        # Validate email
         if not email:
             self._add_error(
                 row_number,
@@ -200,14 +178,11 @@ class ContactImporter(BaseImporter):
             self._add_error(
                 row_number,
                 self.COLUMN_MAPPING["contact_email"],
-                f"Invalid email format: {email_raw}",
+                f"Invalid email format: {email}",
             )
             return False
 
-        # Get fullname
         fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
-
-        # Get `is_active` from `Gestopt` field
         gestopt = row.get(self.COLUMN_MAPPING["contact_is_active"], "").strip()
         is_active = self._parse_is_active(gestopt)
 
@@ -228,7 +203,7 @@ class ContactImporter(BaseImporter):
 
         try:
             if self.dry_run:
-                self._add_warning(
+                self._add_message(
                     f"Row {row_number}: [DRY RUN] Would create/update contact {email} for HOA {hoa.name}"
                 )
             else:
