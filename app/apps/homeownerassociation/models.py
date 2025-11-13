@@ -225,8 +225,10 @@ class HomeownerAssociation(models.Model):
 
 
 class Contact(models.Model):
-    homeowner_associations = models.ManyToManyField(
-        HomeownerAssociation, related_name="contacts", default=None
+    homeowner_association = models.ForeignKey(
+        HomeownerAssociation,
+        related_name="contacts",
+        on_delete=models.CASCADE,
     )
     email = models.EmailField()
     phone = models.CharField(max_length=20)
@@ -250,6 +252,7 @@ class Contact(models.Model):
                 "email": contact.get("email"),
                 "phone": contact.get("phone"),
                 "role": contact.get("role"),
+                "homeowner_association": homeowner_association,
             }
             existing_contact, created = Contact.objects.get_or_create(
                 id=id,
@@ -259,8 +262,6 @@ class Contact(models.Model):
                 for key, value in contact_data.items():
                     setattr(existing_contact, key, value)
                 existing_contact.save()
-
-            existing_contact.homeowner_associations.add(homeowner_association)
 
     class Meta:
         ordering = ["email"]
