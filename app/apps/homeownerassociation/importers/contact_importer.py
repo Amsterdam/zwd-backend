@@ -10,13 +10,14 @@ class ContactImporter(BaseImporter):
 
     COLUMNS_REQUIRED = [
         "ZWD",
+        "Vnummer",
         "Statutaire Naam",
         "Mailadres",
     ]
 
     COLUMN_MAPPING = {
         "case_prefixed_dossier_id": "ZWD",
-        "hoa_vestigingsnummer": "Vnummer",  # Unused
+        "case_legacy_id": "Vnummer",
         "hoa_name": "Statutaire Naam",
         "contact_fullname": "Kontaktpersoon",
         "contact_email": "Mailadres",
@@ -31,7 +32,10 @@ class ContactImporter(BaseImporter):
         self, row: Dict[str, str], row_number: int
     ) -> Optional[HomeownerAssociation]:
         """
-        Find HomeownerAssociation using ZWD (case prefixed_dossier_id) or Statutaire Naam
+        Find HomeownerAssociation using:
+        1. `ZWD` (case prefixed_dossier_id, e.g. "123EAK")
+        2. `Vnummer` (case legacy_id, e.g. "V12345")
+        3. `Statutaire Naam` (exact match, e.g. "Vereniging van Eigenaars van X")
 
         Args:
             row: CSV row data
@@ -43,9 +47,10 @@ class ContactImporter(BaseImporter):
         prefixed_dossier_id = row.get(
             self.COLUMN_MAPPING["case_prefixed_dossier_id"], ""
         ).strip()
+        legacy_id = row.get(self.COLUMN_MAPPING["case_legacy_id"], "").strip()
         hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
 
-        # Try to find by `ZWD` (Case `prefixed_dossier_id`) first
+        # Try to find by `ZWD` (Case `prefixed_dossier_id`)
         if prefixed_dossier_id and prefixed_dossier_id != "0":
             try:
                 case = Case.objects.filter(
@@ -62,7 +67,18 @@ class ContactImporter(BaseImporter):
                     f"Row {row_number}: Error looking up case {prefixed_dossier_id}: {str(e)}"
                 )
 
-        # Fallback: try to find by `Statutaire Naam` (exact match)
+        # Try to find by `Vnummer` (Case `legacy_id`)
+        if legacy_id and legacy_id != "0":
+            try:
+                case = Case.objects.filter(legacy_id__iexact=legacy_id).first()
+                if case and case.homeowner_association:
+                    return case.homeowner_association
+            except Exception as e:
+                self._add_warning(
+                    f"Row {row_number}: Error looking up case {legacy_id}: {str(e)}"
+                )
+
+        # Try to find by `Statutaire Naam` (HomeownerAssociation `name`, exact match)
         if hoa_name:
             try:
                 hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
@@ -212,24 +228,22 @@ class ContactImporter(BaseImporter):
 
         try:
             if self.dry_run:
-                # In dry-run mode, just validate without saving
                 self._add_warning(
                     f"Row {row_number}: [DRY RUN] Would create/update contact {email} for HOA {hoa.name}"
                 )
             else:
                 with transaction.atomic():
-                    # Find existing contact by email (case-insensitive)
-                    contact = Contact.objects.filter(email__iexact=email).first()
+                    contact = Contact.objects.filter(
+                        email__iexact=email,
+                        homeowner_associations=hoa,
+                    ).first()
 
                     if contact:
                         # Update existing contact
-                        contact.fullname = (
-                            fullname or contact.fullname
-                        )  # Full name is optional, so fall back to existing if present
-                        contact.phone = (
-                            contact.phone or phone
-                        )  # Leave as is, if present
-                        contact.role = contact.role or role  # Leave as is, if present
+                        # Note: we preserve existing values if not present in the CSV
+                        contact.fullname = fullname or contact.fullname
+                        contact.phone = contact.phone or phone
+                        contact.role = contact.role or role
                         contact.is_active = is_active
                         contact.save()
                     else:
@@ -242,7 +256,6 @@ class ContactImporter(BaseImporter):
                             is_active=is_active,
                         )
 
-                    # Add HOA relationship (ManyToMany, so this is safe to call multiple times)
                     contact.homeowner_associations.add(hoa)
 
             return True
