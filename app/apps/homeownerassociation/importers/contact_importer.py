@@ -235,7 +235,7 @@ class ContactImporter(BaseImporter):
                 with transaction.atomic():
                     contact = Contact.objects.filter(
                         email__iexact=email,
-                        homeowner_associations=hoa,
+                        homeowner_association=hoa,
                     ).first()
 
                     if contact:
@@ -254,9 +254,8 @@ class ContactImporter(BaseImporter):
                             phone=phone,
                             role=role,
                             is_active=is_active,
+                            homeowner_association=hoa,
                         )
-
-                    contact.homeowner_associations.add(hoa)
 
             return True
 
