@@ -75,6 +75,7 @@ class OwnerAdmin(admin.ModelAdmin):
         "number_of_apartments",
         "homeowner_association__name",
     )
+    autocomplete_fields = ["homeowner_association"]
 
     def get_homeowner_association_name(self, obj):
         return obj.homeowner_association.name
@@ -121,4 +122,5 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
         "note",
         "author_name",
     )
+    autocomplete_fields = ["homeowner_association"]
     exclude = ("author",)
