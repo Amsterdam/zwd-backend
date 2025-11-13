@@ -29,14 +29,11 @@ def update_kvk_number(modeladmin, request, queryset):
 
 
 class ContactInline(admin.TabularInline):
-    model = (
-        Contact.homeowner_associations.through
-    )  # Use the through model for the Many-to-Many relationship
-    extra = (
-        1  # Optionally, specify how many empty forms to display for adding new contacts
-    )
+    model = Contact
+    extra = 1
     verbose_name = "Contact"
     verbose_name_plural = "Contacts"
+    autocomplete_fields = ["homeowner_association"]
 
 
 @admin.register(HomeownerAssociation)
@@ -57,8 +54,9 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ("id", "email", "fullname", "phone", "role")
+    list_display = ("id", "email", "fullname", "phone", "role", "homeowner_association")
     search_fields = ("id", "email", "fullname", "phone", "role")
+    autocomplete_fields = ["homeowner_association"]
 
 
 @admin.register(Owner)
