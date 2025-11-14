@@ -32,7 +32,6 @@ def duplicate_contacts_with_multiple_hoas(apps, schema_editor):
                 phone=original_contact.phone,
                 fullname=original_contact.fullname,
                 role=original_contact.role,
-                is_active=original_contact.is_active,
             )
             duplicate_contact.homeowner_associations.add(hoa)
 
@@ -71,12 +70,13 @@ def drop_manytomany_table(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+
     # Mark as non-atomic to allow operations to commit separately
     # This helps avoid PostgreSQL "pending trigger events" errors
     atomic = False
 
     dependencies = [
-        ("homeownerassociation", "0018_add_contact_is_active"),
+        ("homeownerassociation", "0017_add_hoa_communication_note"),
     ]
 
     operations = [
