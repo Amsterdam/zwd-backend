@@ -21,7 +21,7 @@ class ContactImporter(BaseImporter):
         "hoa_name": "Statutaire Naam",
         "contact_fullname": "Kontaktpersoon",
         "contact_email": "Mailadres",
-        "contact_is_active": "Gestopt",
+        "contact_is_active": "Gestopt",  # Not used for now
     }
 
     def __init__(self, dry_run: bool = False, skip_hoa_api: bool = False):
@@ -153,13 +153,6 @@ class ContactImporter(BaseImporter):
 
         return None
 
-    def _parse_is_active(self, gestopt_value: str) -> bool:
-        """
-        Parse `Gestopt` field to boolean.
-        """
-        gestopt = gestopt_value.strip().lower()
-        return gestopt != "ja"
-
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
         """
         Process a single contact row and return a boolean indicating if the row was processed successfully.
@@ -183,8 +176,6 @@ class ContactImporter(BaseImporter):
             return False
 
         fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
-        gestopt = row.get(self.COLUMN_MAPPING["contact_is_active"], "").strip()
-        is_active = self._parse_is_active(gestopt)
 
         # Find `HomeownerAssociation`
         hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
@@ -219,7 +210,6 @@ class ContactImporter(BaseImporter):
                         contact.fullname = fullname or contact.fullname
                         contact.phone = contact.phone or phone
                         contact.role = contact.role or role
-                        contact.is_active = is_active
                         contact.save()
                     else:
                         # Create new contact
@@ -228,7 +218,6 @@ class ContactImporter(BaseImporter):
                             fullname=fullname,
                             phone=phone,
                             role=role,
-                            is_active=is_active,
                             homeowner_association=hoa,
                         )
 

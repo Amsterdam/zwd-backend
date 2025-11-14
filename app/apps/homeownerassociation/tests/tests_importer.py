@@ -50,7 +50,6 @@ class ContactImporterTest(TestCase):
             self.assertEqual(contact.fullname, "John Doe")
             self.assertEqual(contact.homeowner_association, self.hoa)
             self.assertEqual(contact.role, "Geïmporteerd contact")
-            self.assertTrue(contact.is_active)
         finally:
             os.unlink(csv_file)
 
@@ -64,7 +63,6 @@ class ContactImporterTest(TestCase):
             fullname="Old Name",
             phone="123456789",
             role="Old Role",
-            is_active=True,
         )
 
         csv_content = self._get_valid_csv_content()
@@ -82,7 +80,6 @@ class ContactImporterTest(TestCase):
             self.assertEqual(existing_contact.fullname, "John Doe")
             self.assertEqual(existing_contact.phone, "123456789")  # Preserved
             self.assertEqual(existing_contact.role, "Old Role")  # Preserved
-            self.assertTrue(existing_contact.is_active)
         finally:
             os.unlink(csv_file)
 
@@ -254,42 +251,6 @@ class ContactImporterTest(TestCase):
         finally:
             os.unlink(csv_file)
 
-    def test_parse_is_active_with_ja(self):
-        """Test that 'ja' in Gestopt field sets is_active to False"""
-        csv_content = """ZWD,Vnummer,Statutaire Naam,Kontaktpersoon,Mailadres,Gestopt
-,,Vereniging van Eigenaars Test,John Doe,john@example.com,Ja"""
-        csv_file = self._create_csv_file(csv_content)
-
-        try:
-            importer = ContactImporter(dry_run=False, skip_hoa_api=True)
-            result = importer.import_file(csv_file)
-
-            self.assertEqual(result.successful, 1)
-
-            contact = Contact.objects.filter(email="john@example.com").first()
-            self.assertIsNotNone(contact)
-            self.assertFalse(contact.is_active)
-        finally:
-            os.unlink(csv_file)
-
-    def test_parse_is_active_with_nee(self):
-        """Test that 'nee' in Gestopt field sets is_active to True"""
-        csv_content = """ZWD,Vnummer,Statutaire Naam,Kontaktpersoon,Mailadres,Gestopt
-,,Vereniging van Eigenaars Test,John Doe,john@example.com,Nee"""
-        csv_file = self._create_csv_file(csv_content)
-
-        try:
-            importer = ContactImporter(dry_run=False, skip_hoa_api=True)
-            result = importer.import_file(csv_file)
-
-            self.assertEqual(result.successful, 1)
-
-            contact = Contact.objects.filter(email="john@example.com").first()
-            self.assertIsNotNone(contact)
-            self.assertTrue(contact.is_active)
-        finally:
-            os.unlink(csv_file)
-
     def test_dry_run_mode_does_not_create_contacts(self):
         """Test that dry-run mode validates but doesn't save data"""
         csv_content = self._get_valid_csv_content()
@@ -405,7 +366,6 @@ class ContactImporterTest(TestCase):
 
             contact = Contact.objects.filter(email="john@example.com").first()
             self.assertIsNotNone(contact)
-            self.assertTrue(contact.is_active)  # Defaults to True
         finally:
             os.unlink(csv_file)
 
@@ -454,8 +414,6 @@ class ContactImporterTest(TestCase):
             jane = Contact.objects.filter(email="jane@example.com").first()
             self.assertIsNotNone(john)
             self.assertIsNotNone(jane)
-            self.assertTrue(john.is_active)
-            self.assertFalse(jane.is_active)
         finally:
             os.unlink(csv_file)
 
