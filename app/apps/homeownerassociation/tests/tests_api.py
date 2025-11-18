@@ -70,10 +70,8 @@ class HomeownerAssociationTest(APITestCase):
 
     def test_get_hoa_contacts(self):
         hoa = baker.make(HomeownerAssociation)
-        contact1 = baker.make(Contact)
-        contact1.homeowner_associations.add(hoa)
-        contact2 = baker.make(Contact)
-        contact2.homeowner_associations.add(hoa)
+        contact1 = baker.make(Contact, homeowner_association=hoa)
+        contact2 = baker.make(Contact, homeowner_association=hoa)
         url = reverse("homeownerassociation-contacts", args=[hoa.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -122,9 +120,11 @@ class HomeownerAssociationTest(APITestCase):
         """Test that PUT can update existing contacts."""
         hoa = baker.make("homeownerassociation.HomeownerAssociation")
         existing_contact = baker.make(
-            Contact, fullname="Old Name", email="old@example.com"
+            Contact,
+            fullname="Old Name",
+            email="old@example.com",
+            homeowner_association=hoa,
         )
-        existing_contact.homeowner_associations.add(hoa)
 
         contact_data = [
             {
@@ -225,24 +225,21 @@ class HomeownerAssociationTest(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("fullname", str(response.data))
 
-    def test_delete_contact_shared_not_deleted(self):
-        hoa1 = baker.make(HomeownerAssociation)
-        hoa2 = baker.make(HomeownerAssociation)
-        contact = baker.make(Contact)
-        contact.homeowner_associations.set([hoa1, hoa2])
+    def test_delete_contact_deleted(self):
+        """Test that deleting a contact removes it completely since each contact belongs to one HOA."""
+        hoa = baker.make(HomeownerAssociation)
+        contact = baker.make(Contact, homeowner_association=hoa)
 
-        url = reverse("homeownerassociation-delete", args=[hoa1.id, contact.id])
+        url = reverse("homeownerassociation-delete", args=[hoa.id, contact.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
 
-        contact.refresh_from_db()
-        self.assertIn(hoa2, contact.homeowner_associations.all())
-        self.assertNotIn(hoa1, contact.homeowner_associations.all())
+        with self.assertRaises(Contact.DoesNotExist):
+            Contact.objects.get(id=contact.id)
 
     def test_delete_contact_exclusive_deleted(self):
         hoa = baker.make(HomeownerAssociation)
-        contact = baker.make(Contact)
-        contact.homeowner_associations.set([hoa])
+        contact = baker.make(Contact, homeowner_association=hoa)
 
         url = reverse("homeownerassociation-delete", args=[hoa.id, contact.id])
         response = self.client.delete(url)
