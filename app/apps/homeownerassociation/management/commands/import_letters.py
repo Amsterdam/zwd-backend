@@ -105,10 +105,14 @@ class Command(BaseCommand):
                 self.style.WARNING("Running in DRY-RUN mode (no data will be saved)")
             )
 
-        self.stdout.write(f"Importing letters from: {csv_file}")
+        self.stdout.write(f"Importing letters from: {csv_file}\n\n")
         self.stdout.write(f"Date: {parsed_date}")
         self.stdout.write(f"Author: {author_name}")
-        self.stdout.write(f"Description: {description}")
+        self.stdout.write(f"Description: {description}\n\n")
+
+        self.stdout.write(
+            f"Running import now. Results will be shown shortly, please stay tuned...\n\n"
+        )
         result = importer.import_file(csv_file)
 
         # Output results
@@ -123,6 +127,13 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"  - {error}"))
             self.stdout.write("")
 
+        # Output messages (including skipped duplicates)
+        if result.messages:
+            self.stdout.write(self.style.SUCCESS(f"Messages ({len(result.messages)}):"))
+            for message in result.messages:
+                self.stdout.write(f"  - {message}")
+            self.stdout.write("")
+
         # Output warnings
         if result.warnings:
             self.stdout.write(self.style.WARNING(f"Warnings ({len(result.warnings)}):"))
@@ -131,18 +142,23 @@ class Command(BaseCommand):
             self.stdout.write("")
 
         # Summary
+        summary_parts = []
+        if result.successful > 0:
+            summary_parts.append(
+                f"{result.successful} communication notes imported successfully"
+            )
+        if result.skipped > 0:
+            summary_parts.append(f"{result.skipped} skipped (duplicates)")
+        if result.failed > 0:
+            summary_parts.append(f"{result.failed} failed")
+
         if result.failed > 0:
             self.stdout.write(
-                self.style.ERROR(
-                    f"Import completed with {result.failed} error(s). "
-                    f"{result.successful} communication notes imported successfully."
-                )
+                self.style.ERROR(f"Import completed: {', '.join(summary_parts)}.")
             )
         elif result.successful > 0:
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"Successfully imported {result.successful} communication notes."
-                )
+                self.style.SUCCESS(f"Import completed: {', '.join(summary_parts)}.")
             )
         else:
             self.stdout.write(

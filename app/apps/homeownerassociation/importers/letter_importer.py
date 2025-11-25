@@ -32,6 +32,7 @@ class LetterImporter(BaseImporter):
         self.description = description
         self.author_name = author_name
         self.skip_hoa_api = skip_hoa_api
+        self.processed_hoa_names: set[str] = set()
 
     def _find_homeowner_association(
         self, row: Dict[str, str], row_number: int
@@ -50,6 +51,14 @@ class LetterImporter(BaseImporter):
         """
         # Find `HomeownerAssociation`
         hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+
+        # Check for duplicate HOA names (deduplicate exact matches)
+        if hoa_name in self.processed_hoa_names:
+            self._add_message(
+                f"Row {row_number}: Skipping duplicate HOA '{hoa_name}' (already processed)"
+            )
+            return False
+
         hoa = self._find_homeowner_association(row, row_number)
         if not hoa:
             self._add_error(
@@ -75,6 +84,8 @@ class LetterImporter(BaseImporter):
                         author=None,
                     )
 
+            # Mark this HOA name as processed
+            self.processed_hoa_names.add(hoa_name)
             return True
 
         except Exception as e:
