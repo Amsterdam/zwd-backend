@@ -52,10 +52,10 @@ class LetterImporter(BaseImporter):
         # Find `HomeownerAssociation`
         hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
 
-        # Check for duplicate HOA names (deduplicate exact matches)
+        # Check for duplicate exact matches of HOA names in previous rows (deduplicate exact matches)
         if hoa_name in self.processed_hoa_names:
             self._add_message(
-                f"Row {row_number}: Skipping duplicate HOA '{hoa_name}' (already processed)"
+                f"Row {row_number}: Skipping duplicate HOA '{hoa_name}' (already processed in previous rows)"
             )
             return False
 
@@ -66,6 +66,30 @@ class LetterImporter(BaseImporter):
                 None,
                 f"Could not find homeowner association for '{hoa_name}'",
             )
+            return False
+
+        # Check for already imported communication notes (e.g. if the script is run multiple times).
+        # We're assuming (for now) that a communication note with these criteria would be unique:
+        # - Same homeowner association
+        # - Same date
+        # - Flag `is_imported` is set `True`
+        existing_note = HomeownerAssociationCommunicationNote.objects.filter(
+            homeowner_association=hoa, date=self.date, is_imported=True
+        ).exists()
+
+        if existing_note:
+            if self.dry_run:
+                self._add_message(
+                    f"Row {row_number}: [DRY RUN] Would skip duplicate imported communication note for HOA {hoa.name} "
+                    f"(already exists for date {self.date})"
+                )
+            else:
+                self._add_message(
+                    f"Row {row_number}: Skipping duplicate imported communication note for HOA {hoa.name} "
+                    f"(already exists for date {self.date})"
+                )
+            # Mark this HOA name as processed to avoid duplicate messages
+            self.processed_hoa_names.add(hoa_name)
             return False
 
         try:
@@ -82,6 +106,7 @@ class LetterImporter(BaseImporter):
                         author_name=self.author_name,
                         date=self.date,
                         author=None,
+                        is_imported=True,
                     )
 
             # Mark this HOA name as processed

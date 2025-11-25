@@ -226,14 +226,17 @@ class BaseImporter(ABC):
         self.result.add_message(message)
 
     def _find_homeowner_association_by_name(
-        self, hoa_name: str, row_number: int, skip_hoa_api: bool = False
+        self,
+        hoa_name: str,
+        row_number: int,
+        skip_hoa_api: bool = False,
     ) -> Optional["HomeownerAssociation"]:
         """
         Find HomeownerAssociation by exact name match with optional DSO API fallback.
 
         Args:
-            hoa_name: The HOA name to look up (from 'Statutaire Naam' column)
-            row_number: The current row number for error/warning messages
+            hoa_name: The HOA name to look up (e.g. a 'Statutaire Naam' column)
+            row_number: The current row number for returning error/warning messages
             skip_hoa_api: If True, skip fetching from DSO API even if HOA not found
 
         Returns:
