@@ -122,16 +122,19 @@ class BaseImporter(ABC):
 
                 # Handle single-column file (no delimiter)
                 if delimiter is None:
+                    # Use CSV reader to properly handle quoted values
+                    csv_reader = csv.reader(io.StringIO(content))
                     lines = [
-                        line.strip()
-                        for line in content.strip().split("\n")
-                        if line.strip()
+                        row
+                        for row in csv_reader
+                        if row and any(cell.strip() for cell in row)
                     ]
+
                     if not lines:
                         raise ImportError("CSV file is empty")
 
                     # First line is the header
-                    header = lines[0].strip()
+                    header = lines[0][0].strip() if lines[0] else ""
                     if not header:
                         raise ImportError("CSV file has no headers")
 
@@ -139,7 +142,8 @@ class BaseImporter(ABC):
                     rows = []
                     # Process remaining lines as single-column values
                     for line in lines[1:]:
-                        cleaned_row = {header: line.strip()}
+                        value = line[0].strip() if line else ""
+                        cleaned_row = {header: value}
                         rows.append(cleaned_row)
                 else:
                     reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
