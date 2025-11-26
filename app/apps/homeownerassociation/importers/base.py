@@ -83,13 +83,18 @@ class BaseImporter(ABC):
         # Default to utf-8 if all fail
         return "utf-8"
 
-    def _detect_delimiter(self, first_line: str) -> str:
+    def _detect_delimiter(self, first_line: str) -> Optional[str]:
         """
         Detect CSV delimiter by checking the first line (semicolon or comma).
+        Returns None if no delimiter is found (single-column file).
         """
         # Count semicolons and commas in the first line
         semicolon_count = first_line.count(";")
         comma_count = first_line.count(",")
+
+        # If no delimiter found, return None (single-column file)
+        if semicolon_count == 0 and comma_count == 0:
+            return None
 
         # Use semicolon if it appears more frequently, otherwise default to comma
         if semicolon_count > comma_count:
@@ -115,29 +120,51 @@ class BaseImporter(ABC):
                 first_line = content.split("\n")[0] if content else ""
                 delimiter = self._detect_delimiter(first_line)
 
-                reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
-                headers = reader.fieldnames
+                # Handle single-column file (no delimiter)
+                if delimiter is None:
+                    lines = [
+                        line.strip()
+                        for line in content.strip().split("\n")
+                        if line.strip()
+                    ]
+                    if not lines:
+                        raise ImportError("CSV file is empty")
 
-                if not headers:
-                    raise ImportError("CSV file has no headers")
+                    # First line is the header
+                    header = lines[0].strip()
+                    if not header:
+                        raise ImportError("CSV file has no headers")
 
-                # Normalize headers: strip whitespace and handle None values
-                headers = [
-                    h.strip() if h and isinstance(h, str) else "" for h in headers
-                ]
-                reader.fieldnames = headers
+                    headers = [header]
+                    rows = []
+                    # Process remaining lines as single-column values
+                    for line in lines[1:]:
+                        cleaned_row = {header: line.strip()}
+                        rows.append(cleaned_row)
+                else:
+                    reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
+                    headers = reader.fieldnames
 
-                rows = []
-                for row in reader:
-                    # Strip whitespace from all keys and values, handle None values
-                    cleaned_row = {}
-                    for k, v in row.items():
-                        # Handle None keys
-                        key = k.strip() if k and isinstance(k, str) else ""
-                        # Handle None values
-                        value = v.strip() if v and isinstance(v, str) else ""
-                        cleaned_row[key] = value
-                    rows.append(cleaned_row)
+                    if not headers:
+                        raise ImportError("CSV file has no headers")
+
+                    # Normalize headers: strip whitespace and handle None values
+                    headers = [
+                        h.strip() if h and isinstance(h, str) else "" for h in headers
+                    ]
+                    reader.fieldnames = headers
+
+                    rows = []
+                    for row in reader:
+                        # Strip whitespace from all keys and values, handle None values
+                        cleaned_row = {}
+                        for k, v in row.items():
+                            # Handle None keys
+                            key = k.strip() if k and isinstance(k, str) else ""
+                            # Handle None values
+                            value = v.strip() if v and isinstance(v, str) else ""
+                            cleaned_row[key] = value
+                        rows.append(cleaned_row)
 
                 return headers, rows
 
