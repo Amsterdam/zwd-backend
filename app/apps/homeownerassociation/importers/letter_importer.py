@@ -71,10 +71,10 @@ class LetterImporter(BaseImporter):
         # Check for already imported communication notes (e.g. if the script is run multiple times).
         # We're assuming (for now) that a communication note with these criteria would be unique:
         # - Same homeowner association
-        # - Same date
+        # - Same date (ignoring time, e.g. 2025-11-26 is the same as 2025-11-26 08:00:00)
         # - Flag `is_imported` is set `True`
         existing_note = HomeownerAssociationCommunicationNote.objects.filter(
-            homeowner_association=hoa, date=self.date, is_imported=True
+            homeowner_association=hoa, date__date=self.date.date(), is_imported=True
         ).exists()
 
         if existing_note:
