@@ -42,6 +42,7 @@ class Command(BaseCommand):
     def _parse_date(self, date_string: str) -> datetime:
         """
         Parse date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM:SS.
+        If no time is provided, defaults to 08:00:00.
         Returns timezone-aware datetime object.
         """
         date_formats = [
@@ -53,6 +54,9 @@ class Command(BaseCommand):
         for date_format in date_formats:
             try:
                 naive_dt = datetime.strptime(date_string, date_format)
+                # If only date was provided (no time), default to 08:00:00
+                if date_format == "%Y-%m-%d":
+                    naive_dt = naive_dt.replace(hour=8, minute=0, second=0)
                 # Make the datetime timezone-aware using Django's timezone
                 return timezone.make_aware(naive_dt)
             except ValueError:
