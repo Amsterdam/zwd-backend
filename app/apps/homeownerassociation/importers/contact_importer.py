@@ -72,84 +72,13 @@ class ContactImporter(BaseImporter):
                     f"Row {row_number}: Error looking up case {legacy_id}: {str(e)}"
                 )
 
-        # Try to find by `Statutaire Naam` (HomeownerAssociation `name`, exact match)
+        # Try to find by `Statutaire Naam` (HomeownerAssociation `name`, exact match with DSO API fallback)
         if hoa_name:
-            try:
-                hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
-                if hoa:
-                    return hoa
-
-                # HOA not found in database, try to fetch from DSO API and create it
-                if not self.dry_run and not self.skip_hoa_api:
-                    try:
-                        # Create a temporary instance to use the `_get_hoa_data` method
-                        temp_hoa = HomeownerAssociation()
-                        data = temp_hoa._get_hoa_data(hoa_name)
-
-                        # Check if we got valid data (`response` should not be empty)
-                        if not data.get("response"):
-                            raise ValueError("No data returned from external API")
-
-                        # Create the HOA with data from external API
-                        with transaction.atomic():
-                            hoa = HomeownerAssociation.objects.create(
-                                name=data["hoa_name"],
-                                build_year=data["build_year"],
-                                number_of_apartments=data["number_of_apartments"],
-                                district=data["district"],
-                                neighborhood=data["neighborhood"],
-                                wijk=data["wijk"],
-                                zip_code=data["zip_code"],
-                                monument_status=data["monument_status"],
-                                ligt_in_beschermd_gebied=data[
-                                    "ligt_in_beschermd_gebied"
-                                ],
-                                beschermd_stadsdorpsgezicht=data[
-                                    "beschermd_stadsdorpsgezicht"
-                                ],
-                                kvk_nummer=data["kvk_nummer"],
-                            )
-                            # Create ownerships from the API response
-                            temp_hoa._create_ownerships(data["response"], hoa)
-
-                        self._add_message(
-                            f"Row {row_number}: Created new HOA '{hoa_name}' from external API"
-                        )
-                        return hoa
-                    except (IndexError, KeyError, ValueError) as e:
-                        # API returned empty or invalid data
-                        self._add_warning(
-                            f"Row {row_number}: Could not fetch HOA data from external API for '{hoa_name}': {str(e)}"
-                        )
-                    except Exception as e:
-                        # Other API or creation errors
-                        self._add_warning(
-                            f"Row {row_number}: Error creating HOA '{hoa_name}' from external API: {str(e)}"
-                        )
-                else:
-                    # In dry-run mode, try to fetch data but don't create (unless `skip_hoa_api` is set)
-                    if not self.skip_hoa_api:
-                        try:
-                            temp_hoa = HomeownerAssociation()
-                            data = temp_hoa._get_hoa_data(hoa_name)
-                            if data.get("response"):
-                                self._add_message(
-                                    f"Row {row_number}: [DRY RUN] Would create new HOA '{hoa_name}' from external API"
-                                )
-                            else:
-                                self._add_warning(
-                                    f"Row {row_number}: [DRY RUN] No data available from external API for '{hoa_name}'"
-                                )
-                        except Exception as e:
-                            self._add_warning(
-                                f"Row {row_number}: [DRY RUN] Could not fetch HOA data from external API for '{hoa_name}': {str(e)}"
-                            )
-                    # Return None in dry-run since we're not actually creating it
-                    return None
-            except Exception as e:
-                self._add_warning(
-                    f"Row {row_number}: Error looking up HOA by name '{hoa_name}': {str(e)}"
-                )
+            hoa = self._find_homeowner_association_by_name(
+                hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
+            )
+            if hoa:
+                return hoa
 
         return None
 

@@ -113,8 +113,7 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
         "note",
         "author_name",
         "date",
-        "created",
-        "updated",
+        "is_imported",
     )
     search_fields = (
         "homeowner_association__id",
@@ -124,3 +123,4 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ["homeowner_association"]
     exclude = ("author",)
+    readonly_fields = ("created", "updated", "is_imported")
