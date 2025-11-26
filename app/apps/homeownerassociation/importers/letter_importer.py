@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional
 from django.db import transaction
-from apps.homeownerassociation.models import HomeownerAssociationCommunicationNote
+from apps.homeownerassociation.models import (
+    HomeownerAssociation,
+    HomeownerAssociationCommunicationNote,
+)
 from .base import BaseImporter
-
-if TYPE_CHECKING:
-    from apps.homeownerassociation.models import HomeownerAssociation
 
 
 class LetterImporter(BaseImporter):
@@ -36,7 +36,7 @@ class LetterImporter(BaseImporter):
 
     def _find_homeowner_association(
         self, row: Dict[str, str], row_number: int
-    ) -> Optional["HomeownerAssociation"]:
+    ) -> Optional[HomeownerAssociation]:
         """
         Find HomeownerAssociation by exact name match (`Statutaire Naam` → `HomeownerAssociation.name`) with optional DSO API fallback.
         """
@@ -60,8 +60,6 @@ class LetterImporter(BaseImporter):
             return False
 
         # Check database first before attempting API fetch
-        from apps.homeownerassociation.models import HomeownerAssociation
-
         hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
 
         # If not in database, try to find/create via API (only if not already attempted)

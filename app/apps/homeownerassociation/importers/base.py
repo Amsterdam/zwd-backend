@@ -122,19 +122,27 @@ class BaseImporter(ABC):
 
                 # Handle single-column file (no delimiter)
                 if delimiter is None:
-                    # Use CSV reader to properly handle quoted values
-                    csv_reader = csv.reader(io.StringIO(content))
-                    lines = [
-                        row
-                        for row in csv_reader
-                        if row and any(cell.strip() for cell in row)
-                    ]
+                    # For single-column files, read line by line and handle quotes manually
+                    # Since there's no delimiter, we can't use csv.reader (it defaults to comma)
+                    lines_raw = content.strip().split("\n")
+                    lines = []
+                    for line in lines_raw:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        # Handle quoted values: remove surrounding quotes and unescape internal quotes
+                        if line.startswith('"') and line.endswith('"'):
+                            # Remove surrounding quotes
+                            line = line[1:-1]
+                            # Replace escaped quotes (double quotes) with single quotes
+                            line = line.replace('""', '"')
+                        lines.append(line)
 
                     if not lines:
                         raise ImportError("CSV file is empty")
 
                     # First line is the header
-                    header = lines[0][0].strip() if lines[0] else ""
+                    header = lines[0].strip()
                     if not header:
                         raise ImportError("CSV file has no headers")
 
@@ -142,8 +150,7 @@ class BaseImporter(ABC):
                     rows = []
                     # Process remaining lines as single-column values
                     for line in lines[1:]:
-                        value = line[0].strip() if line else ""
-                        cleaned_row = {header: value}
+                        cleaned_row = {header: line.strip()}
                         rows.append(cleaned_row)
                 else:
                     reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
