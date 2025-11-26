@@ -59,14 +59,23 @@ class LetterImporter(BaseImporter):
             )
             return False
 
-        hoa = self._find_homeowner_association(row, row_number)
+        # Check database first before attempting API fetch
+        from apps.homeownerassociation.models import HomeownerAssociation
+
+        hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
+
+        # If not in database, try to find/create via API (only if not already attempted)
         if not hoa:
-            self._add_error(
-                row_number,
-                None,
-                f"Could not find homeowner association for '{hoa_name}'",
-            )
-            return False
+            hoa = self._find_homeowner_association(row, row_number)
+            if not hoa:
+                # Mark as processed to avoid retrying API fetch for duplicates
+                self.processed_hoa_names.add(hoa_name)
+                self._add_error(
+                    row_number,
+                    None,
+                    f"Could not find homeowner association for '{hoa_name}'",
+                )
+                return False
 
         # Check for already imported communication notes (e.g. if the script is run multiple times).
         # We're assuming (for now) that a communication note with these criteria would be unique:
