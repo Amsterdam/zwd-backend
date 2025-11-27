@@ -1,10 +1,12 @@
 import os
 from django.core.management.base import BaseCommand, CommandError
-from apps.homeownerassociation.importers.contact_importer import ContactImporter
+from apps.homeownerassociation.importers.course_participant_importer import (
+    CourseParticipantImporter,
+)
 
 
 class Command(BaseCommand):
-    help = "Import homeowner association contacts from a CSV file"
+    help = "Import homeowner association course participants from a CSV file"
 
     def add_arguments(self, parser):
         parser.add_argument("file", type=str, help="Path to the CSV file to import")
@@ -32,14 +34,14 @@ class Command(BaseCommand):
             raise CommandError(f"Path is not a file: {csv_file}")
 
         # Create importer and run import
-        importer = ContactImporter(dry_run=dry_run, skip_hoa_api=skip_hoa_api)
+        importer = CourseParticipantImporter(dry_run=dry_run, skip_hoa_api=skip_hoa_api)
 
         if dry_run:
             self.stdout.write(
                 self.style.WARNING("Running in DRY-RUN mode (no data will be saved)")
             )
 
-        self.stdout.write(f"Importing contacts from: {csv_file}")
+        self.stdout.write(f"Importing course participants from: {csv_file}")
         result = importer.import_file(csv_file)
 
         # Output results
@@ -69,8 +71,10 @@ class Command(BaseCommand):
         elif result.successful > 0:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Successfully imported {result.successful} contacts."
+                    f"Successfully imported {result.successful} course participants."
                 )
             )
         else:
-            self.stdout.write(self.style.WARNING("No contacts were imported."))
+            self.stdout.write(
+                self.style.WARNING("No course participants were imported.")
+            )
