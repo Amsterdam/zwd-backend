@@ -108,9 +108,6 @@ class CourseParticipantImporter(BaseImporter):
             # Parse DD/MM/YYYY format
             return datetime.strptime(date_part, "%d/%m/%Y")
         except ValueError:
-            self._add_warning(
-                f"Row {row_number}: Could not parse course date '{date_string}', expected format DD/MM/YYYY"
-            )
             return None
 
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
@@ -137,9 +134,24 @@ class CourseParticipantImporter(BaseImporter):
 
         fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
 
-        # Parse course date
+        # Parse course date - required field
         course_date_str = row.get(self.COLUMN_MAPPING["course_date"], "").strip()
+        if not course_date_str:
+            self._add_error(
+                row_number,
+                self.COLUMN_MAPPING["course_date"],
+                "Course date is required",
+            )
+            return False
+
         course_date = self._parse_course_date(course_date_str, row_number)
+        if not course_date:
+            self._add_error(
+                row_number,
+                self.COLUMN_MAPPING["course_date"],
+                f"Invalid course date format: '{course_date_str}'. Expected format: DD/MM/YYYY",
+            )
+            return False
 
         # Find `HomeownerAssociation`
         hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
@@ -157,9 +169,7 @@ class CourseParticipantImporter(BaseImporter):
 
         try:
             if self.dry_run:
-                course_date_str = (
-                    course_date.strftime("%Y-%m-%d") if course_date else "None"
-                )
+                course_date_str = course_date.strftime("%Y-%m-%d")
                 self._add_message(
                     f"Row {row_number}: [DRY RUN] Would create/update contact {email} "
                     f"for HOA {hoa.name} with course date {course_date_str}"
@@ -176,9 +186,7 @@ class CourseParticipantImporter(BaseImporter):
                         # Note: we preserve existing values if not present in the CSV
                         contact.fullname = fullname or contact.fullname
                         contact.role = contact.role or role
-                        contact.course_date = (
-                            course_date.date() if course_date else None
-                        )
+                        contact.course_date = course_date.date()
                         contact.save()
                     else:
                         # Create new contact
@@ -188,7 +196,7 @@ class CourseParticipantImporter(BaseImporter):
                             phone="",
                             role=role,
                             homeowner_association=hoa,
-                            course_date=course_date.date() if course_date else None,
+                            course_date=course_date.date(),
                         )
 
             return True
