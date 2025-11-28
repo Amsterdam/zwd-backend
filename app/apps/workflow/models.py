@@ -1,6 +1,7 @@
 import copy
 import datetime
 import os
+from functools import lru_cache
 
 
 from apps.users import auth
@@ -141,18 +142,17 @@ class CaseWorkflow(models.Model):
             )
         )
 
-    def _get_workflow_path(
-        # TODO make dynamic
-        self,
-        workflow_type,
-        theme_name="default",
-    ):
+    @staticmethod
+    def _get_workflow_path(workflow_type, workflow_version, theme_name="default"):
+        """
+        Get the filesystem path for a workflow's BPMN files.
+        """
         path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "bpmn_files",
             theme_name.lower(),
             workflow_type.lower(),
-            self.workflow_version.lower(),
+            workflow_version.lower(),
         )
         return path
 
@@ -300,13 +300,33 @@ class CaseWorkflow(models.Model):
         self._save_workflow_state(wf)
         self._update_tasks(wf)
 
-    def _get_or_restore_workflow_state(self):
-        # gets the unserialized workflow from this workflow instance, it has to use an workflow_spec, witch in this case will be load from filesystem.
+    @staticmethod
+    @lru_cache(maxsize=256)
+    def _get_workflow_spec(workflow_type, workflow_version, theme_name="default"):
+        """
+        Parse and cache BPMN workflow spec.
+        We're caching since reading and parsing BPMN files from the filesystem is a slow operation,
+        and versions should never change.
+        """
         parser = CamundaParser()
-        path = self._get_workflow_path(self.workflow_type)
-        for f in self._get_workflow_spec_files(path):
+        path = CaseWorkflow._get_workflow_path(
+            workflow_type,
+            workflow_version,
+            theme_name,
+        )
+        for f in CaseWorkflow._get_workflow_spec_files(path):
             parser.add_bpmn_file(f)
-        workflow_spec = parser.get_spec(self.workflow_type)
+        return parser.get_spec(workflow_type)
+
+    def _get_or_restore_workflow_state(self):
+        """
+        Gets the unserialized workflow from this workflow instance, it has to use an workflow_spec,
+        which in this case will be loaded from the filesystem.
+        """
+        theme_name = self.workflow_theme_name or "default"
+        workflow_spec = self._get_workflow_spec(
+            self.workflow_type, self.workflow_version, theme_name
+        )
         if not workflow_spec:
             return
         if self.serialized_workflow_state:
@@ -320,11 +340,14 @@ class CaseWorkflow(models.Model):
             workflow = self._get_script_engine(workflow)
             return workflow
 
-    def _get_workflow_spec_files(self, path):
+    @staticmethod
+    def _get_workflow_spec_files(path):
+        if not os.path.isdir(path):
+            return []
         return [
             os.path.join(path, f)
             for f in os.listdir(path)
-            if os.path.isfile(os.path.join(path, f)) and self._is_bpmn_file(f)
+            if os.path.isfile(os.path.join(path, f)) and CaseWorkflow._is_bpmn_file(f)
         ]
 
     def _start_child_workflow(
@@ -346,7 +369,8 @@ class CaseWorkflow(models.Model):
             )
             subworkflow.start()
 
-    def _is_bpmn_file(self, file_name):
+    @staticmethod
+    def _is_bpmn_file(file_name):
         return file_name.split(".")[-1] == "bpmn"
 
     def _get_script_engine(self, wf):
