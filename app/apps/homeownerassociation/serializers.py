@@ -117,7 +117,15 @@ class CaseHomeownerAssociationSerializer(serializers.ModelSerializer):
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ["fullname", "email", "phone", "role", "id", "course_date"]
+        fields = [
+            "id",
+            "fullname",
+            "email",
+            "phone",
+            "role",
+            "is_primary",
+            "course_date",
+        ]
         depth = 1
 
 
@@ -127,10 +135,11 @@ class ContactWriteSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(required=True, allow_blank=False, max_length=20)
     fullname = serializers.CharField(required=True, allow_blank=False, max_length=255)
     role = serializers.CharField(required=True, allow_blank=False, max_length=255)
+    is_primary = serializers.BooleanField(required=False, default=False)
 
     class Meta:
         model = Contact
-        fields = ["id", "fullname", "email", "phone", "role"]
+        fields = ["id", "fullname", "email", "phone", "role", "is_primary"]
 
 
 class HomeownerAssociationSearchSerializer(serializers.Serializer):
