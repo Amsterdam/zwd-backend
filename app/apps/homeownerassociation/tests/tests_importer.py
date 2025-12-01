@@ -50,6 +50,8 @@ class ContactImporterTest(TestCase):
             self.assertEqual(contact.fullname, "John Doe")
             self.assertEqual(contact.homeowner_association, self.hoa)
             self.assertEqual(contact.role, "Geïmporteerd contact")
+            # Verify is_primary defaults to False for imported contacts
+            self.assertFalse(contact.is_primary)
         finally:
             os.unlink(csv_file)
 
