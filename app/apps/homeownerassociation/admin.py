@@ -54,7 +54,15 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ("id", "email", "fullname", "phone", "role", "homeowner_association")
+    list_display = (
+        "id",
+        "email",
+        "fullname",
+        "phone",
+        "role",
+        "is_primary",
+        "homeowner_association",
+    )
     search_fields = ("id", "email", "fullname", "phone", "role")
     autocomplete_fields = ["homeowner_association"]
 
