@@ -108,6 +108,10 @@ class HomeownerAssociationTest(APITestCase):
         self.assertEqual(len(get_response.data), 2)
         contact_names = {contact["fullname"] for contact in get_response.data}
         self.assertSetEqual(contact_names, {"John Doe", "Jane Smith"})
+        # Verify is_primary defaults to False and is included in response
+        for contact in get_response.data:
+            self.assertIn("is_primary", contact)
+            self.assertFalse(contact["is_primary"])
 
     def test_put_hoa_contacts_with_empty_data(self):
         hoa = baker.make("homeownerassociation.HomeownerAssociation")
@@ -143,6 +147,7 @@ class HomeownerAssociationTest(APITestCase):
         updated_contact = Contact.objects.get(id=existing_contact.id)
         self.assertEqual(updated_contact.fullname, "New Name")
         self.assertEqual(updated_contact.email, "new@example.com")
+        self.assertFalse(updated_contact.is_primary)
 
     def test_put_hoa_contacts_nonexistent_id(self):
         """Test that PUT returns error for non-existent contact ID."""
@@ -155,6 +160,7 @@ class HomeownerAssociationTest(APITestCase):
                 "email": "john@example.com",
                 "phone": "1234567890",
                 "role": "President",
+                "is_primary": True,
             }
         ]
         url = reverse("homeownerassociation-contacts", args=[hoa.id])
@@ -173,6 +179,7 @@ class HomeownerAssociationTest(APITestCase):
         self.assertEqual(created["email"], "john@example.com")
         self.assertEqual(created["phone"], "1234567890")
         self.assertEqual(created["role"], "President")
+        self.assertTrue(created["is_primary"])
 
     def test_post_hoa_contacts_validation_required_fields(self):
         """Test that POST contacts validates required fields."""
