@@ -234,6 +234,7 @@ class Contact(models.Model):
     phone = models.CharField(max_length=20)
     fullname = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
+    is_primary = models.BooleanField(default=False)
     course_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
@@ -253,6 +254,7 @@ class Contact(models.Model):
                 "email": contact.get("email"),
                 "phone": contact.get("phone"),
                 "role": contact.get("role"),
+                "is_primary": contact.get("is_primary", False),
                 "homeowner_association": homeowner_association,
             }
             existing_contact, created = Contact.objects.get_or_create(
