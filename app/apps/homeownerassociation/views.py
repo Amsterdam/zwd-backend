@@ -10,6 +10,7 @@ from .models import (
 )
 from .serializers import (
     ApartmentSerializer,
+    CourseParticipantImportSerializer,
     DistrictSerializer,
     HomeownerAssociationCommunicationNoteCreateSerializer,
     HomeownerAssociationCommunicationNoteSerializer,
@@ -17,6 +18,8 @@ from .serializers import (
     HomeownerAssociationUpdateSerializer,
     HomeownerAssociationSearchSerializer,
     HomeownerAssociationSerializer,
+    ImportResultSerializer,
+    LetterImportSerializer,
     NeighborhoodSerializer,
     WijkSerializer,
 )
@@ -29,6 +32,9 @@ from apps.homeownerassociation.models import PriorityZipCode
 from .mixins import ContactMixin
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
+from .importers.letter_importer import LetterImporter
+from .importers.course_participant_importer import CourseParticipantImporter
+from .utils import process_csv_import
 
 
 class HomeOwnerAssociationView(
@@ -189,6 +195,74 @@ class HomeOwnerAssociationView(
         result = dso_client.search_hoa_by_name(hoa_name)
         serializer = HomeownerAssociationSearchSerializer(result, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        methods=["post"],
+        request=LetterImportSerializer,
+        responses={200: ImportResultSerializer},
+        description="Import letters from a CSV file",
+    )
+    @action(
+        detail=False,
+        url_path="import-letters",
+        methods=["post"],
+    )
+    def import_letters(self, request):
+        """Import letters from a CSV file"""
+        serializer = LetterImportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        file = serializer.validated_data["file"]
+        date = serializer.validated_data["date"]
+        description = serializer.validated_data["description"]
+        author_name = serializer.validated_data["author_name"]
+
+        importer = LetterImporter(
+            date=date,
+            description=description,
+            author_name=author_name,
+        )
+
+        try:
+            result_data = process_csv_import(file, importer)
+            result_serializer = ImportResultSerializer(data=result_data)
+            result_serializer.is_valid(raise_exception=True)
+            return Response(result_serializer.validated_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"detail": f"Error processing import: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @extend_schema(
+        methods=["post"],
+        request=CourseParticipantImportSerializer,
+        responses={200: ImportResultSerializer},
+        description="Import course participants from a CSV file",
+    )
+    @action(
+        detail=False,
+        url_path="import-course-participants",
+        methods=["post"],
+    )
+    def import_course_participants(self, request):
+        """Import course participants from a CSV file"""
+        serializer = CourseParticipantImportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        file = serializer.validated_data["file"]
+        importer = CourseParticipantImporter()
+
+        try:
+            result_data = process_csv_import(file, importer)
+            result_serializer = ImportResultSerializer(data=result_data)
+            result_serializer.is_valid(raise_exception=True)
+            return Response(result_serializer.validated_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"detail": f"Error processing import: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class DistrictViewset(
