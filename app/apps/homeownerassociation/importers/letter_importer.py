@@ -55,7 +55,7 @@ class LetterImporter(BaseImporter):
         # Check for duplicate exact matches of HOA names in previous rows (deduplicate exact matches)
         if hoa_name in self.processed_hoa_names:
             self._add_message(
-                f"Row {row_number}: Skipping duplicate HOA '{hoa_name}' (already processed in previous rows)"
+                f"Rij {row_number}: Dubbele vve '{hoa_name}' overgeslagen (al verwerkt in eerdere rijen)"
             )
             return False
 
@@ -71,7 +71,7 @@ class LetterImporter(BaseImporter):
                 self._add_error(
                     row_number,
                     None,
-                    f"Could not find homeowner association for '{hoa_name}'",
+                    f"Kon vve niet vinden voor '{hoa_name}'",
                 )
                 return False
 
@@ -89,13 +89,13 @@ class LetterImporter(BaseImporter):
         if existing_note:
             if self.dry_run:
                 self._add_message(
-                    f"Row {row_number}: [DRY RUN] Would skip duplicate imported communication note for HOA {hoa.name} "
-                    f"(already exists for date {self.date})"
+                    f"Rij {row_number}: [DRY RUN] Zou dubbele geïmporteerde contactmelding voor vve '{hoa.name}' overslaan "
+                    f"(bestaat al voor datum {self.date.strftime('%d-%m-%Y')})"
                 )
             else:
                 self._add_message(
-                    f"Row {row_number}: Skipping duplicate imported communication note for HOA {hoa.name} "
-                    f"(already exists for date {self.date})"
+                    f"Rij {row_number}: Dubbele import van contactmelding overgeslagen voor vve '{hoa.name}' "
+                    f"(bestaat al voor datum {self.date.strftime('%d-%m-%Y')})"
                 )
             # Mark this HOA name as processed to avoid duplicate messages
             self.processed_hoa_names.add(hoa_name)
@@ -104,8 +104,8 @@ class LetterImporter(BaseImporter):
         try:
             if self.dry_run:
                 self._add_message(
-                    f"Row {row_number}: [DRY RUN] Would create communication note for HOA {hoa.name} "
-                    f"with date {self.date}, author '{self.author_name}', and description '{self.description}'"
+                    f"Rij {row_number}: [DRY RUN] Zou contactmelding aanmaken voor vve '{hoa.name}' "
+                    f"met datum {self.date}, auteur '{self.author_name}', en beschrijving '{self.description}'"
                 )
             else:
                 with transaction.atomic():
@@ -124,6 +124,6 @@ class LetterImporter(BaseImporter):
 
         except Exception as e:
             self._add_error(
-                row_number, None, f"Error saving communication note: {str(e)}"
+                row_number, None, f"Fout bij het opslaan van contactmelding: {str(e)}"
             )
             return False

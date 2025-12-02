@@ -19,8 +19,8 @@ class RowError:
 
     def __str__(self):
         if self.field:
-            return f"Row {self.row_number}, field '{self.field}': {self.message}"
-        return f"Row {self.row_number}: {self.message}"
+            return f"Rij {self.row_number}, veld '{self.field}': {self.message}"
+        return f"Rij {self.row_number}: {self.message}"
 
 
 class ImportResult:
@@ -51,8 +51,8 @@ class ImportResult:
 
     def __str__(self):
         return (
-            f"Import completed: {self.successful} successful, "
-            f"{self.failed} failed, {self.skipped} skipped out of {self.total_rows} total rows"
+            f"Import voltooid: {self.successful} succesvol, "
+            f"{self.failed} mislukt, {self.skipped} overgeslagen van {self.total_rows} totaal aantal rijen"
         )
 
 
@@ -139,12 +139,12 @@ class BaseImporter(ABC):
                         lines.append(line)
 
                     if not lines:
-                        raise ImportError("CSV file is empty")
+                        raise ImportError("CSV-bestand is leeg")
 
                     # First line is the header
                     header = lines[0].strip()
                     if not header:
-                        raise ImportError("CSV file has no headers")
+                        raise ImportError("CSV-bestand heeft geen headers")
 
                     headers = [header]
                     rows = []
@@ -157,7 +157,7 @@ class BaseImporter(ABC):
                     headers = reader.fieldnames
 
                     if not headers:
-                        raise ImportError("CSV file has no headers")
+                        raise ImportError("CSV-bestand heeft geen headers")
 
                     # Normalize headers: strip whitespace and handle None values
                     headers = [
@@ -180,12 +180,12 @@ class BaseImporter(ABC):
                 return headers, rows
 
         except FileNotFoundError:
-            raise ImportError(f"File not found: {file_path}")
+            raise ImportError(f"Bestand niet gevonden: {file_path}")
         except ImportError:
             # Re-raise ImportError as-is
             raise
         except Exception as e:
-            raise ImportError(f"Error reading CSV file: {str(e)}")
+            raise ImportError(f"Fout bij het lezen van CSV-bestand: {str(e)}")
 
     def _validate_headers(self, headers: List[str]) -> None:
         """
@@ -198,8 +198,8 @@ class BaseImporter(ABC):
 
         if missing_columns:
             raise ImportError(
-                f"Missing required columns: {', '.join(missing_columns)}. "
-                f"Found columns: {', '.join(headers)}"
+                f"Ontbrekende verplichte kolommen: {', '.join(f'‘{col}’' for col in missing_columns)}. "
+                f"Gevonden kolommen: {', '.join(f'‘{col}’' for col in headers)}"
             )
 
     def _validate_email(self, email: str) -> bool:
@@ -302,7 +302,7 @@ class BaseImporter(ABC):
 
                     # Check if we got valid data (`response` should not be empty)
                     if not data.get("response"):
-                        raise ValueError("No data returned from external API")
+                        raise ValueError("Geen data teruggekregen van externe DSO API")
 
                     # Create the HOA with data from external API
                     with transaction.atomic():
@@ -325,18 +325,18 @@ class BaseImporter(ABC):
                         temp_hoa._create_ownerships(data["response"], hoa)
 
                     self._add_message(
-                        f"Row {row_number}: Created new HOA '{hoa_name}' from external API"
+                        f"Rij {row_number}: Nieuwe vve '{hoa_name}' aangemaakt vanuit externe API"
                     )
                     return hoa
                 except (IndexError, KeyError, ValueError) as e:
                     # API returned empty or invalid data
                     self._add_warning(
-                        f"Row {row_number}: Could not fetch HOA data from external API for '{hoa_name}': {str(e)}"
+                        f"Rij {row_number}: Kon vve-data niet ophalen van externe API voor '{hoa_name}': {str(e)}"
                     )
                 except Exception as e:
                     # Other API or creation errors
                     self._add_warning(
-                        f"Row {row_number}: Error creating HOA '{hoa_name}' from external API: {str(e)}"
+                        f"Rij {row_number}: Fout bij het aanmaken van vve '{hoa_name}' vanuit externe API: {str(e)}"
                     )
             else:
                 # In dry-run mode, try to fetch data but don't create (unless `skip_hoa_api` is set)
@@ -346,21 +346,21 @@ class BaseImporter(ABC):
                         data = temp_hoa._get_hoa_data(hoa_name)
                         if data.get("response"):
                             self._add_message(
-                                f"Row {row_number}: [DRY RUN] Would create new HOA '{hoa_name}' from external API"
+                                f"Rij {row_number}: [DRY RUN] Zou nieuwe VvE '{hoa_name}' aanmaken vanuit externe API"
                             )
                         else:
                             self._add_warning(
-                                f"Row {row_number}: [DRY RUN] No data available from external API for '{hoa_name}'"
+                                f"Rij {row_number}: [DRY RUN] Geen data beschikbaar van externe API voor '{hoa_name}'"
                             )
                     except Exception as e:
                         self._add_warning(
-                            f"Row {row_number}: [DRY RUN] Could not fetch HOA data from external API for '{hoa_name}': {str(e)}"
+                            f"Rij {row_number}: [DRY RUN] Kon vve-data niet ophalen van externe API voor '{hoa_name}': {str(e)}"
                         )
                 # Return None in dry-run since we're not actually creating it
                 return None
         except Exception as e:
             self._add_warning(
-                f"Row {row_number}: Error looking up HOA by name '{hoa_name}': {str(e)}"
+                f"Rij {row_number}: Fout bij het opzoeken van vve op naam '{hoa_name}': {str(e)}"
             )
 
         return None
