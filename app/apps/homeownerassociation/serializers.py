@@ -8,6 +8,7 @@ from apps.homeownerassociation.models import (
     Wijk,
 )
 from rest_framework import serializers
+from apps.homeownerassociation.utils import validate_csv_file
 
 
 class NeighborhoodSerializer(serializers.ModelSerializer):
@@ -211,3 +212,41 @@ class HomeownerAssociationCommunicationNoteUpdateSerializer(
             "author_name",
             "date",
         )
+
+
+class RowErrorSerializer(serializers.Serializer):
+    """Serializer for individual row errors from CSV imports"""
+
+    row_number = serializers.IntegerField()
+    field = serializers.CharField(allow_null=True, required=False)
+    message = serializers.CharField()
+
+
+class ImportResultSerializer(serializers.Serializer):
+    """Serializer for CSV import results"""
+
+    counts = serializers.DictField(child=serializers.IntegerField(), required=True)
+    messages = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    warnings = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    errors = RowErrorSerializer(many=True)
+
+
+class LetterImportSerializer(serializers.Serializer):
+    """Serializer for letter CSV import requests"""
+
+    file = serializers.FileField(required=True)
+    date = serializers.DateTimeField(required=True)
+    description = serializers.CharField(required=True, allow_blank=False)
+    author_name = serializers.CharField(required=True, allow_blank=False)
+
+    def validate_file(self, value):
+        return validate_csv_file(value)
+
+
+class CourseParticipantImportSerializer(serializers.Serializer):
+    """Serializer for course participant CSV import requests"""
+
+    file = serializers.FileField(required=True)
+
+    def validate_file(self, value):
+        return validate_csv_file(value)
