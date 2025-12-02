@@ -54,11 +54,11 @@ class ContactImporter(BaseImporter):
                     return case.homeowner_association
                 elif case and not case.homeowner_association:
                     self._add_warning(
-                        f"Row {row_number}: Case {prefixed_dossier_id} found but has no homeowner_association"
+                        f"Rij {row_number}: Zaak {prefixed_dossier_id} gevonden maar heeft geen vve"
                     )
             except Exception as e:
                 self._add_warning(
-                    f"Row {row_number}: Error looking up case {prefixed_dossier_id}: {str(e)}"
+                    f"Rij {row_number}: Fout bij het opzoeken van zaak {prefixed_dossier_id}: {str(e)}"
                 )
 
         # Try to find by `Vnummer` (Case `legacy_id`)
@@ -69,7 +69,7 @@ class ContactImporter(BaseImporter):
                     return case.homeowner_association
             except Exception as e:
                 self._add_warning(
-                    f"Row {row_number}: Error looking up case {legacy_id}: {str(e)}"
+                    f"Rij {row_number}: Fout bij het opzoeken van zaak {legacy_id}: {str(e)}"
                 )
 
         # Try to find by `Statutaire Naam` (HomeownerAssociation `name`, exact match with DSO API fallback)
@@ -92,7 +92,7 @@ class ContactImporter(BaseImporter):
             self._add_error(
                 row_number,
                 self.COLUMN_MAPPING["contact_email"],
-                "Email address is required",
+                "E-mailadres is verplicht",
             )
             return False
 
@@ -100,7 +100,7 @@ class ContactImporter(BaseImporter):
             self._add_error(
                 row_number,
                 self.COLUMN_MAPPING["contact_email"],
-                f"Invalid email format: {email}",
+                f"Ongeldig e-mailadres formaat: {email}",
             )
             return False
 
@@ -113,7 +113,7 @@ class ContactImporter(BaseImporter):
             self._add_error(
                 row_number,
                 None,
-                f"Could not find homeowner association for '{hoa_name}'",
+                f"Kon vve niet vinden voor '{hoa_name}'",
             )
             return False
 
@@ -124,7 +124,7 @@ class ContactImporter(BaseImporter):
         try:
             if self.dry_run:
                 self._add_message(
-                    f"Row {row_number}: [DRY RUN] Would create/update contact {email} for HOA {hoa.name}"
+                    f"Rij {row_number}: [DRY RUN] Zou contact {email} aanmaken/bijwerken voor vve '{hoa.name}'"
                 )
             else:
                 with transaction.atomic():
@@ -153,5 +153,7 @@ class ContactImporter(BaseImporter):
             return True
 
         except Exception as e:
-            self._add_error(row_number, None, f"Error saving contact: {str(e)}")
+            self._add_error(
+                row_number, None, f"Fout bij het opslaan van contact: {str(e)}"
+            )
             return False
