@@ -225,13 +225,17 @@ class HomeownerAssociation(models.Model):
 
 
 class Contact(models.Model):
-    homeowner_associations = models.ManyToManyField(
-        HomeownerAssociation, related_name="contacts", default=None
+    homeowner_association = models.ForeignKey(
+        HomeownerAssociation,
+        related_name="contacts",
+        on_delete=models.CASCADE,
     )
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     fullname = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
+    is_primary = models.BooleanField(default=False)
+    course_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.email
@@ -250,6 +254,8 @@ class Contact(models.Model):
                 "email": contact.get("email"),
                 "phone": contact.get("phone"),
                 "role": contact.get("role"),
+                "is_primary": contact.get("is_primary", False),
+                "homeowner_association": homeowner_association,
             }
             existing_contact, created = Contact.objects.get_or_create(
                 id=id,
@@ -259,8 +265,6 @@ class Contact(models.Model):
                 for key, value in contact_data.items():
                     setattr(existing_contact, key, value)
                 existing_contact.save()
-
-            existing_contact.homeowner_associations.add(homeowner_association)
 
     class Meta:
         ordering = ["email"]
@@ -290,6 +294,7 @@ class HomeownerAssociationCommunicationNote(models.Model):
     )
     author_name = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField(null=True, blank=True)
+    is_imported = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

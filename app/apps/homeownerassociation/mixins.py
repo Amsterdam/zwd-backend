@@ -65,11 +65,8 @@ class ContactMixin:
     )
     def delete(self, request, pk=None, contact_id=None):
         hoa = self.get_object()
-        contact = Contact.objects.get(id=contact_id)
-        if len(contact.homeowner_associations.all()) == 1:
-            contact.delete()
-        else:
-            contact.homeowner_associations.remove(hoa)
+        contact = Contact.objects.get(id=contact_id, homeowner_association=hoa)
+        contact.delete()
         return Response(
             "Successfully deleted contact", status=status.HTTP_204_NO_CONTENT
         )

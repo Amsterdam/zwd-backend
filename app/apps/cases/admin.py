@@ -67,6 +67,7 @@ class CaseAdmin(admin.ModelAdmin):
         "request_date",
         "end_date",
     )
+    autocomplete_fields = ["homeowner_association"]
     actions = [restart_workflow, fix_request_date]
 
 

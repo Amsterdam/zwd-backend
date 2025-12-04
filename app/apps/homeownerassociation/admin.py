@@ -29,14 +29,11 @@ def update_kvk_number(modeladmin, request, queryset):
 
 
 class ContactInline(admin.TabularInline):
-    model = (
-        Contact.homeowner_associations.through
-    )  # Use the through model for the Many-to-Many relationship
-    extra = (
-        1  # Optionally, specify how many empty forms to display for adding new contacts
-    )
+    model = Contact
+    extra = 1
     verbose_name = "Contact"
     verbose_name_plural = "Contacts"
+    autocomplete_fields = ["homeowner_association"]
 
 
 @admin.register(HomeownerAssociation)
@@ -57,8 +54,17 @@ class HomeownerAssociationAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ("id", "email", "fullname", "phone", "role")
+    list_display = (
+        "id",
+        "email",
+        "fullname",
+        "phone",
+        "role",
+        "is_primary",
+        "homeowner_association",
+    )
     search_fields = ("id", "email", "fullname", "phone", "role")
+    autocomplete_fields = ["homeowner_association"]
 
 
 @admin.register(Owner)
@@ -77,6 +83,7 @@ class OwnerAdmin(admin.ModelAdmin):
         "number_of_apartments",
         "homeowner_association__name",
     )
+    autocomplete_fields = ["homeowner_association"]
 
     def get_homeowner_association_name(self, obj):
         return obj.homeowner_association.name
@@ -114,8 +121,7 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
         "note",
         "author_name",
         "date",
-        "created",
-        "updated",
+        "is_imported",
     )
     search_fields = (
         "homeowner_association__id",
@@ -123,4 +129,6 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
         "note",
         "author_name",
     )
+    autocomplete_fields = ["homeowner_association"]
     exclude = ("author",)
+    readonly_fields = ("created", "updated", "is_imported")
