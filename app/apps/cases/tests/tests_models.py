@@ -3,7 +3,7 @@ from apps.cases.models import AdviceType, ApplicationType, Case
 from django.core import management
 from django.test import TestCase
 from model_bakery import baker
-from apps.workflow.models import CaseWorkflow
+from apps.workflow.models import CaseWorkflow, GenericCompletedTask
 
 
 class CaseModelTest(TestCase):
@@ -118,3 +118,20 @@ class CaseModelTest(TestCase):
         )
         self.assertIsNone(case.advice_type)
         self.assertEqual(case.application_type, ApplicationType.COURSE.value)
+
+    def test_get_additional_report_fields(self):
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_apartments=13
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            application_type=ApplicationType.COURSE.value,
+            advice_type=None,
+        )
+        generic_completed_task = baker.make(
+            GenericCompletedTask,
+            case=case,
+            task_name="some_task",
+            variables={"mapped_form_data": {}},
+        )

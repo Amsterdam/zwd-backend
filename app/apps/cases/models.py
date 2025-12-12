@@ -110,6 +110,32 @@ class Case(ModelEventEmitter):
             self.end_date = timezone.datetime.now()
             self.save()
 
+    def get_additional_report_fields(self):
+        completed_tasks = {t.task_name: t for t in self.generic_completed_tasks.all()}
+        results = []
+        for cfg in self._get_export_config():
+            task_name = cfg["task"]
+            completed_task = completed_tasks.get(task_name)
+            if not completed_task:
+                continue
+
+            header_name = cfg["header"]
+            event_data = completed_task.variables.get("mapped_form_data", {})
+            field_name = cfg.get("field")
+
+            if field_name:
+                field_value = event_data.get(field_name)
+                value = field_value.get("value") if field_value else None
+            # No form field specified, use the date the task was completed
+            else:
+                value = completed_task.date_added
+            if not value:
+                continue
+
+            results.append({"header": header_name, "value": value})
+
+        return results
+
     def __str__(self):
         return f"Case: {self.id}"
 
@@ -132,6 +158,33 @@ class Case(ModelEventEmitter):
 
     def __get_case__(self):
         return self
+
+    def _get_export_config():
+        return [
+            {
+                "task": "task_datum_aanvraag",
+                "field": "form_datum_aanvraag",
+                "header": "Datum aanvraag",
+            },
+            {
+                "task": "task_eerder_ingediend",
+                "field": "form_aanvraag_ingediend",
+                "header": "Eerder ingediend",
+            },
+            {
+                "task": "Activity_0vb7d2u",
+                "field": "form_eindpresentatie_datum",
+                "header": "Datum eindpresentatie",
+            },
+            {
+                "task": "task_close_case",
+                "header": "Sluitdatum zaak",
+            },
+            {
+                "task": "Activity_1o7r2hg",
+                "header": "Accordeer startfactuur",
+            },
+        ]
 
     class Meta:
         ordering = ["-id"]
