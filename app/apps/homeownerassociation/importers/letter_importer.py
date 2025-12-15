@@ -83,11 +83,13 @@ class LetterImporter(BaseImporter):
         # - Same homeowner association
         # - Same date (ignoring time, e.g. 2025-11-26 is the same as 2025-11-26 08:00:00)
         # - Flag `is_imported` is set `True`
-        existing_note = HomeownerAssociationCommunicationNote.objects.filter(
-            homeowner_association=hoa,
-            date__date=self.date.date(),
-            is_imported=True,
-        ).exists()
+        existing_note = False
+        if not (self.dry_run and not isinstance(hoa, HomeownerAssociation)):
+            existing_note = HomeownerAssociationCommunicationNote.objects.filter(
+                homeowner_association=hoa,
+                date__date=self.date.date(),
+                is_imported=True,
+            ).exists()
 
         if existing_note:
             if self.dry_run:
