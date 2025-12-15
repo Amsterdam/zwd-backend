@@ -9,14 +9,17 @@ from .base import BaseImporter
 
 
 class LetterImporter(BaseImporter):
-    """Importer for letter CSV files"""
+    """
+    Importer for sent letter CSV files.
+    Creates a single `HomeownerAssociationCommunicationNote` for each matched homeowner association.
+    """
 
     COLUMNS_REQUIRED = [
-        "Statutaire Naam",
+        "vve",
     ]
 
     COLUMN_MAPPING = {
-        "hoa_name": "Statutaire Naam",
+        "hoa_name": "vve",
     }
 
     def __init__(

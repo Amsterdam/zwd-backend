@@ -6,7 +6,10 @@ from .base import BaseImporter
 
 
 class ContactImporter(BaseImporter):
-    """Importer for contact CSV files"""
+    """
+    Importer for contact CSV files.
+    Creates or updates a `Contact` for each contact in the CSV.
+    """
 
     COLUMNS_REQUIRED = [
         "ZWD",
