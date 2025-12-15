@@ -108,10 +108,11 @@ class HomeownerAssociationTest(APITestCase):
         self.assertEqual(len(get_response.data), 2)
         contact_names = {contact["fullname"] for contact in get_response.data}
         self.assertSetEqual(contact_names, {"John Doe", "Jane Smith"})
-        # Verify is_primary defaults to False and is included in response
+
         for contact in get_response.data:
             self.assertIn("is_primary", contact)
             self.assertFalse(contact["is_primary"])
+            self.assertIn("course_date", contact)
 
     def test_put_hoa_contacts_with_empty_data(self):
         hoa = baker.make("homeownerassociation.HomeownerAssociation")
@@ -231,6 +232,33 @@ class HomeownerAssociationTest(APITestCase):
         response = self.client.post(url, {"contacts": contact_data}, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertIn("fullname", str(response.data))
+
+    def test_put_hoa_contacts_with_course_date(self):
+        """Test that course_date can be set when creating/updating contacts."""
+        from datetime import date
+
+        hoa = baker.make("homeownerassociation.HomeownerAssociation")
+        contact_data = [
+            {
+                "fullname": "John Doe",
+                "email": "john@example.com",
+                "phone": "1234567890",
+                "role": "President",
+                "course_date": "2024-01-15",
+            }
+        ]
+        url = reverse("homeownerassociation-contacts", args=[hoa.id])
+        response = self.client.put(url, {"contacts": contact_data}, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(len(get_response.data), 1)
+        created = get_response.data[0]
+        self.assertEqual(created["course_date"], "2024-01-15")
+
+        contact = Contact.objects.get(email="john@example.com")
+        self.assertEqual(contact.course_date, date(2024, 1, 15))
 
     def test_delete_contact_deleted(self):
         """Test that deleting a contact removes it completely since each contact belongs to one HOA."""
