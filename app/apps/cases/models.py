@@ -111,6 +111,16 @@ class Case(ModelEventEmitter):
             self.save()
 
     def get_additional_report_fields(self):
+        """
+        Iterates through the export configuration to extract relevant data from completed tasks.
+        For each configured task, retrieves the specified field value from the task's mapped form data,
+        or uses the task's date added if no field is specified. Only includes fields with non-empty values.
+
+        Returns:
+            list[dict]: A list of dictionaries, each containing:
+                - 'header' (str): The header name for the report field.
+                - 'value' (str): The extracted value for the report field.
+        """
         completed_tasks = {t.task_name: t for t in self.generic_completed_tasks.all()}
         results = []
         for cfg in self._get_export_config():
@@ -123,12 +133,12 @@ class Case(ModelEventEmitter):
             event_data = completed_task.variables.get("mapped_form_data", {})
             field_name = cfg.get("field")
 
+            # If the task has a form field get it, otherwise use the date added
             if field_name:
                 field_value = event_data.get(field_name)
                 value = field_value.get("value") if field_value else None
-            # No form field specified, use the date the task was completed
             else:
-                value = completed_task.date_added
+                value = completed_task.date_added.strftime("%d/%m/%Y")
             if not value:
                 continue
 
@@ -159,30 +169,41 @@ class Case(ModelEventEmitter):
     def __get_case__(self):
         return self
 
-    def _get_export_config():
+    def _get_export_config(self):
+        """
+        Returns:
+            list[dict]: A list of dictionaries, each containing:
+                - "task" (str): The task_name.
+                - "header" (str): The header used in the export.
+                - "field" (str, optional): The form field name associated with the task (if applicable).
+        """
         return [
             {
-                "task": "task_datum_aanvraag",
-                "field": "form_datum_aanvraag",
-                "header": "Datum aanvraag",
+                "task": "Activity_0biofup",
+                "header": "Datum upload startfactuur",
             },
             {
-                "task": "task_eerder_ingediend",
-                "field": "form_aanvraag_ingediend",
-                "header": "Eerder ingediend",
+                "task": "Activity_14gjvcz",
+                "header": "Datum upload tussenfactuur",
             },
             {
-                "task": "Activity_0vb7d2u",
-                "field": "form_eindpresentatie_datum",
-                "header": "Datum eindpresentatie",
+                "task": "Activity_12cc63t",
+                "header": "Datum upload eindfactuur",
             },
             {
-                "task": "task_close_case",
-                "header": "Sluitdatum zaak",
+                "task": "task_inkooporder_en_bedrag",
+                "field": "form_inkooporder",
+                "header": "Inkoopordernummer",
             },
             {
-                "task": "Activity_1o7r2hg",
-                "header": "Accordeer startfactuur",
+                "task": "task_inkooporder_en_bedrag",
+                "field": "form_inkooporder_bedrag",
+                "header": "Bedrag inkooporder",
+            },
+            {
+                "task": "task_opdrachtbevestiging_verzonden",
+                "field": "form_opdrachtbevestiging_verzonden",
+                "header": "Datum opdrachtbevestiging verzonden",
             },
         ]
 
