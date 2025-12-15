@@ -137,10 +137,19 @@ class ContactWriteSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(required=True, allow_blank=False, max_length=255)
     role = serializers.CharField(required=True, allow_blank=False, max_length=255)
     is_primary = serializers.BooleanField(required=False, default=False)
+    course_date = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = Contact
-        fields = ["id", "fullname", "email", "phone", "role", "is_primary"]
+        fields = [
+            "id",
+            "fullname",
+            "email",
+            "phone",
+            "role",
+            "is_primary",
+            "course_date",
+        ]
 
 
 class HomeownerAssociationSearchSerializer(serializers.Serializer):
