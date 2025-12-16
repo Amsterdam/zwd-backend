@@ -7,7 +7,10 @@ from .base import BaseImporter
 
 
 class CourseParticipantImporter(BaseImporter):
-    """Importer for course participants CSV files"""
+    """
+    Importer for course participant CSV files.
+    Creates or updates a `Contact` for each course participant.
+    """
 
     COLUMNS_REQUIRED = [
         "ZWD",  # @TODO not sure if this will be there

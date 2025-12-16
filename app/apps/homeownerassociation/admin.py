@@ -118,7 +118,7 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "homeowner_association",
-        "note",
+        "get_note_preview",
         "author_name",
         "date",
         "is_imported",
@@ -132,3 +132,13 @@ class HomeownerAssociationCommunicationNoteAdmin(admin.ModelAdmin):
     autocomplete_fields = ["homeowner_association"]
     exclude = ("author",)
     readonly_fields = ("created", "updated", "is_imported")
+
+    def get_note_preview(self, obj):
+        if obj.note:
+            max_length = 50
+            if len(obj.note) <= max_length:
+                return obj.note
+            return obj.note[:max_length] + "..."
+        return "-"
+
+    get_note_preview.short_description = "Note"

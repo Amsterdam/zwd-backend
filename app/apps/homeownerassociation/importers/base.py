@@ -348,6 +348,13 @@ class BaseImporter(ABC):
                             self._add_message(
                                 f"Rij {row_number}: [DRY RUN] Zou nieuwe VvE '{hoa_name}' aanmaken vanuit externe API"
                             )
+
+                            class HomeownerAssociationMock:
+                                def __init__(self, name: str):
+                                    self.name = name
+                                    self.pk = None
+
+                            return HomeownerAssociationMock(hoa_name)
                         else:
                             self._add_warning(
                                 f"Rij {row_number}: [DRY RUN] Geen data beschikbaar van externe API voor '{hoa_name}'"

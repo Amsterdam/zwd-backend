@@ -148,9 +148,7 @@ class Command(BaseCommand):
         # Summary
         summary_parts = []
         if result.successful > 0:
-            summary_parts.append(
-                f"{result.successful} communication notes imported successfully"
-            )
+            summary_parts.append(f"{result.successful} letters imported successfully")
         if result.skipped > 0:
             summary_parts.append(f"{result.skipped} skipped (duplicates)")
         if result.failed > 0:
@@ -165,6 +163,4 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Import completed: {', '.join(summary_parts)}.")
             )
         else:
-            self.stdout.write(
-                self.style.WARNING("No communication notes were imported.")
-            )
+            self.stdout.write(self.style.WARNING("No letters were imported."))
