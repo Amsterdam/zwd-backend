@@ -255,6 +255,7 @@ class Contact(models.Model):
                 "phone": contact.get("phone"),
                 "role": contact.get("role"),
                 "is_primary": contact.get("is_primary", False),
+                "course_date": contact.get("course_date"),
                 "homeowner_association": homeowner_association,
             }
             existing_contact, created = Contact.objects.get_or_create(
