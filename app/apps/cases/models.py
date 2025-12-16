@@ -110,6 +110,42 @@ class Case(ModelEventEmitter):
             self.end_date = timezone.datetime.now()
             self.save()
 
+    def get_additional_report_fields(self):
+        """
+        Iterates through the export configuration to extract relevant data from completed tasks.
+        For each configured task, retrieves the specified field value from the task's mapped form data,
+        or uses the task's date added if no field is specified. Only includes fields with non-empty values.
+
+        Returns:
+            list[dict]: A list of dictionaries, each containing:
+                - 'header' (str): The header name for the report field.
+                - 'value' (str): The extracted value for the report field.
+        """
+        completed_tasks = {t.task_name: t for t in self.generic_completed_tasks.all()}
+        results = []
+        for cfg in self._get_export_config():
+            task_name = cfg["task"]
+            completed_task = completed_tasks.get(task_name)
+            if not completed_task:
+                continue
+
+            header_name = cfg["header"]
+            event_data = completed_task.variables.get("mapped_form_data", {})
+            field_name = cfg.get("field")
+
+            # If the task has a form field get it, otherwise use the date added
+            if field_name:
+                field_value = event_data.get(field_name)
+                value = field_value.get("value") if field_value else None
+            else:
+                value = completed_task.date_added.strftime("%d/%m/%Y")
+            if not value:
+                continue
+
+            results.append({"header": header_name, "value": value})
+
+        return results
+
     def __str__(self):
         return f"Case: {self.id}"
 
@@ -132,6 +168,44 @@ class Case(ModelEventEmitter):
 
     def __get_case__(self):
         return self
+
+    def _get_export_config(self):
+        """
+        Returns:
+            list[dict]: A list of dictionaries, each containing:
+                - "task" (str): The task_name.
+                - "header" (str): The header used in the export.
+                - "field" (str, optional): The form field name associated with the task (if applicable).
+        """
+        return [
+            {
+                "task": "Activity_0biofup",
+                "header": "Datum upload startfactuur",
+            },
+            {
+                "task": "Activity_14gjvcz",
+                "header": "Datum upload tussenfactuur",
+            },
+            {
+                "task": "Activity_12cc63t",
+                "header": "Datum upload eindfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag",
+                "field": "form_inkooporder",
+                "header": "Inkoopordernummer",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag",
+                "field": "form_inkooporder_bedrag",
+                "header": "Bedrag inkooporder",
+            },
+            {
+                "task": "task_opdrachtbevestiging_verzonden",
+                "field": "form_opdrachtbevestiging_verzonden",
+                "header": "Datum opdrachtbevestiging verzonden",
+            },
+        ]
 
     class Meta:
         ordering = ["-id"]

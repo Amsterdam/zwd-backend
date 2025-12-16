@@ -1,9 +1,11 @@
+from datetime import date
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.cases.models import AdviceType, ApplicationType, Case
 from django.core import management
 from django.test import TestCase
 from model_bakery import baker
-from apps.workflow.models import CaseWorkflow
+from apps.workflow.models import CaseWorkflow, GenericCompletedTask
+from unittest.mock import patch
 
 
 class CaseModelTest(TestCase):
@@ -118,3 +120,77 @@ class CaseModelTest(TestCase):
         )
         self.assertIsNone(case.advice_type)
         self.assertEqual(case.application_type, ApplicationType.COURSE.value)
+
+    @patch("apps.cases.models.Case._get_export_config")
+    def test_get_additional_report_fields(self, mock_get_export_config):
+        header = "Test Header"
+        value = "Test Value"
+        task_name = "test_task_name"
+        mock_get_export_config.return_value = [
+            {
+                "header": header,
+                "task": task_name,
+                "field": "form_aanvraag_ingediend",
+            }
+        ]
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_apartments=13
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            application_type=ApplicationType.COURSE.value,
+            advice_type=None,
+        )
+        baker.make(
+            GenericCompletedTask,
+            case=case,
+            task_name=task_name,
+            variables={
+                "initiated_by": 1,
+                "mapped_form_data": {
+                    "form_aanvraag_ingediend": {"label": "test label", "value": value}
+                },
+            },
+        )
+
+        self.assertEqual(
+            case.get_additional_report_fields(), [{"header": header, "value": value}]
+        )
+
+    @patch("apps.cases.models.Case._get_export_config")
+    def test_get_additional_report_fields_date_completed(self, mock_get_export_config):
+        header = "Test Header"
+        value = "Test Value"
+        task_name = "test_task_name"
+        mock_get_export_config.return_value = [
+            {
+                "header": header,
+                "task": task_name,
+            }
+        ]
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_apartments=13
+        )
+        case = baker.make(
+            Case,
+            homeowner_association=homeowner_association,
+            application_type=ApplicationType.COURSE.value,
+            advice_type=None,
+        )
+        baker.make(
+            GenericCompletedTask,
+            case=case,
+            task_name=task_name,
+            variables={
+                "initiated_by": 1,
+                "mapped_form_data": {
+                    "form_aanvraag_ingediend": {"label": "test label", "value": value}
+                },
+            },
+        )
+
+        self.assertEqual(
+            case.get_additional_report_fields(),
+            [{"header": header, "value": date.today().strftime("%d/%m/%Y")}],
+        )
