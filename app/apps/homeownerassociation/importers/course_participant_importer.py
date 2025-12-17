@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Dict, Optional
 from django.db import transaction
-from apps.cases.models import Case
 from apps.homeownerassociation.models import Contact, HomeownerAssociation
 from .base import BaseImporter
 
@@ -13,22 +12,22 @@ class CourseParticipantImporter(BaseImporter):
     """
 
     COLUMNS_REQUIRED = [
-        "ZWD",  # @TODO not sure if this will be there
-        "Vnummer",  # @TODO not sure if this will be there
-        "Statutaire Naam",
-        "Kontaktpersoon",
-        "Mailadres",
-        "Cursusdatum",
+        "naam",
+        "email",
+        "cursusdatum",
+        "vve",
     ]
 
     COLUMN_MAPPING = {
-        "case_prefixed_dossier_id": "ZWD",
-        "case_legacy_id": "Vnummer",
-        "hoa_name": "Statutaire Naam",
-        "contact_fullname": "Kontaktpersoon",
-        "contact_email": "Mailadres",
-        "course_date": "Cursusdatum",
+        "hoa_name": "vve",
+        "contact_fullname": "naam",
+        "contact_email": "email",
+        "contact_phone": "telefoon",
+        "contact_role": "functie",
+        "course_date": "cursusdatum",
     }
+
+    DEFAULT_ROLE = "Vve-lid"
 
     def __init__(self, dry_run: bool = False, skip_hoa_api: bool = False):
         super().__init__(self.COLUMNS_REQUIRED, dry_run=dry_run)
@@ -38,54 +37,13 @@ class CourseParticipantImporter(BaseImporter):
         self, row: Dict[str, str], row_number: int
     ) -> Optional[HomeownerAssociation]:
         """
-        Find HomeownerAssociation using:
-
-        1. `ZWD` (case prefixed_dossier_id, e.g. "123EAK")
-        2. `Vnummer` (case legacy_id, e.g. "V12345")
-        3. `Statutaire Naam` (exact match, e.g. "Vereniging van Eigenaars van X")
+        Find HomeownerAssociation by name in database or fetch via DSO API.
         """
-        prefixed_dossier_id = row.get(
-            self.COLUMN_MAPPING["case_prefixed_dossier_id"], ""
-        ).strip()
-        legacy_id = row.get(self.COLUMN_MAPPING["case_legacy_id"], "").strip()
         hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
-
-        # Try to find by `ZWD` (Case `prefixed_dossier_id`)
-        if prefixed_dossier_id and prefixed_dossier_id != "0":
-            try:
-                case = Case.objects.filter(
-                    prefixed_dossier_id__iexact=prefixed_dossier_id
-                ).first()
-                if case and case.homeowner_association:
-                    return case.homeowner_association
-                elif case and not case.homeowner_association:
-                    self._add_warning(
-                        f"Rij {row_number}: Zaak {prefixed_dossier_id} gevonden maar heeft geen vve"
-                    )
-            except Exception as e:
-                self._add_warning(
-                    f"Rij {row_number}: Fout bij het opzoeken van zaak {prefixed_dossier_id}: {str(e)}"
-                )
-
-        # Try to find by `Vnummer` (Case `legacy_id`)
-        if legacy_id and legacy_id != "0":
-            try:
-                case = Case.objects.filter(legacy_id__iexact=legacy_id).first()
-                if case and case.homeowner_association:
-                    return case.homeowner_association
-            except Exception as e:
-                self._add_warning(
-                    f"Rij {row_number}: Fout bij het opzoeken van zaak {legacy_id}: {str(e)}"
-                )
-
-        # Try to find by `Statutaire Naam` (HomeownerAssociation `name`, exact match with DSO API fallback)
         if hoa_name:
-            hoa = self._find_homeowner_association_by_name(
+            return self._find_homeowner_association_by_name(
                 hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
             )
-            if hoa:
-                return hoa
-
         return None
 
     def _parse_course_date(
@@ -167,12 +125,12 @@ class CourseParticipantImporter(BaseImporter):
             )
             return False
 
-        # Set defaults, since these are not in the CSV or optional
-        role = "Vve-lid"
+        # Get optional fields
+        phone = row.get(self.COLUMN_MAPPING["contact_phone"], "").strip()
+        role = row.get(self.COLUMN_MAPPING["contact_role"], "").strip()
 
         try:
             if self.dry_run:
-                course_date_str = course_date.strftime("%Y-%m-%d")
                 self._add_message(
                     f"Rij {row_number}: [DRY RUN] Zou contact {email} aanmaken/bijwerken "
                     f"voor vve {hoa.name} met cursusdatum {course_date_str}"
@@ -186,9 +144,9 @@ class CourseParticipantImporter(BaseImporter):
 
                     if contact:
                         # Update existing contact
-                        # Note: we preserve existing values if not present in the CSV
                         contact.fullname = fullname or contact.fullname
-                        contact.role = contact.role or role
+                        contact.phone = phone or contact.phone
+                        contact.role = role or contact.role or self.DEFAULT_ROLE
                         contact.course_date = course_date.date()
                         contact.save()
                     else:
@@ -196,8 +154,8 @@ class CourseParticipantImporter(BaseImporter):
                         contact = Contact.objects.create(
                             email=email,
                             fullname=fullname,
-                            phone="",
-                            role=role,
+                            phone=phone,
+                            role=role or self.DEFAULT_ROLE,
                             homeowner_association=hoa,
                             course_date=course_date.date(),
                         )
