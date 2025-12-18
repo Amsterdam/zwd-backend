@@ -88,6 +88,8 @@ class OwnerAdmin(admin.ModelAdmin):
     def get_homeowner_association_name(self, obj):
         return obj.homeowner_association.name
 
+    get_homeowner_association_name.short_description = "Homeowner Association"
+
 
 @admin.register(District)
 class DistrictAdmin(admin.ModelAdmin):
