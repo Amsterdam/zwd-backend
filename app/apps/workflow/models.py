@@ -524,3 +524,49 @@ class WorkflowOption(models.Model):
 
     class Meta:
         ordering = ["name"]
+
+
+class CaseWorkflowStateHistory(models.Model):
+    workflow = models.ForeignKey(
+        CaseWorkflow,
+        related_name="state_history",
+        on_delete=models.CASCADE,
+    )
+
+    serialized_workflow_state = models.JSONField()
+    data = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_tasks_to_create(self):
+        return [t.task_spec.bpmn_name for t in self._get_ready_tasks()]
+
+    def get_task_to_delete(self):
+        return list(
+            self.workflow.tasks.filter(completed=False).values_list("name", flat=True)
+        )
+
+    def restore(self):
+        with transaction.atomic():
+            workflow = self.workflow
+            wf = self._restore_workflow_state(persist=True)
+
+            workflow.tasks.filter(completed=False).delete()
+
+            ready_task_ids = [t.id for t in wf.get_tasks(state=TaskState.READY)]
+            CaseUserTask.objects.filter(task_id__in=ready_task_ids).delete()
+
+            workflow._create_user_tasks(wf)
+
+    def _restore_workflow_state(self, persist=False):
+        workflow = self.workflow
+        workflow.serialized_workflow_state = self.serialized_workflow_state
+        workflow.data = self.data
+
+        if persist:
+            workflow.save(update_fields=["serialized_workflow_state", "data"])
+
+        return workflow._get_or_restore_workflow_state()
+
+    def _get_ready_tasks(self):
+        wf = self._restore_workflow_state()
+        return wf.get_tasks(state=TaskState.READY)
