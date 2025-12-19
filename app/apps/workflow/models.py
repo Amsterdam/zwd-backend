@@ -531,8 +531,8 @@ class WorkflowOption(models.Model):
 
 class CaseWorkflowStateHistory(models.Model):
     """
-    Immutable snapshot of a CaseWorkflow execution state.
-    Used for inspection and deterministic restoration.
+    Snapshot of a CaseWorkflow serialized workflow and data.
+    Used for reversing a workflow to a previous state.
     """
 
     workflow = models.ForeignKey(
@@ -555,7 +555,7 @@ class CaseWorkflowStateHistory(models.Model):
 
     def restore(self) -> None:
         """
-        Atomically restore the workflow to this snapshot.
+        Atomically restore the workflow to this state.
         Open tasks are deleted and recreated from the restored BPMN state.
         """
         with transaction.atomic():
