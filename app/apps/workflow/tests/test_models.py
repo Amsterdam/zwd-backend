@@ -13,37 +13,6 @@ class WorkflowModelTest(TestCase):
         management.call_command("flush", verbosity=0, interactive=False)
         super().setUp()
 
-    def _make_case(self):
-        hoa = baker.make(
-            HomeownerAssociation,
-            name="Hoa_name",
-            number_of_apartments=12,
-        )
-        return baker.make(Case, homeowner_association=hoa)
-
-    def _start_director_workflow(self):
-        case = self._make_case()
-        workflow = baker.make(
-            CaseWorkflow,
-            case=case,
-            completed=False,
-            workflow_type="director",
-        )
-        workflow.start()
-        return CaseWorkflow.objects.filter(parent_workflow=workflow).first()
-
-    def _get_ready_tasks(self, workflow):
-        wf = workflow._get_or_restore_workflow_state()
-        return wf.get_tasks(state=TaskState.READY)
-
-    def _get_ready_task_names(self, workflow):
-        return [task.task_spec.bpmn_name for task in self._get_ready_tasks(workflow)]
-
-    def _complete_all_ready_tasks(self, workflow):
-        for task in self._get_ready_tasks(workflow):
-            workflow.complete_user_task_and_create_new_user_tasks(task.id, {})
-        workflow.refresh_from_db()
-
     def test_case_workflow_state_history_creation(self):
         case = self._make_case()
 
@@ -114,3 +83,34 @@ class WorkflowModelTest(TestCase):
         current_task_names = self._get_ready_task_names(child_workflow)
 
         self.assertEqual(current_task_names, history.get_tasks_to_delete())
+
+    def _make_case(self):
+        hoa = baker.make(
+            HomeownerAssociation,
+            name="Hoa_name",
+            number_of_apartments=12,
+        )
+        return baker.make(Case, homeowner_association=hoa)
+
+    def _start_director_workflow(self):
+        case = self._make_case()
+        workflow = baker.make(
+            CaseWorkflow,
+            case=case,
+            completed=False,
+            workflow_type="director",
+        )
+        workflow.start()
+        return CaseWorkflow.objects.filter(parent_workflow=workflow).first()
+
+    def _get_ready_tasks(self, workflow):
+        wf = workflow._get_or_restore_workflow_state()
+        return wf.get_tasks(state=TaskState.READY)
+
+    def _get_ready_task_names(self, workflow):
+        return [task.task_spec.bpmn_name for task in self._get_ready_tasks(workflow)]
+
+    def _complete_all_ready_tasks(self, workflow):
+        for task in self._get_ready_tasks(workflow):
+            workflow.complete_user_task_and_create_new_user_tasks(task.id, {})
+        workflow.refresh_from_db()
