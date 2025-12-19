@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import QuerySet
 
 from .models import (
     CaseUserTask,
@@ -10,7 +11,7 @@ from .models import (
 
 
 @admin.action(description="Restore workflow state to selected history point")
-def restore_history(modeladmin, request, queryset):
+def restore_history(modeladmin, request, queryset: QuerySet[CaseWorkflowStateHistory]):
     for workflow_history in queryset:
         workflow_history.restore()
 
@@ -101,11 +102,11 @@ class CaseWorkflowStateHistoryAdmin(admin.ModelAdmin):
     )
     actions = [restore_history]
 
-    def tasks_created(self, history_obj):
+    def tasks_created(self, history_obj: CaseWorkflowStateHistory):
         return ", ".join(history_obj.get_tasks_to_create())
 
-    def tasks_deleted(self, history_obj):
-        return ", ".join(history_obj.get_task_to_delete())
+    def tasks_deleted(self, history_obj: CaseWorkflowStateHistory):
+        return ", ".join(history_obj.get_tasks_to_delete())
 
     tasks_created.short_description = "Tasks that get recreated"
     tasks_deleted.short_description = "Tasks that get deleted"

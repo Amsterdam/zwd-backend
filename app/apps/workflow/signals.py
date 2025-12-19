@@ -43,7 +43,6 @@ def case_workflow_pre_save(sender, instance, **kwargs):
 def snapshot_case_workflow_state(sender, instance: CaseWorkflow, **kwargs):
     if not instance.pk:
         return
-
     previous = (
         sender.objects.filter(pk=instance.pk)
         .only("serialized_workflow_state", "data")
