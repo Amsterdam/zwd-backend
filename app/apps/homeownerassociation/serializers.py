@@ -50,6 +50,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     wijk = serializers.SerializerMethodField()
     is_small = serializers.BooleanField()
     is_priority_neighborhood = serializers.BooleanField()
+    course_participant_count = serializers.ReadOnlyField()
     owners = OwnerSerializer(many=True, required=False)
 
     def get_district(self, obj):
@@ -74,6 +75,7 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "beschermd_stadsdorpsgezicht",
             "build_year",
             "contacts",
+            "course_participant_count",
             "district",
             "id",
             "is_priority_neighborhood",
