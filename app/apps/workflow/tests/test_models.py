@@ -35,13 +35,13 @@ class WorkflowModelTest(TestCase):
 
     def test_case_workflow_state_history_restoration(self):
         child_workflow = self._start_director_workflow()
-
         initial_task_names = self._get_ready_task_names(child_workflow)
 
+        # Complete all tasks twice to ensure restoring multiple versions back works
+        self._complete_all_ready_tasks(child_workflow)
         self._complete_all_ready_tasks(child_workflow)
 
         current_task_names = self._get_ready_task_names(child_workflow)
-
         history = CaseWorkflowStateHistory.objects.filter(
             workflow=child_workflow
         ).first()
@@ -55,8 +55,11 @@ class WorkflowModelTest(TestCase):
         child_workflow.refresh_from_db()
 
         restored_task_names = self._get_ready_task_names(child_workflow)
-
         self.assertEqual(restored_task_names, initial_task_names)
+
+        # Make sure previously completed tasks are recreated
+        self._complete_all_ready_tasks(child_workflow)
+        self.assertIsNotNone(child_workflow.tasks.filter(completed=False).first())
 
     def test_case_workflow_state_history_get_tasks_to_create(self):
         child_workflow = self._start_director_workflow()
@@ -105,7 +108,9 @@ class WorkflowModelTest(TestCase):
             name="Hoa_name",
             number_of_apartments=12,
         )
-        return baker.make(Case, homeowner_association=hoa)
+        return baker.make(
+            Case, homeowner_association=hoa, application_type="Activatieteam"
+        )
 
     def _start_director_workflow(self):
         case = self._make_case()

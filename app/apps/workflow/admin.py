@@ -109,4 +109,4 @@ class CaseWorkflowStateHistoryAdmin(admin.ModelAdmin):
         return ", ".join(history_obj.get_tasks_to_delete())
 
     tasks_created.short_description = "Tasks that get recreated"
-    tasks_deleted.short_description = "Tasks that get deleted"
+    tasks_deleted.short_description = "Open tasks that get deleted"

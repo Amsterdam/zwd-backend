@@ -555,14 +555,13 @@ class CaseWorkflowStateHistory(models.Model):
     def restore(self) -> None:
         """
         Atomically restore the workflow to this state.
-        Open tasks are deleted and recreated from the restored BPMN state.
+        All CaseUserTasks associated with the workflow will be deleted and recreated based on the restored state.
+        Event records are not deleted, because they are based on the GenericCompletedTask model.
         """
         with transaction.atomic():
             workflow = self.workflow
             wf = self._restore_workflow_state(persist=True)
-            workflow.tasks.filter(completed=False).delete()
-            ready_task_ids = self._get_ready_task_ids(wf)
-            CaseUserTask.objects.filter(task_id__in=ready_task_ids).delete()
+            workflow.tasks.all().delete()
             workflow._create_user_tasks(wf)
 
     def _restore_workflow_state(self, *, persist: bool) -> BpmnWorkflow:
@@ -579,7 +578,3 @@ class CaseWorkflowStateHistory(models.Model):
     def _get_ready_tasks(self) -> List[Task]:
         wf = self._restore_workflow_state(persist=False)
         return list(wf.get_tasks(state=TaskState.READY))
-
-    @staticmethod
-    def _get_ready_task_ids(wf: BpmnWorkflow) -> List[int]:
-        return [task.id for task in wf.get_tasks(state=TaskState.READY)]
