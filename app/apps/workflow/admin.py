@@ -91,7 +91,7 @@ class CaseWorkflowStateHistoryAdmin(admin.ModelAdmin):
         "tasks_created",
         "tasks_deleted",
     )
-    search_fields = ("workflow__id",)
+    search_fields = ("workflow__id", "workflow__case__id")
     list_filter = ("created_at",)
 
     readonly_fields = (
