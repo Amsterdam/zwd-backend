@@ -106,9 +106,8 @@ class BaseImporter(ABC):
         Read and parse CSV file
         We strip whitespace from all keys and values, and handle None values to avoid errors.
         """
-        encoding = self._detect_encoding(file_path)
-
         try:
+            encoding = self._detect_encoding(file_path)
             with open(file_path, "r", encoding=encoding) as f:
                 # Try to detect if there's a BOM
                 content = f.read()
