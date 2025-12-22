@@ -3,10 +3,12 @@ from unittest.mock import patch
 
 
 from apps.homeownerassociation.models import (
+    Contact,
     HomeownerAssociation,
     Owner,
     PriorityZipCode,
 )
+from datetime import date
 from model_bakery import baker
 
 
@@ -156,3 +158,25 @@ class HomeownerAssociationModelTest(TestCase):
     def test_is_priority_neighborhood_empty_zip_code(self):
         hoa = baker.make(HomeownerAssociation, zip_code="")
         self.assertFalse(hoa.is_priority_neighborhood)
+
+    def test_course_participant_count_with_course_participants(self):
+        hoa = baker.make(HomeownerAssociation)
+
+        baker.make(Contact, homeowner_association=hoa, course_date=date(2024, 1, 15))
+        baker.make(Contact, homeowner_association=hoa, course_date=date(2024, 2, 20))
+        baker.make(Contact, homeowner_association=hoa, course_date=date(2024, 3, 10))
+        baker.make(Contact, homeowner_association=hoa, course_date=None)
+
+        self.assertEqual(hoa.course_participant_count, 3)
+
+    def test_course_participant_count_no_participants(self):
+        hoa = baker.make(HomeownerAssociation)
+
+        baker.make(Contact, homeowner_association=hoa, course_date=None)
+        baker.make(Contact, homeowner_association=hoa, course_date=None)
+
+        self.assertEqual(hoa.course_participant_count, 0)
+
+    def test_course_participant_count_no_contacts(self):
+        hoa = baker.make(HomeownerAssociation)
+        self.assertEqual(hoa.course_participant_count, 0)
