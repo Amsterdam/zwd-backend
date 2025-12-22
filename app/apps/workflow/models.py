@@ -4,8 +4,7 @@ import os
 from functools import lru_cache
 from typing import List
 
-from celery import Task
-
+from SpiffWorkflow.task import Task
 
 from apps.users import auth
 from apps.events.models import CaseEvent, TaskModelEventEmitter
