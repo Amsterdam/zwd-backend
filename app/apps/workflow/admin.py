@@ -1,6 +1,19 @@
 from django.contrib import admin
+from django.db.models import QuerySet
 
-from .models import CaseUserTask, CaseWorkflow, GenericCompletedTask, WorkflowOption
+from .models import (
+    CaseUserTask,
+    CaseWorkflow,
+    CaseWorkflowStateHistory,
+    GenericCompletedTask,
+    WorkflowOption,
+)
+
+
+@admin.action(description="Restore workflow state to selected history point")
+def restore_history(modeladmin, request, queryset: QuerySet[CaseWorkflowStateHistory]):
+    for workflow_history in queryset:
+        workflow_history.restore()
 
 
 @admin.register(CaseWorkflow)
@@ -67,3 +80,33 @@ class WorkflowOptionAdmin(admin.ModelAdmin):
         "enabled_on_case_closed",
     )
     list_filter = ("enabled_on_case_closed",)
+
+
+@admin.register(CaseWorkflowStateHistory)
+class CaseWorkflowStateHistoryAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "workflow",
+        "created_at",
+        "tasks_created",
+        "tasks_deleted",
+    )
+    search_fields = ("workflow__id",)
+    list_filter = ("created_at",)
+
+    readonly_fields = (
+        "workflow",
+        "created_at",
+        "tasks_created",
+        "tasks_deleted",
+    )
+    actions = [restore_history]
+
+    def tasks_created(self, history_obj: CaseWorkflowStateHistory):
+        return ", ".join(history_obj.get_tasks_to_create())
+
+    def tasks_deleted(self, history_obj: CaseWorkflowStateHistory):
+        return ", ".join(history_obj.get_tasks_to_delete())
+
+    tasks_created.short_description = "Tasks that get recreated"
+    tasks_deleted.short_description = "Tasks that get deleted"

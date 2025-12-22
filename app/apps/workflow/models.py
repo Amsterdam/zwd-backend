@@ -2,7 +2,9 @@ import copy
 import datetime
 import os
 from functools import lru_cache
+from typing import List
 
+from SpiffWorkflow.task import Task
 
 from apps.users import auth
 from apps.events.models import CaseEvent, TaskModelEventEmitter
@@ -524,3 +526,60 @@ class WorkflowOption(models.Model):
 
     class Meta:
         ordering = ["name"]
+
+
+class CaseWorkflowStateHistory(models.Model):
+    """
+    Snapshot of a CaseWorkflow serialized workflow and data.
+    Used for reversing a workflow to a previous state.
+    """
+
+    workflow = models.ForeignKey(
+        CaseWorkflow,
+        related_name="state_history",
+        on_delete=models.CASCADE,
+    )
+
+    serialized_workflow_state = models.JSONField()
+    data = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_tasks_to_create(self) -> List[str]:
+        return [task.task_spec.bpmn_name for task in self._get_ready_tasks()]
+
+    def get_tasks_to_delete(self) -> List[str]:
+        return list(
+            self.workflow.tasks.filter(completed=False).values_list("name", flat=True)
+        )
+
+    def restore(self) -> None:
+        """
+        Atomically restore the workflow to this state.
+        Open tasks are deleted and recreated from the restored BPMN state.
+        """
+        with transaction.atomic():
+            workflow = self.workflow
+            wf = self._restore_workflow_state(persist=True)
+            workflow.tasks.filter(completed=False).delete()
+            ready_task_ids = self._get_ready_task_ids(wf)
+            CaseUserTask.objects.filter(task_id__in=ready_task_ids).delete()
+            workflow._create_user_tasks(wf)
+
+    def _restore_workflow_state(self, *, persist: bool) -> BpmnWorkflow:
+        workflow = self.workflow
+
+        workflow.serialized_workflow_state = self.serialized_workflow_state
+        workflow.data = self.data
+
+        if persist:
+            workflow.save(update_fields=("serialized_workflow_state", "data"))
+
+        return workflow._get_or_restore_workflow_state()
+
+    def _get_ready_tasks(self) -> List[Task]:
+        wf = self._restore_workflow_state(persist=False)
+        return list(wf.get_tasks(state=TaskState.READY))
+
+    @staticmethod
+    def _get_ready_task_ids(wf: BpmnWorkflow) -> List[int]:
+        return [task.id for task in wf.get_tasks(state=TaskState.READY)]
