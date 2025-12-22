@@ -66,6 +66,39 @@ class BaseImporter(ABC):
         self.result = ImportResult()
         self.email_validator = EmailValidator()
 
+    def import_file(self, file_path: str) -> ImportResult:
+        """
+        Main import method that processes the CSV file and returns a result object.
+        """
+        self.result = ImportResult()
+
+        try:
+            headers, rows = self._read_csv(file_path)
+            self._validate_headers(headers)
+
+            # Process each row
+            self.result.total_rows = len(rows)
+
+            # Loop over rows, and start at 2 (since row 1 is the header)
+            for idx, row in enumerate(rows, start=2):
+                try:
+                    errors_before = len(self.result.errors)
+                    processed = self._process_row(row, idx)
+                    errors_after = len(self.result.errors)
+
+                    if processed:
+                        self.result.successful += 1
+                    else:
+                        if errors_after == errors_before:
+                            self.result.skipped += 1
+                except Exception as e:
+                    self.result.add_error(idx, None, str(e))
+
+        except ImportError as e:
+            self.result.add_error(0, None, str(e))
+
+        return self.result
+
     def _detect_encoding(self, file_path: str) -> str:
         """
         Detect file encoding, trying UTF-8 first, then Windows-1252.
@@ -214,39 +247,6 @@ class BaseImporter(ABC):
             return True
         except ValidationError:
             return False
-
-    def import_file(self, file_path: str) -> ImportResult:
-        """
-        Main import method that processes the CSV file and returns a result object.
-        """
-        self.result = ImportResult()
-
-        try:
-            headers, rows = self._read_csv(file_path)
-            self._validate_headers(headers)
-
-            # Process each row
-            self.result.total_rows = len(rows)
-
-            # Loop over rows, and start at 2 (since row 1 is the header)
-            for idx, row in enumerate(rows, start=2):
-                try:
-                    errors_before = len(self.result.errors)
-                    processed = self._process_row(row, idx)
-                    errors_after = len(self.result.errors)
-
-                    if processed:
-                        self.result.successful += 1
-                    else:
-                        if errors_after == errors_before:
-                            self.result.skipped += 1
-                except Exception as e:
-                    self.result.add_error(idx, None, str(e))
-
-        except ImportError as e:
-            self.result.add_error(0, None, str(e))
-
-        return self.result
 
     @abstractmethod
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
