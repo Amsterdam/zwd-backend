@@ -91,7 +91,7 @@ class CaseWorkflowStateHistoryAdmin(admin.ModelAdmin):
         "tasks_created",
         "tasks_deleted",
     )
-    search_fields = ("workflow__id",)
+    search_fields = ("workflow__id", "workflow__case__id")
     list_filter = ("created_at",)
 
     readonly_fields = (
@@ -109,4 +109,4 @@ class CaseWorkflowStateHistoryAdmin(admin.ModelAdmin):
         return ", ".join(history_obj.get_tasks_to_delete())
 
     tasks_created.short_description = "Tasks that get recreated"
-    tasks_deleted.short_description = "Tasks that get deleted"
+    tasks_deleted.short_description = "Open tasks that get deleted"
