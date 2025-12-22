@@ -84,6 +84,21 @@ class WorkflowModelTest(TestCase):
 
         self.assertEqual(current_task_names, history.get_tasks_to_delete())
 
+    def test_case_workflow_state_history_delete_on_workflow_complete(self):
+        child_workflow = self._start_director_workflow()
+
+        self._complete_all_ready_tasks(child_workflow)
+
+        history = CaseWorkflowStateHistory.objects.filter(
+            workflow=child_workflow
+        ).first()
+
+        self.assertIsNotNone(history)
+        child_workflow.completed = True
+        child_workflow.save()
+        history_qs = CaseWorkflowStateHistory.objects.filter(workflow=child_workflow)
+        self.assertFalse(history_qs.exists())
+
     def _make_case(self):
         hoa = baker.make(
             HomeownerAssociation,

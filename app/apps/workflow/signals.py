@@ -41,8 +41,9 @@ def case_workflow_pre_save(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=CaseWorkflow)
 def snapshot_case_workflow_state(sender, instance: CaseWorkflow, **kwargs):
-    if not instance.pk:
+    if not instance.pk or instance.completed:
         return
+
     previous = (
         sender.objects.filter(pk=instance.pk)
         .only("serialized_workflow_state", "data")
@@ -60,6 +61,25 @@ def snapshot_case_workflow_state(sender, instance: CaseWorkflow, **kwargs):
         serialized_workflow_state=previous.serialized_workflow_state,
         data=previous.data,
     )
+
+
+@receiver(
+    post_save,
+    sender=CaseWorkflow,
+)
+def delete_case_workflow_state_history(sender, instance, created, **kwargs):
+    if created:
+        return
+
+    if not instance.completed:
+        return
+
+    history_qs = CaseWorkflowStateHistory.objects.filter(workflow=instance)
+
+    if not history_qs.exists():
+        return
+
+    history_qs.delete()
 
 
 # Updated Case.updated field if task is completed / generic task is created
