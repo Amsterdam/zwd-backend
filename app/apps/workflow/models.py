@@ -578,3 +578,6 @@ class CaseWorkflowStateHistory(models.Model):
     def _get_ready_tasks(self) -> List[Task]:
         wf = self._restore_workflow_state(persist=False)
         return list(wf.get_tasks(state=TaskState.READY))
+
+    class Meta:
+        verbose_name_plural = "Case workflow state histories"
