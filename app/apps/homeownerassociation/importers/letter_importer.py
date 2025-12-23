@@ -42,45 +42,6 @@ class LetterImporter(BaseImporter):
         self._existing_notes_cache: Set[int] = set()
         self._notes_to_create: list[HomeownerAssociationCommunicationNote] = []
 
-    def _find_homeowner_association(
-        self, row: Dict[str, str], row_number: int
-    ) -> Optional[HomeownerAssociation]:
-        """
-        Find HomeownerAssociation by exact name match (`Statutaire Naam` → `HomeownerAssociation.name`) with optional DSO API fallback.
-        """
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
-        return self._find_homeowner_association_by_name(
-            hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
-        )
-
-    def _prefetch_hoas(self, hoa_names: Set[str]) -> None:
-        """
-        Prefetch all `HomeownerAssociation`s by name in a single query.
-        """
-        names_to_fetch = {
-            name for name in hoa_names if name and name not in self._existing_hoa_cache
-        }
-        if not names_to_fetch:
-            return
-
-        for hoa in HomeownerAssociation.objects.filter(name__in=names_to_fetch):
-            self._existing_hoa_cache[hoa.name] = hoa
-
-    def _prefetch_existing_notes(self, hoa_ids: Set[int]) -> None:
-        """
-        Prefetch all existing communication notes by homeowner association ID, date and `is_imported` flag.
-        """
-        if not hoa_ids:
-            return
-
-        self._existing_notes_cache.update(
-            HomeownerAssociationCommunicationNote.objects.filter(
-                homeowner_association_id__in=hoa_ids,
-                date__date=self.date.date(),
-                is_imported=True,
-            ).values_list("homeowner_association_id", flat=True)
-        )
-
     def import_file(self, file_path: str) -> ImportResult:
         """
         Override `BaseImporter` to cater for bulk prefetching and batch creation.
@@ -131,6 +92,45 @@ class LetterImporter(BaseImporter):
             self.result.add_error(0, None, str(e))
 
         return self.result
+
+    def _find_homeowner_association(
+        self, row: Dict[str, str], row_number: int
+    ) -> Optional[HomeownerAssociation]:
+        """
+        Find HomeownerAssociation by exact name match (`Statutaire Naam` → `HomeownerAssociation.name`) with optional DSO API fallback.
+        """
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        return self._find_homeowner_association_by_name(
+            hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
+        )
+
+    def _prefetch_hoas(self, hoa_names: Set[str]) -> None:
+        """
+        Prefetch all `HomeownerAssociation`s by name in a single query.
+        """
+        names_to_fetch = {
+            name for name in hoa_names if name and name not in self._existing_hoa_cache
+        }
+        if not names_to_fetch:
+            return
+
+        for hoa in HomeownerAssociation.objects.filter(name__in=names_to_fetch):
+            self._existing_hoa_cache[hoa.name] = hoa
+
+    def _prefetch_existing_notes(self, hoa_ids: Set[int]) -> None:
+        """
+        Prefetch all existing communication notes by homeowner association ID, date and `is_imported` flag.
+        """
+        if not hoa_ids:
+            return
+
+        self._existing_notes_cache.update(
+            HomeownerAssociationCommunicationNote.objects.filter(
+                homeowner_association_id__in=hoa_ids,
+                date__date=self.date.date(),
+                is_imported=True,
+            ).values_list("homeowner_association_id", flat=True)
+        )
 
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
         """
