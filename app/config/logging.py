@@ -1,42 +1,21 @@
 import os
-from typing import Any
-
-from azure.monitor.opentelemetry.exporter import (
-    AzureMonitorLogExporter,
-    AzureMonitorTraceExporter,
-    AzureMonitorMetricExporter,
-)
-from opentelemetry import trace, metrics
-from opentelemetry.trace import get_tracer_provider
+from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry._logs import set_logger_provider
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"
+)
+assert APPLICATIONINSIGHTS_CONNECTION_STRING, "Missing App Insights connection string"
 
 
 def start_logging():
-    if getattr(start_logging, "_initialized", False):
-        return
-    start_logging._initialized = True
-
-    if get_tracer_provider().__class__.__name__ != "ProxyTracerProvider":
-        return
-
-    MONITOR_SERVICE_NAME = "zwd-backend"
-
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-
-    APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
-        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+    configure_azure_monitor(
+        connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING,
+        service_name="zwd-backend",
     )
-    if not APPLICATIONINSIGHTS_CONNECTION_STRING:
-        return
 
     def response_hook(span, request, response):
         if (
@@ -47,61 +26,9 @@ def start_logging():
         ):
             span.set_attribute("django.user.name", request.user.username)
 
-    resource = Resource.create({"service.name": MONITOR_SERVICE_NAME})
-
-    tracer_provider = TracerProvider(resource=resource)
-    trace.set_tracer_provider(tracer_provider)
-
-    span_exporter = AzureMonitorTraceExporter(
-        connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING
-    )
-    tracer_provider.add_span_processor(BatchSpanProcessor(span_exporter))
-
-    metric_exporter = AzureMonitorMetricExporter(
-        connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING
-    )
-    metric_reader = PeriodicExportingMetricReader(
-        metric_exporter, export_interval_millis=60000
-    )
-    meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
-    metrics.set_meter_provider(meter_provider)
-
-    log_exporter = AzureMonitorLogExporter(
-        connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING
-    )
-
-    logger_provider = LoggerProvider(resource=resource)
-    logger_provider.add_log_record_processor(
-        BatchLogRecordProcessor(
-            log_exporter,
-            schedule_delay_millis=3000,
-        )
-    )
-    set_logger_provider(logger_provider)
-
-    class AzureLoggingHandler(LoggingHandler):
-        def __init__(self):
-            super().__init__(logger_provider=logger_provider)
-
-    LOGGING_HANDLERS: dict[str, dict[str, Any]] = {
-        "console": {
-            "class": "logging.StreamHandler",
-            "level": "INFO",
-        },
-        "azure": {
-            "()": AzureLoggingHandler,
-            "level": os.getenv("LOGGING_LEVEL", "WARNING"),
-        },
-    }
-
-    if os.getenv("LOGGING_LEVEL") == "DEBUG":
-        Psycopg2Instrumentor().instrument(
-            tracer_provider=tracer_provider,
-            skip_dep_check=True,
-        )
-
-    DjangoInstrumentor().instrument(
-        tracer_provider=tracer_provider,
-        response_hook=response_hook,
-        skip_dep_check=True,
-    )
+    DjangoInstrumentor().uninstrument()
+    DjangoInstrumentor().instrument(response_hook=response_hook)
+    if os.getenv("LOGGING_LEVEL", "").upper() == "DEBUG":
+        Psycopg2Instrumentor().instrument()
+    else:
+        Psycopg2Instrumentor().uninstrument()
