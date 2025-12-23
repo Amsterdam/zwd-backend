@@ -4,8 +4,9 @@ from typing import Any
 from azure.monitor.opentelemetry.exporter import (
     AzureMonitorLogExporter,
     AzureMonitorTraceExporter,
+    AzureMonitorMetricExporter,
 )
-from opentelemetry import trace
+from opentelemetry import trace, metrics
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
@@ -13,10 +14,11 @@ from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 
 
 def start_logging():
-
     MONITOR_SERVICE_NAME = "zwd-backend"
 
     LOGGING_HANDLERS: dict[str, dict[str, Any]] = {
@@ -64,6 +66,20 @@ def start_logging():
         logger_provider.add_log_record_processor(
             BatchLogRecordProcessor(log_exporter, schedule_delay_millis=3000)
         )
+
+        metric_exporter = AzureMonitorMetricExporter(
+            connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING
+        )
+        metric_reader = PeriodicExportingMetricReader(
+            metric_exporter,
+            export_interval_millis=60000,
+        )
+
+        meter_provider = MeterProvider(
+            resource=resource,
+            metric_readers=[metric_reader],
+        )
+        metrics.set_meter_provider(meter_provider)
 
         class AzureLoggingHandler(LoggingHandler):
             def __init__(self):
