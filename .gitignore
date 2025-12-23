@@ -167,6 +167,3 @@ cython_debug/
 
 # macOS
 .DS_Store
-
-# Data (e.g. importable CSV files for local testing)
-/app/data/*
