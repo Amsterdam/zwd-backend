@@ -5,13 +5,16 @@ from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
-APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"
-)
-assert APPLICATIONINSIGHTS_CONNECTION_STRING, "Missing App Insights connection string"
-
 
 def start_logging():
+
+    APPLICATIONINSIGHTS_CONNECTION_STRING = os.getenv(
+        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+    )
+
+    if APPLICATIONINSIGHTS_CONNECTION_STRING is None:
+        return
+
     configure_azure_monitor(
         connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING,
         service_name="zwd-backend",
