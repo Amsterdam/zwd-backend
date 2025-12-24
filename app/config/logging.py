@@ -3,8 +3,6 @@ from azure.monitor.opentelemetry import configure_azure_monitor
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-
 
 def start_logging():
 
