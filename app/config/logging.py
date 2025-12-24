@@ -29,7 +29,7 @@ def start_logging():
 
     DjangoInstrumentor().uninstrument()
     DjangoInstrumentor().instrument(response_hook=response_hook)
-    if os.getenv("LOGGING_LEVEL", "").upper() == "DEBUG":
+    if os.getenv("LOGGING_LEVEL", "WARNING").upper() == "DEBUG":
         Psycopg2Instrumentor().instrument()
     else:
         Psycopg2Instrumentor().uninstrument()
