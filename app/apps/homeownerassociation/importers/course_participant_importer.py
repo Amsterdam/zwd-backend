@@ -39,7 +39,7 @@ class CourseParticipantImporter(BaseImporter):
         """
         Find HomeownerAssociation by name in database or fetch via DSO API.
         """
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
         if hoa_name:
             return self._find_homeowner_association_by_name(
                 hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
@@ -64,7 +64,7 @@ class CourseParticipantImporter(BaseImporter):
         else:
             date_part = date_string
 
-        # Try different date formats
+        # Allowed date formats
         formats = [
             "%d/%m/%Y",  # DD/MM/YYYY or D/M/YYYY
             "%d/%m/%y",  # DD/MM/YY or D/M/YY
@@ -84,7 +84,7 @@ class CourseParticipantImporter(BaseImporter):
         """
         Process a single course participant row and return a boolean indicating if the row was processed successfully.
         """
-        email = row.get(self.COLUMN_MAPPING["contact_email"], "").strip()
+        email = row.get(self.COLUMN_MAPPING["contact_email"].lower(), "").strip()
 
         if not email:
             self._add_error(
@@ -102,10 +102,14 @@ class CourseParticipantImporter(BaseImporter):
             )
             return False
 
-        fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
+        fullname = (
+            row.get(self.COLUMN_MAPPING["contact_fullname"].lower(), "").strip() or ""
+        )
 
         # Parse course date - required field
-        course_date_str = row.get(self.COLUMN_MAPPING["course_date"], "").strip()
+        course_date_str = row.get(
+            self.COLUMN_MAPPING["course_date"].lower(), ""
+        ).strip()
         if not course_date_str:
             self._add_error(
                 row_number,
@@ -124,7 +128,7 @@ class CourseParticipantImporter(BaseImporter):
             return False
 
         # Find `HomeownerAssociation`
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
         hoa = self._find_homeowner_association(row, row_number)
         if not hoa:
             self._add_error(
@@ -135,8 +139,8 @@ class CourseParticipantImporter(BaseImporter):
             return False
 
         # Get optional fields
-        phone = row.get(self.COLUMN_MAPPING["contact_phone"], "").strip()
-        role = row.get(self.COLUMN_MAPPING["contact_role"], "").strip()
+        phone = row.get(self.COLUMN_MAPPING["contact_phone"].lower(), "").strip()
+        role = row.get(self.COLUMN_MAPPING["contact_role"].lower(), "").strip()
 
         try:
             if self.dry_run:

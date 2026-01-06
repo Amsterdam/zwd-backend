@@ -61,7 +61,7 @@ class BaseImporter(ABC):
         """
         Initialize the importer
         """
-        self.required_columns = required_columns
+        self.required_columns = [col.lower() for col in required_columns]
         self.dry_run = dry_run
         self.result = ImportResult()
         self.email_validator = EmailValidator()
@@ -178,11 +178,11 @@ class BaseImporter(ABC):
                     if not header:
                         raise ImportError("CSV-bestand heeft geen headers")
 
-                    headers = [header]
+                    headers = [header.lower()]
                     rows = []
                     # Process remaining lines as single-column values
                     for line in lines[1:]:
-                        cleaned_row = {header: line.strip()}
+                        cleaned_row = {header.lower(): line.strip()}
                         rows.append(cleaned_row)
                 else:
                     reader = csv.DictReader(io.StringIO(content), delimiter=delimiter)
@@ -192,9 +192,10 @@ class BaseImporter(ABC):
                         raise ImportError("CSV-bestand heeft geen headers")
 
                     # Normalize headers: strip whitespace and handle None values
-                    headers = [
+                    original_headers = [
                         h.strip() if h and isinstance(h, str) else "" for h in headers
                     ]
+                    headers = [h.lower() for h in original_headers]
                     reader.fieldnames = headers
 
                     rows = []
@@ -203,7 +204,7 @@ class BaseImporter(ABC):
                         cleaned_row = {}
                         for k, v in row.items():
                             # Handle None keys
-                            key = k.strip() if k and isinstance(k, str) else ""
+                            key = k.strip().lower() if k and isinstance(k, str) else ""
                             # Handle None values
                             value = v.strip() if v and isinstance(v, str) else ""
                             cleaned_row[key] = value
@@ -221,11 +222,12 @@ class BaseImporter(ABC):
 
     def _validate_headers(self, headers: List[str]) -> None:
         """
-        Validate that all required columns are present.
+        Validate that all required columns are present (case-insensitive).
         """
+        headers_set = set(headers)
         missing_columns = []
         for col in self.required_columns:
-            if col not in headers:
+            if col not in headers_set:
                 missing_columns.append(col)
 
         if missing_columns:

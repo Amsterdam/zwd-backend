@@ -54,9 +54,9 @@ class LetterImporter(BaseImporter):
             self.result.total_rows = len(rows)
 
             unique_hoa_names = {
-                row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+                row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
                 for row in rows
-                if row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+                if row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
             }
             self._prefetch_hoas(unique_hoa_names)
 
@@ -99,7 +99,7 @@ class LetterImporter(BaseImporter):
         """
         Find HomeownerAssociation by exact name match (`Statutaire Naam` → `HomeownerAssociation.name`) with optional DSO API fallback.
         """
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
         return self._find_homeowner_association_by_name(
             hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
         )
@@ -137,7 +137,7 @@ class LetterImporter(BaseImporter):
         Process a single letter row and return a boolean indicating if the row was processed successfully.
         """
         # Find `HomeownerAssociation`
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
 
         # Check for duplicate exact matches of HOA names in previous rows (deduplicate exact matches)
         if hoa_name in self._processed_hoa_names:
