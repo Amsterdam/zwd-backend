@@ -158,7 +158,9 @@ class LetterImporter(BaseImporter):
                 # Mark as processed to avoid retrying API fetch for duplicates
                 self._processed_hoa_names.add(hoa_name)
                 self._add_error(
-                    row_number, None, f"Kon vve niet vinden voor '{hoa_name}'"
+                    row_number,
+                    self.COLUMN_MAPPING["hoa_name"],
+                    f"Kon vve niet vinden voor '{hoa_name}'",
                 )
                 return False
 
