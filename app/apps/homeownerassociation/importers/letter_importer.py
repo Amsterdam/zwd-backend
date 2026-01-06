@@ -51,6 +51,11 @@ class LetterImporter(BaseImporter):
         try:
             headers, rows = self._read_csv(file_path)
             self._validate_headers(headers)
+
+            # Store headers and rows for potential failed rows export
+            self.result.headers = headers
+            self.result.rows = rows
+
             self.result.total_rows = len(rows)
 
             unique_hoa_names = {
