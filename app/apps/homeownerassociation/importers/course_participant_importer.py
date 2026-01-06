@@ -50,7 +50,7 @@ class CourseParticipantImporter(BaseImporter):
         self, date_string: str, row_number: int
     ) -> Optional[datetime]:
         """
-        Parse course date from CSV format (e.g., "25/11/2025 00:00").
+        Parse course date. Supports most common date formats and strips optional time component.
         Returns datetime object or None if parsing fails.
         """
         if not date_string or not date_string.strip():
@@ -58,18 +58,27 @@ class CourseParticipantImporter(BaseImporter):
 
         date_string = date_string.strip()
 
-        # Try to parse formats: "25/11/2025 00:00" or "25/11/2025"
-        try:
-            # First try with time component
-            if " " in date_string:
-                date_part = date_string.split(" ")[0]
-            else:
-                date_part = date_string
+        # Remove time component if present
+        if " " in date_string:
+            date_part = date_string.split(" ")[0]
+        else:
+            date_part = date_string
 
-            # Parse DD/MM/YYYY format
-            return datetime.strptime(date_part, "%d/%m/%Y")
-        except ValueError:
-            return None
+        # Try different date formats
+        formats = [
+            "%d/%m/%Y",  # DD/MM/YYYY or D/M/YYYY
+            "%d/%m/%y",  # DD/MM/YY or D/M/YY
+            "%d-%m-%Y",  # DD-MM-YYYY or D-M-YYYY
+            "%d-%m-%y",  # DD-MM-YY or D-M-YY
+        ]
+
+        for format in formats:
+            try:
+                return datetime.strptime(date_part, format)
+            except ValueError:
+                continue
+
+        return None
 
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
         """
@@ -110,7 +119,7 @@ class CourseParticipantImporter(BaseImporter):
             self._add_error(
                 row_number,
                 self.COLUMN_MAPPING["course_date"],
-                f"Ongeldig cursusdatum formaat: '{course_date_str}'. Verwacht formaat: DD/MM/YYYY",
+                f"Ongeldige cursusdatum: '{course_date_str}'. Mogelijke formaten: DD/MM/YYYY, DD/MM/YY, D/M/YYYY, D/M/YY, DD-MM-YYYY, DD-MM-YY, D-M-YYYY, D-M-YY",
             )
             return False
 

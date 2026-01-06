@@ -472,7 +472,15 @@ class CourseParticipantImporterTest(TestImporterBase):
         self.assertEqual(len(importer.result.errors), 1)
         self.assertIn("Ongeldig e-mailadres", str(importer.result.errors[0]))
 
-    def test_parse_course_date_valid(self):
+    def test_parse_course_date_dd_mm_yyyy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/11/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yyyy_slash_with_time(self):
         importer = CourseParticipantImporter(skip_hoa_api=True)
         date = importer._parse_course_date("25/11/2025 00:00", 1)
         self.assertIsNotNone(date)
@@ -480,11 +488,135 @@ class CourseParticipantImporterTest(TestImporterBase):
         self.assertEqual(date.month, 11)
         self.assertEqual(date.year, 2025)
 
-    def test_parse_course_date_without_time(self):
+    def test_parse_course_date_d_m_yyyy_slash(self):
         importer = CourseParticipantImporter(skip_hoa_api=True)
-        date = importer._parse_course_date("25/11/2025", 1)
+        date = importer._parse_course_date("5/3/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/11/25", 1)
         self.assertIsNotNone(date)
         self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_m_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5/3/25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-11-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_m_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-3-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-11-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_m_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-3-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/1/25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yyyy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/1/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5/11/25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yyyy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5/11/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-1-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-1-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-11-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-11-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_empty_string(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("", 1)
+        self.assertIsNone(date)
+
+    def test_parse_course_date_whitespace_only(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("   ", 1)
+        self.assertIsNone(date)
 
     def test_parse_course_date_invalid(self):
         importer = CourseParticipantImporter(skip_hoa_api=True)
