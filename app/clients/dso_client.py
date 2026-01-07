@@ -1,4 +1,5 @@
 import requests
+from urllib.parse import quote
 from django.conf import settings
 
 from utils.exceptions import NotFoundException
@@ -21,7 +22,7 @@ class DsoClient:
         raise NotFoundException(f"HomeownerAssociation with bag ID {bag_id} not found.")
 
     def get_hoa_by_name(self, hoa_name):
-        url = f"{settings.DSO_API_URL}?brkVveStatutaireNaam={hoa_name}&_pageSize=300"
+        url = f"{settings.DSO_API_URL}?brkVveStatutaireNaam={quote(hoa_name)}&_pageSize=300"
         hoa_json = self._get_paginated_response(url)
         verblijfsobjecten = hoa_json.get("_embedded", {}).get(
             "wonen_verblijfsobject", []
@@ -36,7 +37,7 @@ class DsoClient:
         return list({obj["votIdentificatie"]: obj for obj in woon_objecten}.values())
 
     def search_hoa_by_name(self, hoa_name):
-        url = f"{settings.DSO_API_URL}?brkVveIsEigendomVve=ja&brkVveStatutaireNaam[like]=*{hoa_name}*&_pageSize=300"
+        url = f"{settings.DSO_API_URL}?brkVveIsEigendomVve=ja&brkVveStatutaireNaam[like]=*{quote(hoa_name)}*&_pageSize=300"
         hoa_json = self._get_paginated_response(url)
         hoa_verblijfsobject = hoa_json["_embedded"]["wonen_verblijfsobject"]
         return list(
