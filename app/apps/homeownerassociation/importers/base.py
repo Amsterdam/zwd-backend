@@ -33,6 +33,8 @@ class ImportResult:
         self.errors: List[RowError] = []
         self.warnings: List[str] = []
         self.messages: List[str] = []
+        self.headers: List[str] = []
+        self.rows: List[Dict[str, str]] = []
 
     def add_error(self, row_number: int, field: Optional[str], message: str):
         """Add an error to the result"""
@@ -75,6 +77,10 @@ class BaseImporter(ABC):
         try:
             headers, rows = self._read_csv(file_path)
             self._validate_headers(headers)
+
+            # Store headers and rows for potential failed rows export
+            self.result.headers = headers
+            self.result.rows = rows
 
             # Process each row
             self.result.total_rows = len(rows)
@@ -192,10 +198,10 @@ class BaseImporter(ABC):
                         raise ImportError("CSV-bestand heeft geen headers")
 
                     # Normalize headers: strip whitespace and handle None values
-                    original_headers = [
-                        h.strip() if h and isinstance(h, str) else "" for h in headers
+                    headers = [
+                        h.strip().lower() if h and isinstance(h, str) else ""
+                        for h in headers
                     ]
-                    headers = [h.lower() for h in original_headers]
                     reader.fieldnames = headers
 
                     rows = []

@@ -73,6 +73,28 @@ def process_csv_import(file, importer):
         # Run import
         result = importer.import_file(temp_file_path)
 
+        # Extract failed rows data (only if there are failed rows and no CSV structure errors)
+        failed_rows_data = None
+        if result.failed_rows and result.headers and result.rows:
+            # Check if there's a CSV structure error (row_number 0)
+            has_structure_error = any(error.row_number == 0 for error in result.errors)
+            if not has_structure_error:
+                # Filter rows that failed (row numbers start at 2, so index is row_number - 2)
+                failed_rows_list = []
+                for row_idx, row in enumerate(result.rows, start=2):
+                    if row_idx in result.failed_rows:
+                        # Use lowercase headers for the CSV export
+                        failed_row_dict = {}
+                        for header in result.headers:
+                            failed_row_dict[header] = row.get(header, "")
+                        failed_rows_list.append(failed_row_dict)
+
+                if failed_rows_list:
+                    failed_rows_data = {
+                        "headers": result.headers,
+                        "rows": failed_rows_list,
+                    }
+
         # Serialize result
         result_data = {
             "counts": {
@@ -92,6 +114,10 @@ def process_csv_import(file, importer):
             "warnings": result.warnings,
             "messages": result.messages,
         }
+
+        # Add failed rows data if available
+        if failed_rows_data:
+            result_data["failed_rows_data"] = failed_rows_data
 
         return result_data
 

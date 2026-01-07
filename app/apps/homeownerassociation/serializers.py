@@ -233,6 +233,15 @@ class RowErrorSerializer(serializers.Serializer):
     message = serializers.CharField()
 
 
+class FailedRowsDataSerializer(serializers.Serializer):
+    """Serializer for failed rows data structure"""
+
+    headers = serializers.ListField(child=serializers.CharField())
+    rows = serializers.ListField(
+        child=serializers.DictField(child=serializers.CharField(allow_blank=True))
+    )
+
+
 class ImportResultSerializer(serializers.Serializer):
     """Serializer for CSV import results"""
 
@@ -240,6 +249,7 @@ class ImportResultSerializer(serializers.Serializer):
     messages = serializers.ListField(child=serializers.CharField(), allow_empty=True)
     warnings = serializers.ListField(child=serializers.CharField(), allow_empty=True)
     errors = RowErrorSerializer(many=True)
+    failed_rows_data = FailedRowsDataSerializer(required=False, allow_null=True)
 
 
 class LetterImportSerializer(serializers.Serializer):
