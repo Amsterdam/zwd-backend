@@ -205,6 +205,31 @@ class BaseImporterTest(TestImporterBase):
         self.assertIn("Ontbrekende verplichte kolommen", str(context.exception))
         self.assertIn("telefoon", str(context.exception))
 
+    def test_validate_headers_case_insensitive(self):
+        importer = self.TestImporter(required_columns=["naam", "email"])
+        importer._validate_headers(["naam", "email", "telefoon"])
+        importer2 = self.TestImporter(required_columns=["NAAM", "EMAIL"])
+        importer2._validate_headers(["naam", "email", "telefoon"])
+
+    def test_read_csv_case_insensitive_headers(self):
+        content = "NAAM,EMAIL\nJan,jan@test.nl\nPiet,piet@test.nl"
+        csv_path = self.create_temp_csv(content)
+        importer = self.TestImporter(required_columns=["naam", "email"])
+        headers, rows = importer._read_csv(csv_path)
+        self.assertEqual(headers, ["naam", "email"])
+        self.assertEqual(rows[0]["naam"], "Jan")
+        self.assertEqual(rows[0]["email"], "jan@test.nl")
+
+    def test_read_csv_mixed_case_headers(self):
+        content = "Naam,Email,Telefoon\nJan,jan@test.nl,0612345678"
+        csv_path = self.create_temp_csv(content)
+        importer = self.TestImporter(required_columns=["naam", "email"])
+        headers, rows = importer._read_csv(csv_path)
+        self.assertEqual(headers, ["naam", "email", "telefoon"])
+        self.assertEqual(rows[0]["naam"], "Jan")
+        self.assertEqual(rows[0]["email"], "jan@test.nl")
+        self.assertEqual(rows[0]["telefoon"], "0612345678")
+
     def test_validate_email_valid(self):
         importer = self.TestImporter(required_columns=[])
         self.assertTrue(importer._validate_email("test@example.com"))
@@ -221,6 +246,25 @@ class BaseImporterTest(TestImporterBase):
         content = "naam,email\nJan,jan@test.nl\nPiet,piet@test.nl"
         csv_path = self.create_temp_csv(content)
         importer = self.TestImporter(required_columns=["naam", "email"])
+        result = importer.import_file(csv_path)
+        self.assertEqual(result.total_rows, 2)
+        self.assertEqual(result.successful, 2)
+        self.assertEqual(result.failed, 0)
+
+    def test_import_file_case_insensitive_columns(self):
+        content = "NAAM,EMAIL\nJan,jan@test.nl\nPiet,piet@test.nl"
+        csv_path = self.create_temp_csv(content)
+        importer = self.TestImporter(required_columns=["naam", "email"])
+        result = importer.import_file(csv_path)
+        self.assertEqual(result.total_rows, 2)
+        self.assertEqual(result.successful, 2)
+        self.assertEqual(result.failed, 0)
+
+    def test_import_file_mixed_case_required_columns(self):
+        # Test with mixed case required columns (should be normalized)
+        content = "naam,email\nJan,jan@test.nl\nPiet,piet@test.nl"
+        csv_path = self.create_temp_csv(content)
+        importer = self.TestImporter(required_columns=["NAAM", "Email"])
         result = importer.import_file(csv_path)
         self.assertEqual(result.total_rows, 2)
         self.assertEqual(result.successful, 2)
@@ -362,6 +406,30 @@ class LetterImporterTest(TestImporterBase):
         notes = HomeownerAssociationCommunicationNote.objects.filter(is_imported=True)
         self.assertEqual(notes.count(), 2)
 
+    def test_import_file_case_insensitive_columns(self):
+        baker.make(HomeownerAssociation, name="Vve A")
+        baker.make(HomeownerAssociation, name="Vve B")
+
+        # Test with uppercase column header
+        content = "VVE\nVve A\nVve B"
+        csv_path = self.create_temp_csv(content)
+
+        importer = LetterImporter(
+            date=self.date,
+            description=self.description,
+            author_name=self.author_name,
+            skip_hoa_api=True,
+        )
+        result = importer.import_file(csv_path)
+
+        self.assertEqual(result.total_rows, 2)
+        self.assertEqual(result.successful, 2)
+        self.assertEqual(result.failed, 0)
+
+        # Check that notes were created
+        notes = HomeownerAssociationCommunicationNote.objects.filter(is_imported=True)
+        self.assertEqual(notes.count(), 2)
+
     def test_import_file_skips_existing_notes(self):
         hoa = baker.make(HomeownerAssociation, name="Vve A")
         # Create an existing note for the same date
@@ -395,6 +463,28 @@ class CourseParticipantImporterTest(TestImporterBase):
     """Test CourseParticipantImporter functionality"""
 
     def test_process_row_success_new_contact(self):
+        hoa = baker.make(HomeownerAssociation, name="Test Vve")
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+
+        with patch.object(importer, "_find_homeowner_association", return_value=hoa):
+            row = {
+                "naam": "Jan Janssen",
+                "email": "jan@test.nl",
+                "telefoon": "0612345678",
+                "functie": "Bestuurslid",
+                "cursusdatum": "15/11/2025",
+                "vve": "Test Vve",
+            }
+            result = importer._process_row(row, 2)
+
+        self.assertTrue(result)
+        contact = Contact.objects.get(email="jan@test.nl")
+        self.assertEqual(contact.fullname, "Jan Janssen")
+        self.assertEqual(contact.phone, "0612345678")
+        self.assertEqual(contact.role, "Bestuurslid")
+        self.assertEqual(contact.course_date.strftime("%d/%m/%Y"), "15/11/2025")
+
+    def test_process_row_case_insensitive_columns(self):
         hoa = baker.make(HomeownerAssociation, name="Test Vve")
         importer = CourseParticipantImporter(skip_hoa_api=True)
 
@@ -472,7 +562,15 @@ class CourseParticipantImporterTest(TestImporterBase):
         self.assertEqual(len(importer.result.errors), 1)
         self.assertIn("Ongeldig e-mailadres", str(importer.result.errors[0]))
 
-    def test_parse_course_date_valid(self):
+    def test_parse_course_date_dd_mm_yyyy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/11/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yyyy_slash_with_time(self):
         importer = CourseParticipantImporter(skip_hoa_api=True)
         date = importer._parse_course_date("25/11/2025 00:00", 1)
         self.assertIsNotNone(date)
@@ -480,11 +578,135 @@ class CourseParticipantImporterTest(TestImporterBase):
         self.assertEqual(date.month, 11)
         self.assertEqual(date.year, 2025)
 
-    def test_parse_course_date_without_time(self):
+    def test_parse_course_date_d_m_yyyy_slash(self):
         importer = CourseParticipantImporter(skip_hoa_api=True)
-        date = importer._parse_course_date("25/11/2025", 1)
+        date = importer._parse_course_date("5/3/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/11/25", 1)
         self.assertIsNotNone(date)
         self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_m_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5/3/25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-11-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_m_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-3-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_mm_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-11-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_m_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-3-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 3)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/1/25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yyyy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25/1/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5/11/25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yyyy_slash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5/11/2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-1-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_dd_m_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("25-1-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 25)
+        self.assertEqual(date.month, 1)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-11-25", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_d_mm_yyyy_dash(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("5-11-2025", 1)
+        self.assertIsNotNone(date)
+        self.assertEqual(date.day, 5)
+        self.assertEqual(date.month, 11)
+        self.assertEqual(date.year, 2025)
+
+    def test_parse_course_date_empty_string(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("", 1)
+        self.assertIsNone(date)
+
+    def test_parse_course_date_whitespace_only(self):
+        importer = CourseParticipantImporter(skip_hoa_api=True)
+        date = importer._parse_course_date("   ", 1)
+        self.assertIsNone(date)
 
     def test_parse_course_date_invalid(self):
         importer = CourseParticipantImporter(skip_hoa_api=True)
@@ -545,11 +767,30 @@ class ContactImporterTest(TestImporterBase):
 
         with patch.object(importer, "_find_homeowner_association", return_value=hoa):
             row = {
-                "ZWD": "123EAK",
-                "Vnummer": "V12345",
-                "Statutaire Naam": "Test Vve",
-                "Kontaktpersoon": "Jan Janssen",
-                "Mailadres": "jan@test.nl",
+                "zwd": "123EAK",
+                "vnummer": "V12345",
+                "statutaire naam": "Test Vve",
+                "kontaktpersoon": "Jan Janssen",
+                "mailadres": "jan@test.nl",
+            }
+            result = importer._process_row(row, 2)
+
+        self.assertTrue(result)
+        contact = Contact.objects.get(email="jan@test.nl")
+        self.assertEqual(contact.fullname, "Jan Janssen")
+        self.assertEqual(contact.role, "Geïmporteerd contact")
+
+    def test_process_row_case_insensitive_columns(self):
+        hoa = baker.make(HomeownerAssociation, name="Test Vve")
+        importer = ContactImporter(skip_hoa_api=True)
+
+        with patch.object(importer, "_find_homeowner_association", return_value=hoa):
+            row = {
+                "zwd": "123EAK",
+                "vnummer": "V12345",
+                "statutaire naam": "Test Vve",
+                "kontaktpersoon": "Jan Janssen",
+                "mailadres": "jan@test.nl",
             }
             result = importer._process_row(row, 2)
 
@@ -568,11 +809,11 @@ class ContactImporterTest(TestImporterBase):
 
         with patch.object(importer, "_find_homeowner_association", return_value=hoa):
             row = {
-                "ZWD": "123EAK",
-                "Vnummer": "V12345",
-                "Statutaire Naam": "Test Vve",
-                "Kontaktpersoon": "Jan Janssen (Updated)",
-                "Mailadres": "jan@test.nl",
+                "zwd": "123EAK",
+                "vnummer": "V12345",
+                "statutaire naam": "Test Vve",
+                "kontaktpersoon": "Jan Janssen (Updated)",
+                "mailadres": "jan@test.nl",
             }
             result = importer._process_row(row, 2)
 
@@ -586,10 +827,10 @@ class ContactImporterTest(TestImporterBase):
 
         importer = ContactImporter(skip_hoa_api=True)
         row = {
-            "ZWD": "123EAK",
-            "Vnummer": "",
-            "Statutaire Naam": "",
-            "Mailadres": "test@test.nl",
+            "zwd": "123EAK",
+            "vnummer": "",
+            "statutaire naam": "",
+            "mailadres": "test@test.nl",
         }
         result = importer._find_homeowner_association(row, 2)
 
@@ -601,10 +842,10 @@ class ContactImporterTest(TestImporterBase):
 
         importer = ContactImporter(skip_hoa_api=True)
         row = {
-            "ZWD": "",
-            "Vnummer": "V12345",
-            "Statutaire Naam": "",
-            "Mailadres": "test@test.nl",
+            "zwd": "",
+            "vnummer": "V12345",
+            "statutaire naam": "",
+            "mailadres": "test@test.nl",
         }
         result = importer._find_homeowner_association(row, 2)
 
@@ -615,10 +856,10 @@ class ContactImporterTest(TestImporterBase):
 
         importer = ContactImporter(skip_hoa_api=True)
         row = {
-            "ZWD": "",
-            "Vnummer": "",
-            "Statutaire Naam": "Test Vve",
-            "Mailadres": "test@test.nl",
+            "zwd": "",
+            "vnummer": "",
+            "statutaire naam": "Test Vve",
+            "mailadres": "test@test.nl",
         }
         result = importer._find_homeowner_association(row, 2)
 
@@ -627,11 +868,11 @@ class ContactImporterTest(TestImporterBase):
     def test_process_row_missing_email(self):
         importer = ContactImporter(skip_hoa_api=True)
         row = {
-            "ZWD": "123EAK",
-            "Vnummer": "V12345",
-            "Statutaire Naam": "Test Vve",
-            "Kontaktpersoon": "Jan Janssen",
-            "Mailadres": "",
+            "zwd": "123EAK",
+            "vnummer": "V12345",
+            "statutaire naam": "Test Vve",
+            "kontaktpersoon": "Jan Janssen",
+            "mailadres": "",
         }
         result = importer._process_row(row, 2)
 
@@ -641,11 +882,11 @@ class ContactImporterTest(TestImporterBase):
     def test_process_row_invalid_email(self):
         importer = ContactImporter(skip_hoa_api=True)
         row = {
-            "ZWD": "123EAK",
-            "Vnummer": "V12345",
-            "Statutaire Naam": "Test Vve",
-            "Kontaktpersoon": "Jan Janssen",
-            "Mailadres": "invalid-email",
+            "zwd": "123EAK",
+            "vnummer": "V12345",
+            "statutaire naam": "Test Vve",
+            "kontaktpersoon": "Jan Janssen",
+            "mailadres": "invalid-email",
         }
         result = importer._process_row(row, 2)
 
@@ -655,11 +896,11 @@ class ContactImporterTest(TestImporterBase):
     def test_process_row_hoa_not_found(self):
         importer = ContactImporter(skip_hoa_api=True)
         row = {
-            "ZWD": "999XXX",
-            "Vnummer": "V99999",
-            "Statutaire Naam": "Nonexistent Vve",
-            "Kontaktpersoon": "Jan Janssen",
-            "Mailadres": "jan@test.nl",
+            "zwd": "999XXX",
+            "vnummer": "V99999",
+            "statutaire naam": "Nonexistent Vve",
+            "kontaktpersoon": "Jan Janssen",
+            "mailadres": "jan@test.nl",
         }
         result = importer._process_row(row, 2)
 
@@ -672,11 +913,11 @@ class ContactImporterTest(TestImporterBase):
 
         with patch.object(importer, "_find_homeowner_association", return_value=hoa):
             row = {
-                "ZWD": "123EAK",
-                "Vnummer": "V12345",
-                "Statutaire Naam": "Test Vve",
-                "Kontaktpersoon": "Jan Janssen",
-                "Mailadres": "jan@test.nl",
+                "zwd": "123EAK",
+                "vnummer": "V12345",
+                "statutaire naam": "Test Vve",
+                "kontaktpersoon": "Jan Janssen",
+                "mailadres": "jan@test.nl",
             }
             result = importer._process_row(row, 2)
 
@@ -689,6 +930,24 @@ class ContactImporterTest(TestImporterBase):
         baker.make(Case, prefixed_dossier_id="123EAK", homeowner_association=hoa)
 
         content = "ZWD,Vnummer,Statutaire Naam,Kontaktpersoon,Mailadres\n123EAK,V12345,Test Vve,Jan Janssen,jan@test.nl"
+        csv_path = self.create_temp_csv(content)
+
+        importer = ContactImporter(skip_hoa_api=True)
+        result = importer.import_file(csv_path)
+
+        self.assertEqual(result.total_rows, 1)
+        self.assertEqual(result.successful, 1)
+        self.assertEqual(result.failed, 0)
+
+        # Check contact was created
+        contact = Contact.objects.get(email="jan@test.nl")
+        self.assertEqual(contact.fullname, "Jan Janssen")
+
+    def test_import_file_case_insensitive_columns(self):
+        hoa = baker.make(HomeownerAssociation, name="Test Vve")
+        baker.make(Case, prefixed_dossier_id="123EAK", homeowner_association=hoa)
+
+        content = "ZWD,Vnummer,statutaire naam,Kontaktpersoon,MAILADRES\n123EAK,V12345,Test Vve,Jan Janssen,jan@test.nl"
         csv_path = self.create_temp_csv(content)
 
         importer = ContactImporter(skip_hoa_api=True)

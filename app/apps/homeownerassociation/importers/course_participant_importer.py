@@ -39,7 +39,7 @@ class CourseParticipantImporter(BaseImporter):
         """
         Find HomeownerAssociation by name in database or fetch via DSO API.
         """
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
         if hoa_name:
             return self._find_homeowner_association_by_name(
                 hoa_name, row_number, skip_hoa_api=self.skip_hoa_api
@@ -50,7 +50,7 @@ class CourseParticipantImporter(BaseImporter):
         self, date_string: str, row_number: int
     ) -> Optional[datetime]:
         """
-        Parse course date from CSV format (e.g., "25/11/2025 00:00").
+        Parse course date. Supports most common date formats and strips optional time component.
         Returns datetime object or None if parsing fails.
         """
         if not date_string or not date_string.strip():
@@ -58,24 +58,33 @@ class CourseParticipantImporter(BaseImporter):
 
         date_string = date_string.strip()
 
-        # Try to parse formats: "25/11/2025 00:00" or "25/11/2025"
-        try:
-            # First try with time component
-            if " " in date_string:
-                date_part = date_string.split(" ")[0]
-            else:
-                date_part = date_string
+        # Remove time component if present
+        if " " in date_string:
+            date_part = date_string.split(" ")[0]
+        else:
+            date_part = date_string
 
-            # Parse DD/MM/YYYY format
-            return datetime.strptime(date_part, "%d/%m/%Y")
-        except ValueError:
-            return None
+        # Allowed date formats
+        formats = [
+            "%d/%m/%Y",  # DD/MM/YYYY or D/M/YYYY
+            "%d/%m/%y",  # DD/MM/YY or D/M/YY
+            "%d-%m-%Y",  # DD-MM-YYYY or D-M-YYYY
+            "%d-%m-%y",  # DD-MM-YY or D-M-YY
+        ]
+
+        for format in formats:
+            try:
+                return datetime.strptime(date_part, format)
+            except ValueError:
+                continue
+
+        return None
 
     def _process_row(self, row: Dict[str, str], row_number: int) -> bool:
         """
         Process a single course participant row and return a boolean indicating if the row was processed successfully.
         """
-        email = row.get(self.COLUMN_MAPPING["contact_email"], "").strip()
+        email = row.get(self.COLUMN_MAPPING["contact_email"].lower(), "").strip()
 
         if not email:
             self._add_error(
@@ -93,10 +102,14 @@ class CourseParticipantImporter(BaseImporter):
             )
             return False
 
-        fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
+        fullname = (
+            row.get(self.COLUMN_MAPPING["contact_fullname"].lower(), "").strip() or ""
+        )
 
         # Parse course date - required field
-        course_date_str = row.get(self.COLUMN_MAPPING["course_date"], "").strip()
+        course_date_str = row.get(
+            self.COLUMN_MAPPING["course_date"].lower(), ""
+        ).strip()
         if not course_date_str:
             self._add_error(
                 row_number,
@@ -110,12 +123,12 @@ class CourseParticipantImporter(BaseImporter):
             self._add_error(
                 row_number,
                 self.COLUMN_MAPPING["course_date"],
-                f"Ongeldig cursusdatum formaat: '{course_date_str}'. Verwacht formaat: DD/MM/YYYY",
+                f"Ongeldige cursusdatum: '{course_date_str}'. Mogelijke formaten: DD/MM/YYYY, DD/MM/YY, D/M/YYYY, D/M/YY, DD-MM-YYYY, DD-MM-YY, D-M-YYYY, D-M-YY",
             )
             return False
 
         # Find `HomeownerAssociation`
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
         hoa = self._find_homeowner_association(row, row_number)
         if not hoa:
             self._add_error(
@@ -126,8 +139,8 @@ class CourseParticipantImporter(BaseImporter):
             return False
 
         # Get optional fields
-        phone = row.get(self.COLUMN_MAPPING["contact_phone"], "").strip()
-        role = row.get(self.COLUMN_MAPPING["contact_role"], "").strip()
+        phone = row.get(self.COLUMN_MAPPING["contact_phone"].lower(), "").strip()
+        role = row.get(self.COLUMN_MAPPING["contact_role"].lower(), "").strip()
 
         try:
             if self.dry_run:

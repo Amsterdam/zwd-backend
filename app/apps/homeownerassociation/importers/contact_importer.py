@@ -42,10 +42,10 @@ class ContactImporter(BaseImporter):
         3. `Statutaire Naam` (exact match, e.g. "Vereniging van Eigenaars van X")
         """
         prefixed_dossier_id = row.get(
-            self.COLUMN_MAPPING["case_prefixed_dossier_id"], ""
+            self.COLUMN_MAPPING["case_prefixed_dossier_id"].lower(), ""
         ).strip()
-        legacy_id = row.get(self.COLUMN_MAPPING["case_legacy_id"], "").strip()
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        legacy_id = row.get(self.COLUMN_MAPPING["case_legacy_id"].lower(), "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
 
         # Try to find by `ZWD` (Case `prefixed_dossier_id`)
         if prefixed_dossier_id and prefixed_dossier_id != "0":
@@ -89,7 +89,7 @@ class ContactImporter(BaseImporter):
         """
         Process a single contact row and return a boolean indicating if the row was processed successfully.
         """
-        email = row.get(self.COLUMN_MAPPING["contact_email"], "").strip()
+        email = row.get(self.COLUMN_MAPPING["contact_email"].lower(), "").strip()
 
         if not email:
             self._add_error(
@@ -107,10 +107,12 @@ class ContactImporter(BaseImporter):
             )
             return False
 
-        fullname = row.get(self.COLUMN_MAPPING["contact_fullname"], "").strip() or ""
+        fullname = (
+            row.get(self.COLUMN_MAPPING["contact_fullname"].lower(), "").strip() or ""
+        )
 
         # Find `HomeownerAssociation`
-        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"], "").strip()
+        hoa_name = row.get(self.COLUMN_MAPPING["hoa_name"].lower(), "").strip()
         hoa = self._find_homeowner_association(row, row_number)
         if not hoa:
             self._add_error(
