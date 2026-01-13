@@ -16,13 +16,23 @@ class NotFoundException(BaseException):
     default_message = "Dit object is niet gevonden."
 
 
+class InvalidDsoResponseException(BaseException):
+    default_message = "Ongeldige reactie van DSO ontvangen."
+
+
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if isinstance(exc, NotFoundException):
         return Response(
             {"message": exc.message},
-            status=status.HTTP_200_OK,
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if isinstance(exc, InvalidDsoResponseException):
+        return Response(
+            {"message": exc.message},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     if response is not None:

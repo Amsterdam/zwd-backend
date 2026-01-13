@@ -2,7 +2,7 @@ import requests
 from urllib.parse import quote
 from django.conf import settings
 
-from utils.exceptions import NotFoundException
+from utils.exceptions import InvalidDsoResponseException, NotFoundException
 
 
 class DsoClient:
@@ -46,6 +46,8 @@ class DsoClient:
 
     def _get_paginated_response(self, url):
         response = requests.get(url, headers=self.headers)
+        if response.status_code != 200:
+            raise InvalidDsoResponseException()
         response_json = response.json()
         while "_links" in response_json and "next" in response_json["_links"]:
             next_page = response_json["_links"]["next"]["href"]
