@@ -32,7 +32,10 @@ class DsoClient:
         woon_objecten = [
             obj for obj in verblijfsobjecten if obj.get("eigWoningvoorraad") == "true"
         ]
-
+        if not woon_objecten:
+            raise InvalidDsoResponseException(
+                f"No addresses with residential use found for {hoa_name}."
+            )
         # Use dict to deduplicate by 'votIdentificatie'
         return list({obj["votIdentificatie"]: obj for obj in woon_objecten}.values())
 
