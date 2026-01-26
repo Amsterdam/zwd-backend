@@ -391,32 +391,6 @@ class CaseApiTest(APITestCase):
         self.assertEqual(response.data[0], case_status.name)
 
     @patch("apps.cases.views.CaseViewSet.start_workflow")
-    def test_create_course_case_success(self, mock_start_workflow):
-        """Test creating a Course case without advice_type"""
-        mock_start_workflow.return_value = "task_start_workflow: completed"
-        homeowner_association = baker.make(
-            HomeownerAssociation, number_of_apartments=13
-        )
-        url = reverse("cases-list")
-        data = {
-            "application_type": ApplicationType.COURSE.value,
-            "description": "Course test case",
-            "homeowner_association": homeowner_association.id,
-            "request_date": timezone.now().date().isoformat(),
-        }
-
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(
-            response.data["application_type"], ApplicationType.COURSE.value
-        )
-        self.assertIsNone(response.data.get("advice_type"))
-
-        # Verify prefixed_dossier_id has CUR suffix
-        case = Case.objects.get(id=response.data["id"])
-        self.assertTrue(case.prefixed_dossier_id.endswith("CUR"))
-
-    @patch("apps.cases.views.CaseViewSet.start_workflow")
     def test_create_advice_case_requires_advice_type(self, mock_start_workflow):
         """Test that advice_type is required when application_type is ADVICE"""
         mock_start_workflow.return_value = "task_start_workflow: completed"
@@ -459,15 +433,15 @@ class CaseApiTest(APITestCase):
         )
         self.assertEqual(response.data["advice_type"], AdviceType.ENERGY_ADVICE.value)
 
-    def test_filter_cases_by_course_application_type(self):
-        """Test filtering cases by Course application type"""
+    def test_filter_cases_by_activation_team_application_type(self):
+        """Test filtering cases by Activation Team application type"""
         homeowner_association = baker.make(
             HomeownerAssociation, number_of_apartments=13
         )
-        course_case = baker.make(
+        activation_team_case = baker.make(
             Case,
             homeowner_association=homeowner_association,
-            application_type=ApplicationType.COURSE.value,
+            application_type=ApplicationType.ACTIVATIONTEAM.value,
             advice_type=None,
         )
         # Create another case with different application type
@@ -480,11 +454,11 @@ class CaseApiTest(APITestCase):
 
         url = reverse("cases-list")
         response = self.client.get(
-            url, {"application_type": ApplicationType.COURSE.value}
+            url, {"application_type": ApplicationType.ACTIVATIONTEAM.value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
-        self.assertEqual(response.data["results"][0]["id"], course_case.id)
+        self.assertEqual(response.data["results"][0]["id"], activation_team_case.id)
 
     def _create_sample_document(self):
         url = reverse("cases-create-document")
