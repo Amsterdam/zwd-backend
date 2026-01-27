@@ -37,20 +37,6 @@ class CaseModelTest(TestCase):
         self.assertEqual(Case.objects.filter(end_date__isnull=True).count(), 0)
         self.assertEqual(CaseWorkflow.objects.count(), 0)
 
-    def test_prefixed_dossier_id_for_course(self):
-        """Test that Course cases get CUR prefix"""
-        homeowner_association = baker.make(
-            HomeownerAssociation, number_of_apartments=13
-        )
-        case = baker.make(
-            Case,
-            homeowner_association=homeowner_association,
-            application_type=ApplicationType.COURSE.value,
-            advice_type=None,
-        )
-        expected_prefix = f"{case.id}CUR"
-        self.assertEqual(case.prefixed_dossier_id, expected_prefix)
-
     def test_prefixed_dossier_id_for_activation_team(self):
         """Test that ActivationTeam cases get ACT prefix"""
         homeowner_association = baker.make(
@@ -107,19 +93,19 @@ class CaseModelTest(TestCase):
         expected_prefix = f"{case.id}EAG"
         self.assertEqual(case.prefixed_dossier_id, expected_prefix)
 
-    def test_course_case_has_no_advice_type(self):
-        """Test that Course cases should not have advice_type set"""
+    def test_activation_team_case_has_no_advice_type(self):
+        """Test that Activation Team cases should not have advice_type set"""
         homeowner_association = baker.make(
             HomeownerAssociation, number_of_apartments=13
         )
         case = baker.make(
             Case,
             homeowner_association=homeowner_association,
-            application_type=ApplicationType.COURSE.value,
+            application_type=ApplicationType.ACTIVATIONTEAM.value,
             advice_type=None,
         )
         self.assertIsNone(case.advice_type)
-        self.assertEqual(case.application_type, ApplicationType.COURSE.value)
+        self.assertEqual(case.application_type, ApplicationType.ACTIVATIONTEAM.value)
 
     @patch("apps.cases.models.Case._get_export_config")
     def test_get_additional_report_fields(self, mock_get_export_config):
@@ -139,7 +125,7 @@ class CaseModelTest(TestCase):
         case = baker.make(
             Case,
             homeowner_association=homeowner_association,
-            application_type=ApplicationType.COURSE.value,
+            application_type=ApplicationType.ACTIVATIONTEAM.value,
             advice_type=None,
         )
         baker.make(
@@ -175,7 +161,7 @@ class CaseModelTest(TestCase):
         case = baker.make(
             Case,
             homeowner_association=homeowner_association,
-            application_type=ApplicationType.COURSE.value,
+            application_type=ApplicationType.ACTIVATIONTEAM.value,
             advice_type=None,
         )
         baker.make(

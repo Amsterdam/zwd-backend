@@ -12,7 +12,6 @@ from django.core.files.storage import default_storage
 class ApplicationType(Enum):
     ADVICE = "Advies"
     ACTIVATIONTEAM = "Activatieteam"
-    COURSE = "Cursus"
 
     @classmethod
     def choices(cls):
@@ -84,8 +83,6 @@ class Case(ModelEventEmitter):
     def _compute_prefixed_dossier_id(self):
         if self.application_type == ApplicationType.ACTIVATIONTEAM.value:
             return f"{self.id}ACT"
-        if self.application_type == ApplicationType.COURSE.value:
-            return f"{self.id}CUR"
         if self.advice_type == AdviceType.HBO.value:
             return f"{self.id}HBO"
         if self.advice_type == AdviceType.ENERGY_ADVICE.value:

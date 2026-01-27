@@ -90,14 +90,13 @@ class CaseCreateSerializer(serializers.ModelSerializer):
                 }
             )
 
-        # The `advice_type` field should NOT be set when `application_type` is COURSE or ACTIVATIONTEAM
+        # The `advice_type` field should NOT be set when `application_type` is ACTIVATIONTEAM
         if data.get("application_type") in [
-            ApplicationType.COURSE.value,
             ApplicationType.ACTIVATIONTEAM.value,
         ] and data.get("advice_type"):
             raise serializers.ValidationError(
                 {
-                    "advice_type": "This field should not be set for COURSE or ACTIVATIONTEAM application types."
+                    "advice_type": "This field should not be set for ACTIVATIONTEAM application types."
                 }
             )
 

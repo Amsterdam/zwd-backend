@@ -264,6 +264,7 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.3.0": {},
                 "1.4.0": {},
                 "2.0.0": {},
+                "2.1.0": {},
             },
         },
         "activatieteam": {
@@ -319,12 +320,6 @@ WORKFLOW_SPEC_CONFIG = {
                 "1.0.0": {},
                 "1.1.0": {},
                 "1.2.0": {},
-            },
-        },
-        "cursus": {
-            "initial_data": {},
-            "versions": {
-                "1.0.0": {},
             },
         },
         "close_case": {
