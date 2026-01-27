@@ -1,5 +1,7 @@
+import django_filters
 from rest_framework import viewsets, mixins
 
+from utils.pagination import CustomPagination
 from clients.dso_client import DsoClient
 from .models import (
     District,
@@ -35,6 +37,61 @@ from drf_spectacular.utils import extend_schema
 from .importers.letter_importer import LetterImporter
 from .importers.course_participant_importer import CourseParticipantImporter
 from .utils import process_csv_import
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+from django.db.models import Count, Q
+
+
+class HomeOwnerAssociationFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method="filter_search", label="Search")
+    is_small_hoa = django_filters.BooleanFilter(
+        method="filter_is_small_hoa", label="HOA has <= 12 apartments"
+    )
+
+    district = django_filters.ModelMultipleChoiceFilter(
+        queryset=District.objects.all(),
+        method="filter_district",
+        to_field_name="name",
+    )
+
+    participant_count = django_filters.NumberFilter(
+        method="filter_participant_count", label="Minimum number of course participants"
+    )
+
+    def filter_search(self, queryset, _, value):
+        """
+        Filter hoa based on a search term that matches name.
+        """
+        if value:
+            return queryset.filter(Q(name__icontains=value))
+        return queryset
+
+    def filter_district(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                district__in=value,
+            )
+        return queryset
+
+    def filter_is_small_hoa(self, queryset, _, value):
+        """
+        Filter cases based on the 'is_small' property of the HomeownerAssociation.
+        """
+        if value is True:
+            return queryset.filter(number_of_apartments__lte=12)
+        if value is False:
+            return queryset.filter(number_of_apartments__gt=12)
+        return queryset
+
+    def filter_participant_count(self, queryset, _, value):
+        if not value:
+            return queryset
+
+        return queryset.annotate(
+            participant_count_db=Count(
+                "contacts", filter=Q(contacts__course_date__isnull=False)
+            )
+        ).filter(participant_count_db__gte=value)
 
 
 class HomeOwnerAssociationView(
@@ -46,6 +103,9 @@ class HomeOwnerAssociationView(
 ):
     queryset = HomeownerAssociation.objects.all()
     serializer_class = HomeownerAssociationSerializer
+    pagination_class = CustomPagination
+    filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
+    filterset_class = HomeOwnerAssociationFilter
 
     def get_serializer_class(self):
         if self.action == "cases":
