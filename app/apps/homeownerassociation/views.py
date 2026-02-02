@@ -54,8 +54,28 @@ class HomeOwnerAssociationFilter(django_filters.FilterSet):
         to_field_name="name",
     )
 
-    participant_count = django_filters.NumberFilter(
-        method="filter_participant_count", label="Minimum number of course participants"
+    course_participant_count = django_filters.NumberFilter(
+        field_name="course_participant_count",
+        lookup_expr="gte",
+        label="Minimum number of course participants",
+    )
+
+    letter_count = django_filters.NumberFilter(
+        field_name="letter_count",
+        lookup_expr="gte",
+        label="Minimum number of letters sent",
+    )
+
+    cases_count = django_filters.NumberFilter(
+        field_name="cases_count",
+        lookup_expr="gte",
+        label="Minimum number of cases",
+    )
+
+    neighborhood = django_filters.ModelMultipleChoiceFilter(
+        queryset=Neighborhood.objects.all(),
+        method="filter_neighborhood",
+        to_field_name="name",
     )
 
     def filter_search(self, queryset, _, value):
@@ -83,15 +103,12 @@ class HomeOwnerAssociationFilter(django_filters.FilterSet):
             return queryset.filter(number_of_apartments__gt=12)
         return queryset
 
-    def filter_participant_count(self, queryset, _, value):
-        if not value:
-            return queryset
-
-        return queryset.annotate(
-            participant_count_db=Count(
-                "contacts", filter=Q(contacts__course_date__isnull=False)
+    def filter_neighborhood(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                neighborhood__in=value,
             )
-        ).filter(participant_count_db__gte=value)
+        return queryset
 
 
 class HomeOwnerAssociationView(
@@ -101,7 +118,25 @@ class HomeOwnerAssociationView(
     mixins.UpdateModelMixin,
     ContactMixin,
 ):
-    queryset = HomeownerAssociation.objects.all()
+    # TODO: Improve prefetching to avoid N+1 queries in list view
+    queryset = (
+        HomeownerAssociation.objects.annotate(
+            course_participant_count=Count(
+                "contacts",
+                filter=Q(contacts__course_date__isnull=False),
+                distinct=True,
+            ),
+            letter_count=Count(
+                "communication_notes",
+                filter=Q(communication_notes__is_imported=True),
+                distinct=True,
+            ),
+            cases_count=Count(
+                "cases",
+                distinct=True,
+            ),
+        )
+    ).all()
     serializer_class = HomeownerAssociationSerializer
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)

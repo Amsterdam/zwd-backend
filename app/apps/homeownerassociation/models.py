@@ -108,10 +108,6 @@ class HomeownerAssociation(models.Model):
     def is_priority_neighborhood(self):
         return PriorityZipCode.objects.filter(zip_code=self.zip_code).exists()
 
-    @property
-    def course_participant_count(self):
-        return self.contacts.filter(course_date__isnull=False).count()
-
     def __str__(self):
         return self.name
 
