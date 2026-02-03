@@ -94,7 +94,7 @@ class HomeOwnerAssociationFilter(django_filters.FilterSet):
 
     def filter_is_small_hoa(self, queryset, _, value):
         """
-        Filter cases based on the 'is_small' property of the HomeownerAssociation.
+        Filter HOAs based on the number of apartments (small HOAs have <= 12 apartments).
         """
         if value is True:
             return queryset.filter(number_of_apartments__lte=12)
