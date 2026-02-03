@@ -1,8 +1,11 @@
+from datetime import date
 from django.test import TestCase
 from unittest.mock import patch
 
 
+from apps.homeownerassociation.utils import hoa_with_counts
 from apps.homeownerassociation.models import (
+    Contact,
     HomeownerAssociation,
     Owner,
     PriorityZipCode,
@@ -121,12 +124,16 @@ class HomeownerAssociationModelTest(TestCase):
         baker.make(
             Owner, homeowner_association=hoa, number_of_apartments=3, type="Corporatie"
         )
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
         self.assertTrue(hoa.has_major_shareholder)
 
         hoa = baker.make(HomeownerAssociation, number_of_apartments=12)
         baker.make(
             Owner, homeowner_association=hoa, number_of_apartments=2, type="Corporatie"
         )
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
         self.assertFalse(hoa.has_major_shareholder)
 
         hoa = baker.make(HomeownerAssociation, number_of_apartments=12)
@@ -136,23 +143,66 @@ class HomeownerAssociationModelTest(TestCase):
             number_of_apartments=8,
             type="Natuurlijk persoon",
         )
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
         self.assertFalse(hoa.has_major_shareholder)
 
     def test_is_priority_neighborhood_true(self):
         zip_code = "1234AB"
         baker.make(PriorityZipCode, zip_code=zip_code)
         hoa = baker.make(HomeownerAssociation, zip_code=zip_code)
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
         self.assertTrue(hoa.is_priority_neighborhood)
 
     def test_is_priority_neighborhood_false(self):
         zip_code = "5678CD"
         hoa = baker.make(HomeownerAssociation, zip_code=zip_code)
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
         self.assertFalse(hoa.is_priority_neighborhood)
 
     def test_is_priority_neighborhood_no_zip_code(self):
         hoa = baker.make(HomeownerAssociation, zip_code=None)
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
         self.assertFalse(hoa.is_priority_neighborhood)
 
     def test_is_priority_neighborhood_empty_zip_code(self):
         hoa = baker.make(HomeownerAssociation, zip_code="")
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
         self.assertFalse(hoa.is_priority_neighborhood)
+
+    def test_course_participant_count_with_course_participants(self):
+        hoa = baker.make(HomeownerAssociation)
+
+        baker.make(Contact, homeowner_association=hoa, course_date=date(2024, 1, 15))
+        baker.make(Contact, homeowner_association=hoa, course_date=date(2024, 2, 20))
+        baker.make(Contact, homeowner_association=hoa, course_date=date(2024, 3, 10))
+        baker.make(Contact, homeowner_association=hoa, course_date=None)
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
+        self.assertEqual(hoa.course_participant_count, 3)
+
+    def test_course_participant_count_no_participants(self):
+        hoa = baker.make(HomeownerAssociation)
+
+        baker.make(Contact, homeowner_association=hoa, course_date=None)
+        baker.make(Contact, homeowner_association=hoa, course_date=None)
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
+        self.assertEqual(hoa.course_participant_count, 0)
+
+    def test_course_participant_count_no_contacts(self):
+        hoa = baker.make(HomeownerAssociation)
+
+        hoa = hoa_with_counts().get(pk=hoa.pk)
+
+        self.assertEqual(hoa.course_participant_count, 0)
