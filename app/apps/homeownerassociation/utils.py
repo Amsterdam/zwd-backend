@@ -2,7 +2,8 @@ import os
 import tempfile
 import magic
 from rest_framework import serializers
-
+from django.db.models import Count, Q, F, OuterRef, Exists
+from .models import HomeownerAssociation, Owner, PriorityZipCode
 
 CSV_MIME_TYPES = ["text/csv", "text/plain", "application/csv"]
 
@@ -133,3 +134,44 @@ def process_csv_import(file, importer):
                 os.unlink(temp_file_path)
             except Exception:
                 pass
+
+
+def hoa_with_counts():
+    major_owner_qs = (
+        Owner.objects.filter(homeowner_association=OuterRef("pk"))
+        .annotate(
+            fraction=F("number_of_apartments")
+            * 1.0
+            / F("homeowner_association__number_of_apartments")
+        )
+        .filter(fraction__gte=0.25)
+        .exclude(type="Natuurlijk persoon")
+    )
+
+    priority_qs = PriorityZipCode.objects.filter(zip_code=OuterRef("zip_code"))
+
+    return (
+        HomeownerAssociation.objects.annotate(
+            course_participant_count=Count(
+                "contacts",
+                filter=Q(contacts__course_date__isnull=False),
+                distinct=True,
+            ),
+            letter_count=Count(
+                "communication_notes",
+                filter=Q(communication_notes__is_imported=True),
+                distinct=True,
+            ),
+            cases_count=Count("cases", distinct=True),
+            has_major_shareholder=Exists(major_owner_qs),
+            is_priority_neighborhood=Exists(priority_qs),
+        )
+        .select_related(
+            "district",
+            "neighborhood",
+            "wijk",
+        )
+        .prefetch_related(
+            "owners",
+        )
+    )

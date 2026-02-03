@@ -6,7 +6,6 @@ from clients.dso_client import DsoClient
 from .models import (
     District,
     HomeownerAssociationCommunicationNote,
-    HomeownerAssociation,
     Neighborhood,
     Wijk,
 )
@@ -36,10 +35,10 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from .importers.letter_importer import LetterImporter
 from .importers.course_participant_importer import CourseParticipantImporter
-from .utils import process_csv_import
+from .utils import hoa_with_counts, process_csv_import
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
-from django.db.models import Count, Q
+from django.db.models import Q
 
 
 class HomeOwnerAssociationFilter(django_filters.FilterSet):
@@ -118,25 +117,7 @@ class HomeOwnerAssociationView(
     mixins.UpdateModelMixin,
     ContactMixin,
 ):
-    # TODO: Improve prefetching to avoid N+1 queries in list view
-    queryset = (
-        HomeownerAssociation.objects.annotate(
-            course_participant_count=Count(
-                "contacts",
-                filter=Q(contacts__course_date__isnull=False),
-                distinct=True,
-            ),
-            letter_count=Count(
-                "communication_notes",
-                filter=Q(communication_notes__is_imported=True),
-                distinct=True,
-            ),
-            cases_count=Count(
-                "cases",
-                distinct=True,
-            ),
-        )
-    ).all()
+    queryset = hoa_with_counts()
     serializer_class = HomeownerAssociationSerializer
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
