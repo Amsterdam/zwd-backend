@@ -1,10 +1,11 @@
+import django_filters
 from rest_framework import viewsets, mixins
 
+from utils.pagination import CustomPagination
 from clients.dso_client import DsoClient
 from .models import (
     District,
     HomeownerAssociationCommunicationNote,
-    HomeownerAssociation,
     Neighborhood,
     Wijk,
 )
@@ -34,7 +35,79 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from .importers.letter_importer import LetterImporter
 from .importers.course_participant_importer import CourseParticipantImporter
-from .utils import process_csv_import
+from .utils import hoa_with_counts, process_csv_import
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+from django.db.models import Q
+
+
+class HomeOwnerAssociationFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method="filter_search", label="Search")
+    is_small_hoa = django_filters.BooleanFilter(
+        method="filter_is_small_hoa", label="HOA has <= 12 apartments"
+    )
+
+    district = django_filters.ModelMultipleChoiceFilter(
+        queryset=District.objects.all(),
+        method="filter_district",
+        to_field_name="name",
+    )
+
+    course_participant_count = django_filters.NumberFilter(
+        field_name="course_participant_count",
+        lookup_expr="gte",
+        label="Minimum number of course participants",
+    )
+
+    letter_count = django_filters.NumberFilter(
+        field_name="letter_count",
+        lookup_expr="gte",
+        label="Minimum number of letters sent",
+    )
+
+    cases_count = django_filters.NumberFilter(
+        field_name="cases_count",
+        lookup_expr="gte",
+        label="Minimum number of cases",
+    )
+
+    neighborhood = django_filters.ModelMultipleChoiceFilter(
+        queryset=Neighborhood.objects.all(),
+        method="filter_neighborhood",
+        to_field_name="name",
+    )
+
+    def filter_search(self, queryset, _, value):
+        """
+        Filter hoa based on a search term that matches name.
+        """
+        if value:
+            return queryset.filter(Q(name__icontains=value))
+        return queryset
+
+    def filter_district(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                district__in=value,
+            )
+        return queryset
+
+    def filter_is_small_hoa(self, queryset, _, value):
+        """
+        Filter HOAs based on the number of apartments (small HOAs have <= 12 apartments).
+        """
+        if value is True:
+            return queryset.filter(number_of_apartments__lte=12)
+        if value is False:
+            return queryset.filter(number_of_apartments__gt=12)
+        return queryset
+
+    def filter_neighborhood(self, queryset, _, value):
+        if value:
+            return queryset.filter(
+                neighborhood__in=value,
+            )
+        return queryset
 
 
 class HomeOwnerAssociationView(
@@ -44,8 +117,11 @@ class HomeOwnerAssociationView(
     mixins.UpdateModelMixin,
     ContactMixin,
 ):
-    queryset = HomeownerAssociation.objects.all()
+    queryset = hoa_with_counts()
     serializer_class = HomeownerAssociationSerializer
+    pagination_class = CustomPagination
+    filter_backends = (filters.OrderingFilter, DjangoFilterBackend)
+    filterset_class = HomeOwnerAssociationFilter
 
     def get_serializer_class(self):
         if self.action == "cases":

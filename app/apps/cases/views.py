@@ -1,4 +1,5 @@
 import mimetypes
+from apps.homeownerassociation.utils import hoa_with_counts
 from apps.advisor.serializers import UpdateCaseAdvisorSerializer
 from apps.homeownerassociation.models import Contact, District, Neighborhood, Wijk
 from apps.events.serializers import CaseEventSerializer
@@ -44,7 +45,7 @@ from utils.pagination import CustomPagination
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 
 
 class CaseFilter(django_filters.FilterSet):
@@ -164,7 +165,12 @@ class CaseViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
 ):
-    queryset = Case.objects.all().prefetch_related("homeowner_association")
+    queryset = Case.objects.prefetch_related(
+        Prefetch(
+            "homeowner_association",
+            queryset=hoa_with_counts(),
+        )
+    )
     serializer_class = CaseSerializer
     pagination_class = CustomPagination
     filter_backends = (filters.OrderingFilter, DjangoFilterBackend)

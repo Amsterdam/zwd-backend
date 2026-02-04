@@ -57,6 +57,14 @@ def export_selected_users_to_excel(modeladmin, request, queryset):
 
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
+    def changelist_view(self, request, extra_context=None):
+        if "is_active__exact" not in request.GET:
+            q = request.GET.copy()
+            q["is_active__exact"] = "1"
+            request.GET = q
+            request.META["QUERY_STRING"] = q.urlencode()
+        return super().changelist_view(request, extra_context)
+
     list_display = (
         "email",
         "first_name",
@@ -64,5 +72,7 @@ class CustomUserAdmin(BaseUserAdmin):
         "is_staff",
         "last_login",
         "date_joined",
+        "is_active",
     )
+
     actions = [export_selected_users_to_excel]

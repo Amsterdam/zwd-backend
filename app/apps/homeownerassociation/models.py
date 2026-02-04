@@ -94,24 +94,6 @@ class HomeownerAssociation(models.Model):
     def is_small(self):
         return self.number_of_apartments <= 12
 
-    @property
-    def has_major_shareholder(self):
-        for owner in self.owners.all():
-            if (
-                owner.number_of_apartments / self.number_of_apartments >= 0.25
-                and owner.type != "Natuurlijk persoon"
-            ):
-                return True
-        return False
-
-    @property
-    def is_priority_neighborhood(self):
-        return PriorityZipCode.objects.filter(zip_code=self.zip_code).exists()
-
-    @property
-    def course_participant_count(self):
-        return self.contacts.filter(course_date__isnull=False).count()
-
     def __str__(self):
         return self.name
 

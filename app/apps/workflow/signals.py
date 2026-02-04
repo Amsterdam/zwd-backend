@@ -9,24 +9,27 @@ from django.dispatch import receiver
 from .utils import get_latest_version_from_config
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import Prefetch
+from apps.homeownerassociation.utils import hoa_with_counts
 
 
 @receiver(pre_save, sender=CaseWorkflow, dispatch_uid="case_workflow_pre_save")
 def case_workflow_pre_save(sender, instance, **kwargs):
     if not instance.id:
         instance.data = instance.data if isinstance(instance.data, dict) else {}
+        case = Case.objects.prefetch_related(
+            Prefetch("homeowner_association", queryset=hoa_with_counts())
+        ).get(pk=instance.case_id)
+
+        hoa = case.homeowner_association
         instance.data.update(
             {
                 "application_type": {"value": instance.case.application_type},
                 "advice_type": {"value": instance.case.advice_type},
-                "hoa_is_small": {"value": instance.case.homeowner_association.is_small},
-                "build_year": {"value": instance.case.homeowner_association.build_year},
-                "has_major_shareholder": {
-                    "value": instance.case.homeowner_association.has_major_shareholder
-                },
-                "is_priority_neighborhood": {
-                    "value": instance.case.homeowner_association.is_priority_neighborhood
-                },
+                "hoa_is_small": {"value": hoa.is_small},
+                "build_year": {"value": hoa.build_year},
+                "has_major_shareholder": {"value": hoa.has_major_shareholder},
+                "is_priority_neighborhood": {"value": hoa.is_priority_neighborhood},
             }
         )
         existing_main_workflow = CaseWorkflow.objects.filter(
