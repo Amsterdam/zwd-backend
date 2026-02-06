@@ -1,5 +1,6 @@
 from django.db import models, transaction
 from django.conf import settings
+from apps.homeownerassociation.utils import hoa_with_counts
 from clients.kvk_client import KvkClient
 from clients.dso_client import DsoClient
 from collections import Counter
@@ -100,7 +101,7 @@ class HomeownerAssociation(models.Model):
     def get_or_create_hoa_by_bag_id(self, bag_id):
         client = DsoClient()
         hoa_name = client.get_hoa_name_by_bag_id(bag_id)
-        existing_hoa = HomeownerAssociation.objects.filter(name=hoa_name).first()
+        existing_hoa = hoa_with_counts().filter(name=hoa_name).first()
         if existing_hoa:
             return existing_hoa
 
@@ -121,6 +122,9 @@ class HomeownerAssociation(models.Model):
                 kvk_nummer=data["kvk_nummer"],
             )
             self._create_ownerships(data["response"], model)
+            model = hoa_with_counts().get(
+                pk=model.pk
+            )  # Re-fetch to include annotated fields
             return model
 
     def update_hoa_admin(self, hoa_name):
