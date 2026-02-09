@@ -153,11 +153,11 @@ class CourseParticipantImporter(BaseImporter):
                     contact = Contact.objects.filter(
                         email__iexact=email,
                         homeowner_association=hoa,
+                        fullname__iexact=fullname,
                     ).first()
 
                     if contact:
                         # Update existing contact
-                        contact.fullname = fullname or contact.fullname
                         contact.phone = phone or contact.phone
                         contact.role = role or contact.role or self.DEFAULT_ROLE
                         contact.course_date = course_date.date()
