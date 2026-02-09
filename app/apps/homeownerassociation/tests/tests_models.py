@@ -111,6 +111,40 @@ class HomeownerAssociationModelTest(TestCase):
         self.assertEqual(result.district.neighborhoods.count(), 1)
         self.assertEqual(result.neighborhood.homeowner_associations.count(), 1)
 
+    @patch("apps.homeownerassociation.models.DsoClient")
+    def test_get_or_create_hoa_by_bag_id_returns_annotated_instance(
+        self, MockDsoClient
+    ):
+        mock_client = MockDsoClient.return_value
+        mock_client.get_hoa_name_by_bag_id.return_value = "HOA"
+        mock_client.get_hoa_by_name.return_value = [
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "333",
+                "eigCategorieEigenaar": "Corporatie",
+                "brkStatutaireNaam": "Corpo1",
+            },
+            {
+                "pndOorspronkelijkBouwjaar": 2010,
+                "votIdentificatie": "444",
+                "eigCategorieEigenaar": "Particulier",
+                "brkStatutaireNaam": "John Doe",
+            },
+        ]
+
+        result = HomeownerAssociation().get_or_create_hoa_by_bag_id("unique_id")
+
+        self.assertIsNotNone(result.pk)
+        self.assertIn("course_participant_count", result.__dict__)
+        self.assertIn("letter_count", result.__dict__)
+        self.assertIn("cases_count", result.__dict__)
+
+        self.assertEqual(result.course_participant_count, 0)
+        self.assertEqual(result.letter_count, 0)
+        self.assertEqual(result.cases_count, 0)
+
+        self.assertTrue(result.has_major_shareholder)
+
     def test_is_small(
         self,
     ):

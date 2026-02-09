@@ -3,7 +3,6 @@ import tempfile
 import magic
 from rest_framework import serializers
 from django.db.models import Count, Q, F, OuterRef, Exists
-from .models import HomeownerAssociation, Owner, PriorityZipCode
 
 CSV_MIME_TYPES = ["text/csv", "text/plain", "application/csv"]
 
@@ -137,6 +136,8 @@ def process_csv_import(file, importer):
 
 
 def hoa_with_counts():
+    from .models import HomeownerAssociation, Owner, PriorityZipCode
+
     major_owner_qs = (
         Owner.objects.filter(homeowner_association=OuterRef("pk"))
         .annotate(
@@ -149,7 +150,6 @@ def hoa_with_counts():
     )
 
     priority_qs = PriorityZipCode.objects.filter(zip_code=OuterRef("zip_code"))
-
     return (
         HomeownerAssociation.objects.annotate(
             course_participant_count=Count(
