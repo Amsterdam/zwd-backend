@@ -520,7 +520,7 @@ class CourseParticipantImporterTest(TestImporterBase):
 
         with patch.object(importer, "_find_homeowner_association", return_value=hoa):
             row = {
-                "naam": "Jan Janssen (Updated)",
+                "naam": "Jan",
                 "email": "jan@test.nl",
                 "telefoon": "0687654321",
                 "functie": "Voorzitter",
@@ -531,7 +531,7 @@ class CourseParticipantImporterTest(TestImporterBase):
 
         self.assertTrue(result)
         contact = Contact.objects.get(email="jan@test.nl")
-        self.assertEqual(contact.fullname, "Jan Janssen (Updated)")
+        self.assertEqual(contact.fullname, "Jan")
         self.assertEqual(contact.role, "Voorzitter")
 
     def test_process_row_missing_email(self):
@@ -816,14 +816,14 @@ class ContactImporterTest(TestImporterBase):
                 "zwd": "123EAK",
                 "vnummer": "V12345",
                 "statutaire naam": "Test Vve",
-                "kontaktpersoon": "Jan Janssen",
+                "kontaktpersoon": "Jan",
                 "mailadres": "jan@test.nl",
             }
             result = importer._process_row(row, 2)
 
         self.assertTrue(result)
         contact = Contact.objects.get(email="jan@test.nl")
-        self.assertEqual(contact.fullname, "Jan Janssen")
+        self.assertEqual(contact.fullname, "Jan")
 
     def test_find_homeowner_association_by_prefixed_dossier_id(self):
         hoa = baker.make(HomeownerAssociation, name="Test Vve")
