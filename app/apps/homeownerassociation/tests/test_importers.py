@@ -802,7 +802,11 @@ class ContactImporterTest(TestImporterBase):
     def test_process_row_update_existing_contact(self):
         hoa = baker.make(HomeownerAssociation, name="Test Vve")
         existing_contact = baker.make(
-            Contact, email="jan@test.nl", homeowner_association=hoa, fullname="Jan"
+            Contact,
+            email="jan@test.nl",
+            homeowner_association=hoa,
+            fullname="Jan",
+            phone="0612345678",
         )
 
         importer = ContactImporter(skip_hoa_api=True)
@@ -812,14 +816,16 @@ class ContactImporterTest(TestImporterBase):
                 "zwd": "123EAK",
                 "vnummer": "V12345",
                 "statutaire naam": "Test Vve",
-                "kontaktpersoon": "Jan Janssen (Updated)",
+                "kontaktpersoon": "Jan Janssen",
                 "mailadres": "jan@test.nl",
+                "telefoon": "0687654321",
             }
             result = importer._process_row(row, 2)
 
         self.assertTrue(result)
         contact = Contact.objects.get(email="jan@test.nl")
-        self.assertEqual(contact.fullname, "Jan Janssen (Updated)")
+        self.assertEqual(contact.fullname, "Jan Janssen")
+        self.assertEqual(contact.phone, "0687654321")
 
     def test_find_homeowner_association_by_prefixed_dossier_id(self):
         hoa = baker.make(HomeownerAssociation, name="Test Vve")
