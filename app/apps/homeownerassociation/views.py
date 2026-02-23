@@ -65,12 +65,6 @@ class HomeOwnerAssociationFilter(django_filters.FilterSet):
         label="Minimum number of letters sent",
     )
 
-    cases_count = django_filters.NumberFilter(
-        field_name="cases_count",
-        lookup_expr="gte",
-        label="Minimum number of cases",
-    )
-
     neighborhood = django_filters.ModelMultipleChoiceFilter(
         queryset=Neighborhood.objects.all(),
         method="filter_neighborhood",
