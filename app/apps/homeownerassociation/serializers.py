@@ -53,7 +53,8 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
     course_participant_count = serializers.ReadOnlyField()
     owners = OwnerSerializer(many=True, required=False)
     letter_count = serializers.ReadOnlyField()
-    cases_count = serializers.ReadOnlyField()
+    activationteam_cases_count = serializers.ReadOnlyField()
+    advice_cases_count = serializers.ReadOnlyField()
 
     def get_district(self, obj):
         if not obj.district:
@@ -92,7 +93,8 @@ class HomeownerAssociationSerializer(serializers.ModelSerializer):
             "wijk",
             "zip_code",
             "letter_count",
-            "cases_count",
+            "advice_cases_count",
+            "activationteam_cases_count",
         ]
         depth = 1
 
