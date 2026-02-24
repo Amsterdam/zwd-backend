@@ -137,11 +137,13 @@ class HomeownerAssociationModelTest(TestCase):
         self.assertIsNotNone(result.pk)
         self.assertIn("course_participant_count", result.__dict__)
         self.assertIn("letter_count", result.__dict__)
-        self.assertIn("cases_count", result.__dict__)
+        self.assertIn("advice_cases_count", result.__dict__)
+        self.assertIn("activationteam_cases_count", result.__dict__)
 
         self.assertEqual(result.course_participant_count, 0)
         self.assertEqual(result.letter_count, 0)
-        self.assertEqual(result.cases_count, 0)
+        self.assertEqual(result.advice_cases_count, 0)
+        self.assertEqual(result.activationteam_cases_count, 0)
 
         self.assertTrue(result.has_major_shareholder)
 
