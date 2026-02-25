@@ -190,12 +190,47 @@ class Case(ModelEventEmitter):
             {
                 "task": "task_inkooporder_en_bedrag",
                 "field": "form_inkooporder",
-                "header": "Inkoopordernummer",
+                "header": "Inkoopordernummer startfactuur",
             },
             {
                 "task": "task_inkooporder_en_bedrag",
                 "field": "form_inkooporder_bedrag",
-                "header": "Bedrag inkooporder",
+                "header": "Bedrag inkooporder startfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag",
+                "field": "form_inkooporder_datum",
+                "header": "Datum inkooporder startfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag_tussenfactuur",
+                "field": "form_inkooporder",
+                "header": "Inkoopordernummer tussenfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag_tussenfactuur",
+                "field": "form_inkooporder_bedrag",
+                "header": "Bedrag inkooporder tussenfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag_tussenfactuur",
+                "field": "form_inkooporder_datum",
+                "header": "Datum inkooporder tussenfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag_eindfactuur",
+                "field": "form_inkooporder",
+                "header": "Inkoopordernummer eindfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag_eindfactuur",
+                "field": "form_inkooporder_bedrag",
+                "header": "Bedrag inkooporder eindfactuur",
+            },
+            {
+                "task": "task_inkooporder_en_bedrag_eindfactuur",
+                "field": "form_inkooporder_datum",
+                "header": "Datum inkooporder eindfactuur",
             },
             {
                 "task": "task_opdrachtbevestiging_verzonden",
