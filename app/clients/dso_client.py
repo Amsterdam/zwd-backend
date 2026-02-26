@@ -17,7 +17,10 @@ class DsoClient:
             "wonen_verblijfsobject", []
         )
         if wonen_verblijfsobject_list:
-            hoa = wonen_verblijfsobject_list[0]
+            hoa = sorted(
+                wonen_verblijfsobject_list,
+                key=lambda x: (x.get("brkVveStatutaireNaam") or "").lower(),
+            )[0]
             return hoa["brkVveStatutaireNaam"]
         raise NotFoundException(f"HomeownerAssociation with bag ID {bag_id} not found.")
 
