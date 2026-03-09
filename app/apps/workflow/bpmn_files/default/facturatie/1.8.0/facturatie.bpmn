@@ -42,8 +42,8 @@
         <bpmn:flowNodeRef>Activity_1ueftjf</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_upload_opdrachtbevestiging</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_opdrachtbevestiging_verzonden</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gateway_13i2csn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_1sym9vx</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_13i2csn</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:parallelGateway id="Gateway_085oxhc">
@@ -339,11 +339,6 @@
       <bpmn:incoming>Flow_1xfalxz</bpmn:incoming>
       <bpmn:outgoing>Flow_04awqi8</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:parallelGateway id="Gateway_13i2csn">
-      <bpmn:incoming>Flow_0pdiuif</bpmn:incoming>
-      <bpmn:outgoing>Flow_02ac9ec</bpmn:outgoing>
-      <bpmn:outgoing>Flow_1xfalxz</bpmn:outgoing>
-    </bpmn:parallelGateway>
     <bpmn:parallelGateway id="Gateway_1sym9vx">
       <bpmn:incoming>Flow_04awqi8</bpmn:incoming>
       <bpmn:incoming>Flow_0s1to1j</bpmn:incoming>
@@ -404,6 +399,11 @@
     <bpmn:sequenceFlow id="Flow_0s1to1j" sourceRef="task_upload_opdrachtbevestiging" targetRef="Gateway_1sym9vx" />
     <bpmn:sequenceFlow id="Flow_1xfalxz" sourceRef="Gateway_13i2csn" targetRef="task_opdrachtbevestiging_verzonden" />
     <bpmn:sequenceFlow id="Flow_04awqi8" sourceRef="task_opdrachtbevestiging_verzonden" targetRef="Gateway_1sym9vx" />
+    <bpmn:parallelGateway id="Gateway_13i2csn">
+      <bpmn:incoming>Flow_0pdiuif</bpmn:incoming>
+      <bpmn:outgoing>Flow_02ac9ec</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1xfalxz</bpmn:outgoing>
+    </bpmn:parallelGateway>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0rd68ax">
@@ -545,11 +545,11 @@
         <dc:Bounds x="640" y="310" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_036lxg3" bpmnElement="Gateway_13i2csn">
-        <dc:Bounds x="575" y="435" width="50" height="50" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_06zeccx" bpmnElement="Gateway_1sym9vx">
         <dc:Bounds x="745" y="435" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_036lxg3" bpmnElement="Gateway_13i2csn">
+        <dc:Bounds x="585" y="435" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1eiwomt_di" bpmnElement="Flow_1eiwomt">
         <di:waypoint x="1610" y="350" />
@@ -771,11 +771,11 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pdiuif_di" bpmnElement="Flow_0pdiuif">
         <di:waypoint x="560" y="460" />
-        <di:waypoint x="575" y="460" />
+        <di:waypoint x="585" y="460" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_02ac9ec_di" bpmnElement="Flow_02ac9ec">
-        <di:waypoint x="600" y="485" />
-        <di:waypoint x="600" y="570" />
+        <di:waypoint x="610" y="485" />
+        <di:waypoint x="610" y="570" />
         <di:waypoint x="640" y="570" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0s1to1j_di" bpmnElement="Flow_0s1to1j">
@@ -784,8 +784,8 @@
         <di:waypoint x="770" y="485" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xfalxz_di" bpmnElement="Flow_1xfalxz">
-        <di:waypoint x="600" y="435" />
-        <di:waypoint x="600" y="350" />
+        <di:waypoint x="610" y="435" />
+        <di:waypoint x="610" y="350" />
         <di:waypoint x="640" y="350" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_04awqi8_di" bpmnElement="Flow_04awqi8">
