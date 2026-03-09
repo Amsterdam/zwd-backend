@@ -195,12 +195,12 @@ class Case(ModelEventEmitter):
             {
                 "task": "task_inkooporder_en_bedrag",
                 "field": "form_inkooporder_bedrag",
-                "header": "Bedrag inkooporder startfactuur",
+                "header": "Bedrag startfactuur",
             },
             {
                 "task": "task_inkooporder_en_bedrag",
                 "field": "form_inkooporder_datum",
-                "header": "Datum inkooporder startfactuur",
+                "header": "Datum startfactuur",
             },
             {
                 "task": "task_inkooporder_en_bedrag_tussenfactuur",
@@ -210,12 +210,12 @@ class Case(ModelEventEmitter):
             {
                 "task": "task_inkooporder_en_bedrag_tussenfactuur",
                 "field": "form_inkooporder_bedrag",
-                "header": "Bedrag inkooporder tussenfactuur",
+                "header": "Bedrag tussenfactuur",
             },
             {
                 "task": "task_inkooporder_en_bedrag_tussenfactuur",
                 "field": "form_inkooporder_datum",
-                "header": "Datum inkooporder tussenfactuur",
+                "header": "Datum tussenfactuur",
             },
             {
                 "task": "task_inkooporder_en_bedrag_eindfactuur",
@@ -225,12 +225,12 @@ class Case(ModelEventEmitter):
             {
                 "task": "task_inkooporder_en_bedrag_eindfactuur",
                 "field": "form_inkooporder_bedrag",
-                "header": "Bedrag inkooporder eindfactuur",
+                "header": "Bedrag eindfactuur",
             },
             {
                 "task": "task_inkooporder_en_bedrag_eindfactuur",
                 "field": "form_inkooporder_datum",
-                "header": "Datum inkooporder eindfactuur",
+                "header": "Datum eindfactuur",
             },
             {
                 "task": "task_opdrachtbevestiging_verzonden",
