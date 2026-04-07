@@ -16,6 +16,8 @@ DEFAULT_LAST_NAME = "user"
 
 class OIDCAuthenticationBackend(OIDCAuthenticationBackend):
     def update_user(self, user, claims):
+        if user.is_active is False:
+            raise PermissionDenied("User account is inactive.")
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
         user.username = claims.get("email")
