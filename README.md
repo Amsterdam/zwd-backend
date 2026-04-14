@@ -132,3 +132,16 @@ In the workflow model is a "method _evaluate_form_field_label" that will parse a
 ``
 The above label will be parsed to "This is a sentence for case 123"
 Currently all properties and related objects of the workflow model are supported
+
+
+## Updating priority neighborhoods
+The format of the txt file should be:
+
+Buurt
+
+Stadsdeel
+
+https://lokaleregelgeving.overheid.nl/CVDR641449/#bijlage_V: Is used as source.
+```
+python manage.py sync_priority_neighborhoods  --file ./neighborhoods.txt
+```

@@ -25,6 +25,7 @@ class Neighborhood(models.Model):
     district = models.ForeignKey(
         District, related_name="neighborhoods", on_delete=models.DO_NOTHING
     )
+    priority_neighborhood = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -49,15 +50,6 @@ class Wijk(models.Model):
         verbose_name = "Wijk"
         verbose_name_plural = "Wijken"
         ordering = ["name"]
-
-
-class PriorityZipCode(models.Model):
-    zip_code = models.CharField(max_length=6, unique=True)
-
-    class Meta:
-        verbose_name = "Prioriteitsbuurt postcode"
-        verbose_name_plural = "Prioriteitsbuurt postcodes"
-        ordering = ["zip_code"]
 
 
 class HomeownerAssociation(models.Model):

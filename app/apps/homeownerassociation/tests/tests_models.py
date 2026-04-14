@@ -7,8 +7,8 @@ from apps.homeownerassociation.utils import hoa_with_counts
 from apps.homeownerassociation.models import (
     Contact,
     HomeownerAssociation,
+    Neighborhood,
     Owner,
-    PriorityZipCode,
 )
 from model_bakery import baker
 
@@ -184,9 +184,8 @@ class HomeownerAssociationModelTest(TestCase):
         self.assertFalse(hoa.has_major_shareholder)
 
     def test_is_priority_neighborhood_true(self):
-        zip_code = "1234AB"
-        baker.make(PriorityZipCode, zip_code=zip_code)
-        hoa = baker.make(HomeownerAssociation, zip_code=zip_code)
+        neighborhood = baker.make(Neighborhood, priority_neighborhood=True)
+        hoa = baker.make(HomeownerAssociation, neighborhood=neighborhood)
 
         hoa = hoa_with_counts().get(pk=hoa.pk)
 

@@ -136,7 +136,7 @@ def process_csv_import(file, importer):
 
 
 def hoa_with_counts():
-    from .models import HomeownerAssociation, Owner, PriorityZipCode
+    from .models import HomeownerAssociation, Owner, Neighborhood
     from apps.cases.models import ApplicationType
 
     major_owner_qs = (
@@ -150,7 +150,9 @@ def hoa_with_counts():
         .exclude(type="Natuurlijk persoon")
     )
 
-    priority_qs = PriorityZipCode.objects.filter(zip_code=OuterRef("zip_code"))
+    is_priority_neighborhood_qs = Neighborhood.objects.filter(
+        name=OuterRef("neighborhood__name"), priority_neighborhood=True
+    )
 
     return (
         HomeownerAssociation.objects.annotate(
@@ -179,7 +181,7 @@ def hoa_with_counts():
                 distinct=True,
             ),
             has_major_shareholder=Exists(major_owner_qs),
-            is_priority_neighborhood=Exists(priority_qs),
+            is_priority_neighborhood=Exists(is_priority_neighborhood_qs),
         )
         .select_related("district", "neighborhood", "wijk")
         .prefetch_related("owners")
