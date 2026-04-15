@@ -7,7 +7,6 @@ from apps.homeownerassociation.models import (
     Neighborhood,
     Owner,
     District,
-    PriorityZipCode,
     Wijk,
 )
 
@@ -99,7 +98,7 @@ class DistrictAdmin(admin.ModelAdmin):
 
 @admin.register(Neighborhood)
 class NeighborhoodAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "district")
+    list_display = ("id", "name", "district", "priority_neighborhood")
     search_fields = ("id", "name", "district__name")
 
 
@@ -107,12 +106,6 @@ class NeighborhoodAdmin(admin.ModelAdmin):
 class WijkAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "neighborhood")
     search_fields = ("id", "name", "neighborhood__name")
-
-
-@admin.register(PriorityZipCode)
-class PriorityZipCodeAdmin(admin.ModelAdmin):
-    list_display = ("id", "zip_code")
-    search_fields = ("id", "zip_code")
 
 
 @admin.register(HomeownerAssociationCommunicationNote)

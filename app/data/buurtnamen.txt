@@ -1,0 +1,338 @@
+Planciusbuurt-Zuid
+Centrum
+Arondeusbuurt
+Nieuw-West
+Bakemabuurt
+Nieuw-West
+Bedrijvencentrum Osdorp
+Nieuw-West
+Belgiëplein e.o.
+Nieuw-West
+Botteskerkbuurt
+Nieuw-West
+Calandlaan/Lelylaan
+Nieuw-West
+Confuciusbuurt
+Nieuw-West
+Coronelbuurt
+Nieuw-West
+Delflandpleinbuurt-Oost
+Nieuw-West
+Dichtersbuurt
+Nieuw-West
+Dijkgraafpleinbuurt
+Nieuw-West
+Dobbebuurt
+Nieuw-West
+Dudokbuurt
+Nieuw-West
+Eendrachtspark
+Nieuw-West
+Emanuel van Meterenbuurt
+Nieuw-West
+Jacob Geelbuurt
+Nieuw-West
+Jan de Louterbuurt
+Nieuw-West
+Johan Jongkindbuurt
+Nieuw-West
+Lodewijk van Deysselbuurt
+Nieuw-West
+Louis Chrispijnbuurt
+Nieuw-West
+Louis Couperusbuurt
+Nieuw-West
+Meer en Oever
+Nieuw-West
+Meerwaldtbuurt
+Nieuw-West
+Middelveldsche Akerpolder
+Nieuw-West
+Nieuwe Meer
+Nieuw-West
+Noordoever Sloterplas
+Nieuw-West
+Ookmeer
+Nieuw-West
+Oostoever Sloterplas
+Nieuw-West
+Osdorpplein e.o.
+Nieuw-West
+Osdorp-Zuidoost
+Nieuw-West
+Overtoomse Veld-Noord
+Nieuw-West
+Reimerswaal
+Nieuw-West
+Riekerhaven
+Nieuw-West
+Ruys de Beerenbrouckbuurt
+Nieuw-West
+Sloterdijk Stationskwartier
+Nieuw-West
+Sloterpark
+Nieuw-West
+Staalmanbuurt
+Nieuw-West
+Van Tijenbuurt
+Nieuw-West
+Wegener Sleeswijkbuurt
+Nieuw-West
+Wildeman
+Nieuw-West
+Zuidwestkwadrant-Noord
+Nieuw-West
+Zuidwestkwadrant-Zuid
+Nieuw-West
+Banne-Noordoost
+Noord
+Banne-Noordwest
+Noord
+Banne-Zuidoost
+Noord
+Banne-Zuidwest
+Noord
+Blauwe Zand
+Noord
+Bloemenbuurt-Noord
+Noord
+Bloemenbuurt-Zuid
+Noord
+Buikslotermeerplein
+Noord
+De Kleine Wereld
+Noord
+Elzenhagen-Zuid
+Noord
+IJplein e.o.
+Noord
+Loenermark
+Noord
+Markengouw-Midden
+Noord
+Markengouw-Zuid
+Noord
+Molenwijk
+Noord
+NDSM terrein
+Noord
+Plan van Gool
+Noord
+Terrasdorp
+Noord
+Tuindorp Nieuwendam-Oost
+Noord
+Tuindorp Nieuwendam-West
+Noord
+Tuindorp Oostzaan-Oost
+Noord
+Tuindorp Oostzaan-West
+Noord
+Van der Pekbuurt
+Noord
+Vliegenbos
+Noord
+Vogelbuurt-Noord
+Noord
+Vogelbuurt-Zuid
+Noord
+Werengouw-Midden
+Noord
+Werengouw-Zuid
+Noord
+Ambonpleinbuurt
+Oost
+Baaibuurt-West
+Oost
+Betondorp
+Oost
+Dapperbuurt-Noord
+Oost
+Drieburg
+Oost
+Havenkwartier IJburg
+Oost
+Makassarpleinbuurt
+Oost
+Nieuwe Oosterbegraafplaats
+Oost
+Oosterpark
+Oost
+Oosterparkbuurt-Zuidwest
+Oost
+Oostpoort
+Oost
+Science Park-Zuid
+Oost
+Sportheldenbuurt
+Oost
+Sportpark Middenmeer-Noord
+Oost
+Sumatraplantsoenbuurt
+Oost
+Transvaalbuurt-West
+Oost
+Tuindorp Amstelstation
+Oost
+Tuindorp Frankendael
+Oost
+Van der Kunbuurt
+Oost
+Hogewey-Midden
+Weesp
+Hogewey-Zuid
+Weesp
+Weesp-Zuid I
+Weesp
+Balboaplein e.o.
+West
+Bedrijventerrein Landlust
+West
+Borgerbuurt
+West
+Bosleeuw
+West
+Columbusplein e.o.
+West
+De Wester Quartier
+West
+De Wittenbuurt-Zuid
+West
+Erasmusparkbuurt-Oost
+West
+Geuzenhofbuurt
+West
+Gibraltarbuurt
+West
+Jan Maijenbuurt
+West
+John Franklinbuurt
+West
+Kolenkitbuurt-Noord
+West
+Kolenkitbuurt-Zuid
+West
+Landlust-Noord
+West
+Landlust-Zuid
+West
+Mercatorpark
+West
+Orteliusbuurt-Midden
+West
+Orteliusbuurt-Noord
+West
+Orteliusbuurt-Zuid
+West
+Pieter van der Doesbuurt
+West
+Robert Scottbuurt-Oost
+West
+Robert Scottbuurt-West
+West
+Spaarndammerbuurt-Midden
+West
+Spaarndammerbuurt-Noordoost
+West
+Spaarndammerbuurt-Noordwest
+West
+Spaarndammerbuurt-Zuidwest
+West
+Staatsliedenbuurt-Noordoost
+West
+Trompbuurt
+West
+Van Brakelkwartier
+West
+Bertelmanpleinbuurt
+Zuid
+Burgemeester Tellegenbuurt-Oost
+Zuid
+Burgemeester Tellegenbuurt-West
+Zuid
+Diamantbuurt
+Zuid
+IJsbaanpad e.o.
+Zuid
+IJselbuurt-Oost
+Zuid
+IJselbuurt-West
+Zuid
+Kromme Mijdrechtbuurt
+Zuid
+Marathonbuurt-Oost
+Zuid
+Marathonbuurt-West
+Zuid
+Olympisch Stadion e.o.
+Zuid
+Rijnbuurt-Midden
+Zuid
+Rijnbuurt-Oost
+Zuid
+Rijnbuurt-West
+Zuid
+Van Tuyllbuurt
+Zuid
+Zorgvlied
+Zuid
+Amstel III deel A/B-Zuid
+Zuidoost
+Amsterdamse Poort
+Zuidoost
+Bijlmermuseum-Noord
+Zuidoost
+Bijlmermuseum-Zuid
+Zuidoost
+D-buurt
+Zuidoost
+De Kameleon e.o.
+Zuidoost
+F-buurt
+Zuidoost
+G-buurt-Noord
+Zuidoost
+G-buurt-West
+Zuidoost
+Gein 1
+Zuidoost
+Gein 2
+Zuidoost
+Gein 4
+Zuidoost
+Hakfort/Huigenbos
+Zuidoost
+Holendrecht-West
+Zuidoost
+Holendrecht-Zuid
+Zuidoost
+Hoptille
+Zuidoost
+Kantershof
+Zuidoost
+K-buurt-Zuidoost
+Zuidoost
+K-buurt-Zuidwest
+Zuidoost
+Kelbergen
+Zuidoost
+Kortvoort
+Zuidoost
+L-buurt
+Zuidoost
+Rechte H-buurt
+Zuidoost
+Reigersbos 1
+Zuidoost
+Reigersbos 2
+Zuidoost
+Reigersbos 3
+Zuidoost
+Reigersbos 4
+Zuidoost
+Venserpolder-Oost
+Zuidoost
+Venserpolder-West
+Zuidoost
+Vogeltjeswei
+Zuidoost
