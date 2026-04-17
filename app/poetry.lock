@@ -561,22 +561,18 @@ files = [
 
 [[package]]
 name = "cron-descriptor"
-version = "2.0.6"
+version = "1.4.5"
 description = "A Python library that converts cron expressions into human readable strings."
 optional = false
-python-versions = ">=3.9"
+python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "cron_descriptor-2.0.6-py3-none-any.whl", hash = "sha256:3a1c0d837c0e5a32e415f821b36cf758eb92d510e6beff8fbfe4fa16573d93d6"},
-    {file = "cron_descriptor-2.0.6.tar.gz", hash = "sha256:e39d2848e1d8913cfb6e3452e701b5eec662ee18bea8cc5aa53ee1a7bb217157"},
+    {file = "cron_descriptor-1.4.5-py3-none-any.whl", hash = "sha256:736b3ae9d1a99bc3dbfc5b55b5e6e7c12031e7ba5de716625772f8b02dcd6013"},
+    {file = "cron_descriptor-1.4.5.tar.gz", hash = "sha256:f51ce4ffc1d1f2816939add8524f206c376a42c87a5fca3091ce26725b3b1bca"},
 ]
 
-[package.dependencies]
-typing_extensions = "*"
-
 [package.extras]
-dev = ["mypy", "polib", "ruff"]
-test = ["pytest"]
+dev = ["polib"]
 
 [[package]]
 name = "cryptography"
@@ -725,20 +721,20 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-celery-beat"
-version = "2.8.1"
+version = "2.9.0"
 description = "Database-backed Periodic Tasks."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "django_celery_beat-2.8.1-py3-none-any.whl", hash = "sha256:da2b1c6939495c05a551717509d6e3b79444e114a027f7b77bf3727c2a39d171"},
-    {file = "django_celery_beat-2.8.1.tar.gz", hash = "sha256:dfad0201c0ac50c91a34700ef8fa0a10ee098cc7f3375fe5debed79f2204f80a"},
+    {file = "django_celery_beat-2.9.0-py3-none-any.whl", hash = "sha256:4a9e5ebe26d6f8d7215e1fc5c46e466016279dc102435a28141108649bdf2157"},
+    {file = "django_celery_beat-2.9.0.tar.gz", hash = "sha256:92404650f52fcb44cf08e2b09635cb1558327c54b1a5d570f0e2d3a22130934c"},
 ]
 
 [package.dependencies]
 celery = ">=5.2.3,<6.0"
-cron-descriptor = ">=1.2.32"
-Django = ">=2.2,<6.0"
+cron-descriptor = ">=1.2.32,<2.0.0"
+Django = ">=2.2,<6.1"
 django-timezone-field = ">=5.0"
 python-crontab = ">=2.3.4"
 tzdata = "*"
@@ -2603,4 +2599,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~=3.13"
-content-hash = "fe259d907a74651db9da2ccebb554700df3ae153ec9d525235ac3a625674ad62"
+content-hash = "cc9a6e4dcde32c881fe6d862545ab57dc7b24502f21b6e471ed8690076acf197"
