@@ -9,7 +9,7 @@ packages = [{ include = "apps" }]
 
 dependencies = [
     "azure-identity~=1.23",
-    "azure-monitor-opentelemetry~=1.6",
+    "azure-monitor-opentelemetry~=1.8",
     "azure-storage-blob~=12.24",
     "celery~=5.5",
     "debugpy~=1.8",
