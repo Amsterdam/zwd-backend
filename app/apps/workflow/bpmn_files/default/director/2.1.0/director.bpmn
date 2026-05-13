@@ -21,7 +21,6 @@
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:scriptTask id="script_start_workflow_beoordeling" name="Start beoordeling">
-      <bpmn:incoming>Flow_0bmrgy5</bpmn:incoming>
       <bpmn:outgoing>Flow_1qqjv57</bpmn:outgoing>
       <bpmn:script>start_workflow("beoordeling")</bpmn:script>
     </bpmn:scriptTask>
@@ -90,10 +89,11 @@
     </bpmn:intermediateCatchEvent>
     <bpmn:scriptTask id="script_start_workflow_facturatie" name="Start facturatie">
       <bpmn:incoming>Flow_0yrgt3b</bpmn:incoming>
+      <bpmn:incoming>Flow_0bmrgy5</bpmn:incoming>
       <bpmn:outgoing>Flow_0nb6083</bpmn:outgoing>
       <bpmn:script>start_workflow("facturatie")</bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:sequenceFlow id="Flow_0bmrgy5" name="Advies&#10;" sourceRef="Gateway_0rudoxb" targetRef="script_start_workflow_beoordeling" />
+    <bpmn:sequenceFlow id="Flow_0bmrgy5" name="Advies&#10;" sourceRef="Gateway_0rudoxb" targetRef="script_start_workflow_facturatie" />
   </bpmn:process>
   <bpmn:message id="Message_0s8g375" name="resume_after_beoordeling" />
   <bpmn:message id="Message_21ddler" name="resume_after_facturatie" />
@@ -216,9 +216,11 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0bmrgy5_di" bpmnElement="Flow_0bmrgy5">
         <di:waypoint x="365" y="187" />
-        <di:waypoint x="610" y="187" />
+        <di:waypoint x="708" y="187" />
+        <di:waypoint x="708" y="220" />
+        <di:waypoint x="1050" y="220" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="473" y="169" width="33" height="27" />
+          <dc:Bounds x="865" y="202" width="33" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
