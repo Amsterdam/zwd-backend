@@ -3,6 +3,7 @@ import glob
 import json
 import os
 from django.conf import settings
+from packaging.version import Version
 
 
 def get_bpmn_models():
@@ -189,7 +190,7 @@ def get_latest_version_from_config(workflow_type, director_version=None):
         )
 
     # Retrieve and sort workflow type versions
-    workflow_type_versions = sorted(config.get("versions", {}).keys())
+    workflow_type_versions = sorted(config.get("versions", {}).keys(), key=Version)
     if not workflow_type_versions:
         raise Exception(
             f"No versions found for workflow type '{workflow_type}' under theme '{theme_name}'"
