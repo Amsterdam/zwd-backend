@@ -37,12 +37,12 @@
         <bpmn:flowNodeRef>Activity_0vb7d2u</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0fozti8</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_1f9jqdu</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_12cc63t</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_14gjvcz</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_inkooporder_en_bedrag_eindfactuur</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_datum_ontvangst_eindpresentatie</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_12cc63t</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0fqpziu</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_0qoynbp</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_14gjvcz</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_datum_ontvangst_eindpresentatie</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:parallelGateway id="Gateway_085oxhc">
@@ -337,14 +337,14 @@
       <bpmn:incoming>Flow_1rha9nj</bpmn:incoming>
       <bpmn:outgoing>Flow_11ingiu</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="Activity_12cc63t" name="Upload eindfactuur">
+    <bpmn:userTask id="Activity_14gjvcz" name="Upload tussenfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_upload_eindfactuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
+          <camunda:formField id="form_upload_tweede_factuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
         </camunda:formData>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_018mt7r</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ehv4pu</bpmn:outgoing>
+      <bpmn:incoming>Flow_07homqe</bpmn:incoming>
+      <bpmn:outgoing>Flow_1eiwomt</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="task_inkooporder_en_bedrag_eindfactuur" name="Inkoopordernummer en bedrag eindfactuur">
       <bpmn:extensionElements>
@@ -357,14 +357,14 @@
       <bpmn:incoming>Flow_1dxft5q</bpmn:incoming>
       <bpmn:outgoing>Flow_1lt9qel</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="task_datum_ontvangst_eindpresentatie" name="Ontvangstdatum eindpresentatie">
+    <bpmn:userTask id="Activity_12cc63t" name="Upload eindfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_datum_ontvangst_eindpresentatie" label="Datum ontvangst" type="date" />
+          <camunda:formField id="form_upload_eindfactuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
         </camunda:formData>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1p3ka9n</bpmn:incoming>
-      <bpmn:outgoing>Flow_1adiaen</bpmn:outgoing>
+      <bpmn:incoming>Flow_018mt7r</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ehv4pu</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:userTask id="Activity_0fqpziu" name="Upload accordering">
       <bpmn:extensionElements>
@@ -384,14 +384,14 @@
       <bpmn:incoming>Flow_0qm151u</bpmn:incoming>
       <bpmn:outgoing>Flow_11p215f</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="Activity_14gjvcz" name="Upload tussenfactuur">
+    <bpmn:userTask id="task_datum_ontvangst_eindpresentatie" name="Ontvangstdatum eindpresentatie">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_upload_tweede_factuur" label="Upload de factuur pas nadat je hebt beoordeeld dat deze aan de voorwaarden voldoet" type="file" />
+          <camunda:formField id="form_datum_ontvangst_eindpresentatie" label="Datum ontvangst" type="date" />
         </camunda:formData>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_07homqe</bpmn:incoming>
-      <bpmn:outgoing>Flow_1eiwomt</bpmn:outgoing>
+      <bpmn:incoming>Flow_1p3ka9n</bpmn:incoming>
+      <bpmn:outgoing>Flow_1adiaen</bpmn:outgoing>
     </bpmn:userTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -512,28 +512,28 @@
         <dc:Bounds x="2350" y="240" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1q22y1m" bpmnElement="Activity_12cc63t">
-        <dc:Bounds x="2910" y="420" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_02n7061" bpmnElement="Activity_14gjvcz">
+        <dc:Bounds x="1500" y="310" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0r7zbz1" bpmnElement="task_inkooporder_en_bedrag_eindfactuur">
-        <dc:Bounds x="2910" y="310" width="100" height="80" />
+        <dc:Bounds x="2910" y="420" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1v3chvb_di" bpmnElement="task_datum_ontvangst_eindpresentatie">
-        <dc:Bounds x="2910" y="200" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_1q22y1m" bpmnElement="Activity_12cc63t">
+        <dc:Bounds x="2910" y="520" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1typ1yq" bpmnElement="Activity_0fqpziu">
-        <dc:Bounds x="2910" y="530" width="100" height="80" />
+        <dc:Bounds x="2910" y="620" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_00vclx5" bpmnElement="Activity_0qoynbp">
-        <dc:Bounds x="2910" y="640" width="100" height="80" />
+        <dc:Bounds x="2910" y="320" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_02n7061" bpmnElement="Activity_14gjvcz">
-        <dc:Bounds x="1500" y="310" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_1v3chvb_di" bpmnElement="task_datum_ontvangst_eindpresentatie">
+        <dc:Bounds x="2910" y="220" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1eiwomt_di" bpmnElement="Flow_1eiwomt">
@@ -612,23 +612,24 @@
         <di:waypoint x="2805" y="460" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0qm151u_di" bpmnElement="Flow_0qm151u">
-        <di:waypoint x="2830" y="485" />
-        <di:waypoint x="2830" y="680" />
-        <di:waypoint x="2910" y="680" />
+        <di:waypoint x="2836" y="441" />
+        <di:waypoint x="2860" y="360" />
+        <di:waypoint x="2910" y="360" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1p3ka9n_di" bpmnElement="Flow_1p3ka9n">
         <di:waypoint x="2831" y="436" />
-        <di:waypoint x="2831" y="240" />
-        <di:waypoint x="2910" y="240" />
+        <di:waypoint x="2831" y="260" />
+        <di:waypoint x="2910" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_018mt7r_di" bpmnElement="Flow_018mt7r">
-        <di:waypoint x="2855" y="460" />
-        <di:waypoint x="2910" y="460" />
+        <di:waypoint x="2836" y="479" />
+        <di:waypoint x="2860" y="560" />
+        <di:waypoint x="2910" y="560" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1cmnqg6_di" bpmnElement="Flow_1cmnqg6">
-        <di:waypoint x="2837" y="478" />
-        <di:waypoint x="2870" y="570" />
-        <di:waypoint x="2910" y="570" />
+        <di:waypoint x="2831" y="484" />
+        <di:waypoint x="2831" y="660" />
+        <di:waypoint x="2910" y="660" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ou088s_di" bpmnElement="Flow_0ou088s">
         <di:waypoint x="2258" y="478" />
@@ -636,28 +637,28 @@
         <di:waypoint x="2350" y="520" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1dxft5q_di" bpmnElement="Flow_1dxft5q">
-        <di:waypoint x="2837" y="442" />
-        <di:waypoint x="2870" y="350" />
-        <di:waypoint x="2910" y="350" />
+        <di:waypoint x="2855" y="460" />
+        <di:waypoint x="2910" y="460" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ehv4pu_di" bpmnElement="Flow_0ehv4pu">
-        <di:waypoint x="3010" y="460" />
-        <di:waypoint x="3055" y="460" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1m9ifzp_di" bpmnElement="Flow_1m9ifzp">
-        <di:waypoint x="3010" y="570" />
-        <di:waypoint x="3040" y="570" />
+        <di:waypoint x="3010" y="560" />
+        <di:waypoint x="3040" y="560" />
         <di:waypoint x="3073" y="478" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m9ifzp_di" bpmnElement="Flow_1m9ifzp">
+        <di:waypoint x="3010" y="660" />
+        <di:waypoint x="3079" y="660" />
+        <di:waypoint x="3079" y="484" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1adiaen_di" bpmnElement="Flow_1adiaen">
-        <di:waypoint x="3010" y="240" />
-        <di:waypoint x="3079" y="240" />
+        <di:waypoint x="3010" y="260" />
+        <di:waypoint x="3079" y="260" />
         <di:waypoint x="3079" y="436" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_11p215f_di" bpmnElement="Flow_11p215f">
-        <di:waypoint x="3010" y="680" />
-        <di:waypoint x="3080" y="680" />
-        <di:waypoint x="3080" y="485" />
+        <di:waypoint x="3010" y="360" />
+        <di:waypoint x="3040" y="360" />
+        <di:waypoint x="3073" y="442" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_01uzvux_di" bpmnElement="Flow_01uzvux">
         <di:waypoint x="2450" y="520" />
@@ -665,9 +666,8 @@
         <di:waypoint x="2548" y="473" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1lt9qel_di" bpmnElement="Flow_1lt9qel">
-        <di:waypoint x="3010" y="350" />
-        <di:waypoint x="3040" y="350" />
-        <di:waypoint x="3073" y="442" />
+        <di:waypoint x="3010" y="460" />
+        <di:waypoint x="3055" y="460" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10r2sf5_di" bpmnElement="Flow_10r2sf5">
         <di:waypoint x="3105" y="460" />
