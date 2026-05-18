@@ -10,7 +10,7 @@ from clients.dso_client import DsoClient
 from apps.cases.models import AdviceType, Case, CaseStatus
 from apps.homeownerassociation.models import HomeownerAssociation
 from datetime import datetime
-
+from django.db import transaction
 
 months = {
     "jan": "Jan",
@@ -170,18 +170,18 @@ class Command(BaseCommand):
                         )
 
                     if not dry_run:
-                        # atomic..
-                        case = Case.objects.create(
-                            advice_type=AdviceType.OUD.value,
-                            homeowner_association=homeowner_association,
-                            created=creation_date,
-                            legacy_id=legacy_id,
-                            advisor=advisor if advisor else None,
-                        )
-                        case.workflows.all().delete()
-                        case.end_date = creation_date
-                        case.status = status_closed
-                        case.save()
+                        with transaction.atomic():
+                            case = Case.objects.create(
+                                advice_type=AdviceType.OUD.value,
+                                homeowner_association=homeowner_association,
+                                created=creation_date,
+                                legacy_id=legacy_id,
+                                advisor=advisor if advisor else None,
+                            )
+                            case.workflows.all().delete()
+                            case.end_date = creation_date
+                            case.status = status_closed
+                            case.save()
 
                     result.successful += 1
 
