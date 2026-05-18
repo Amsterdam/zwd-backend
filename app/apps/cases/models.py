@@ -21,6 +21,7 @@ class ApplicationType(Enum):
 class AdviceType(Enum):
     ENERGY_ADVICE = "Energieadvies"
     HBO = "Haalbaarheidsonderzoek"
+    OUD = "Oud advies"
 
     @classmethod
     def choices(cls):
