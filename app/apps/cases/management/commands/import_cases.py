@@ -62,10 +62,17 @@ class Command(BaseCommand):
             action="store_true",
             help="Run in dry-run mode (validate but do not save data)",
         )
+        parser.add_argument(
+            "--description",
+            type=str,
+            default="",
+            help="Optional description to set on every imported case",
+        )
 
     def handle(self, *args, **options):
         csv_file = options["file"]
         dry_run = options["dry_run"]
+        description = options.get("description", "")
 
         if not os.path.exists(csv_file):
             raise CommandError(f"CSV file not found: {csv_file}")
@@ -104,10 +111,9 @@ class Command(BaseCommand):
                     }
 
                     vve_name = row_norm.get("statutaire naam")
-                    already_in_zwd = row_norm.get("zwd?")
-                    creation_date = row_norm.get("aanmelding ontvangen")
-                    legacy_id = row_norm.get("dossier nummer")
-                    advisor = row_norm.get("naam bedrijf")
+                    creation_date = row_norm.get("datum")
+                    legacy_id = row_norm.get("dossier")
+                    advisor = row_norm.get("adviseur")
                     if creation_date is None or creation_date == "":
                         result.skipped += 1
                         continue
@@ -117,9 +123,6 @@ class Command(BaseCommand):
                     date_obj = datetime.strptime(creation_date, "%d-%b-%y")
 
                     creation_date = date_obj.date()
-                    if already_in_zwd and already_in_zwd.lower() in ("ja"):
-                        result.skipped += 1
-                        continue
                     if not vve_name or vve_name.lower() in ("0"):
                         result.skipped += 1
                         continue
@@ -156,8 +159,7 @@ class Command(BaseCommand):
                                 )
                             )
                     existing_case = Case.objects.filter(
-                        advice_type=AdviceType.OUD.value,
-                        homeowner_association=homeowner_association,
+                        legacy_id=legacy_id,
                     ).first()
 
                     if existing_case:
@@ -175,6 +177,8 @@ class Command(BaseCommand):
                                 advice_type=AdviceType.OUD.value,
                                 homeowner_association=homeowner_association,
                                 created=creation_date,
+                                request_date=creation_date,
+                                description=description,
                                 legacy_id=legacy_id,
                                 advisor=advisor if advisor else None,
                             )
