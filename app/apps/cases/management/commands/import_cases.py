@@ -111,12 +111,27 @@ class Command(BaseCommand):
                     }
 
                     vve_name = row_norm.get("statutaire naam")
-                    creation_date = row_norm.get("datum")
+                    creation_date = row_norm.get("aanmelding")
                     legacy_id = row_norm.get("dossier")
                     advisor = row_norm.get("adviseur")
+                    advice_type = row_norm.get("type advies")
                     if creation_date is None or creation_date == "":
                         result.skipped += 1
                         continue
+
+                    if advice_type == "Oud advies":
+                        advice_type = AdviceType.OLD_ENERGY_ADVICE.value
+
+                    if advice_type not in {
+                        AdviceType.OLD_ENERGY_ADVICE.value,
+                        AdviceType.OLD_SOLAR_ADVICE.value,
+                    }:
+                        result.failed += 1
+                        result.errors.append(
+                            f"Rij {idx}, veld 'type advies': onbekend oud adviestype '{advice_type}'"
+                        )
+                        continue
+
                     for nl, en in months.items():
                         creation_date = creation_date.replace(nl, en)
 
@@ -130,11 +145,18 @@ class Command(BaseCommand):
                     try:
                         dso_objects = dso_client.get_hoa_by_name(vve_name)
                     except Exception:
-                        result.failed += 1
-                        result.errors.append(
-                            f"Rij {idx} Lookup failed for '{vve_name}'"
-                        )
-                        continue
+                        try:
+                            if vve_name.endswith("."):
+                                vve_name = vve_name[:-1]
+                            dso_objects = dso_client.search_hoa_by_name(vve_name)
+                        except Exception:
+                            dso_objects = []
+                        if not dso_objects:
+                            result.failed += 1
+                            result.errors.append(
+                                f"Rij {idx} Lookup failed for '{vve_name}'"
+                            )
+                            continue
 
                     homeowner_association = HomeownerAssociation.objects.filter(
                         name__iexact=vve_name
@@ -153,11 +175,18 @@ class Command(BaseCommand):
                             )
                             continue
                         if not dry_run:
-                            homeowner_association = (
-                                HomeownerAssociation().get_or_create_hoa_by_bag_id(
-                                    bag_id
+                            try:
+                                homeowner_association = (
+                                    HomeownerAssociation().get_or_create_hoa_by_bag_id(
+                                        bag_id
+                                    )
                                 )
-                            )
+                            except Exception as exc:
+                                result.failed += 1
+                                result.errors.append(
+                                    f"Rij {idx}, veld 'statutaire naam': Fout bij het aanmaken van de VvE: {exc}"
+                                )
+                                continue
                     existing_case = Case.objects.filter(
                         legacy_id=legacy_id,
                     ).first()
@@ -174,7 +203,7 @@ class Command(BaseCommand):
                     if not dry_run:
                         with transaction.atomic():
                             case = Case.objects.create(
-                                advice_type=AdviceType.OUD.value,
+                                advice_type=advice_type,
                                 homeowner_association=homeowner_association,
                                 created=creation_date,
                                 request_date=creation_date,
