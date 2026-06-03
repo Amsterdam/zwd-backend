@@ -21,7 +21,8 @@ class ApplicationType(Enum):
 class AdviceType(Enum):
     ENERGY_ADVICE = "Energieadvies"
     HBO = "Haalbaarheidsonderzoek"
-    OUD = "Oud advies"
+    OLD_ENERGY_ADVICE = "Energieadvies (OUD)"
+    OLD_SOLAR_ADVICE = "Zon-Advies (OUD)"
 
     @classmethod
     def choices(cls):
@@ -86,7 +87,11 @@ class Case(ModelEventEmitter):
             return f"{self.id}ACT"
         if self.advice_type == AdviceType.HBO.value:
             return f"{self.id}HBO"
-        if self.advice_type == AdviceType.OUD.value:
+        if self.advice_type in (
+            AdviceType.OLD_ENERGY_ADVICE.value,
+            AdviceType.OLD_SOLAR_ADVICE.value,
+            "Oud advies",
+        ):
             return f"{self.id}OUD"
         if self.advice_type == AdviceType.ENERGY_ADVICE.value:
             if self.homeowner_association and self.homeowner_association.is_small:
