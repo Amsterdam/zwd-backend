@@ -196,9 +196,11 @@ class Command(BaseCommand):
                         continue
 
                     if not dry_run and advisor:
-                        advisor, _ = Advisor.objects.get_or_create(
-                            name=advisor, enabled=False
-                        )
+                        advisor_obj = Advisor.objects.filter(name=advisor).first()
+                        if not advisor_obj:
+                            advisor_obj = Advisor.objects.create(
+                                name=advisor, enabled=False
+                            )
 
                     if not dry_run:
                         with transaction.atomic():
@@ -209,7 +211,7 @@ class Command(BaseCommand):
                                 request_date=creation_date,
                                 description=description,
                                 legacy_id=legacy_id,
-                                advisor=advisor if advisor else None,
+                                advisor=advisor_obj if advisor_obj else None,
                             )
                             case.workflows.all().delete()
                             case.end_date = creation_date
