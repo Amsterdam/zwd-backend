@@ -292,7 +292,7 @@ class SubsidyItemSerializer(serializers.Serializer):
         max_digits=12, decimal_places=2, allow_null=True, required=False
     )
     bedragVerleend = serializers.DecimalField(
-        max_digits=12, decimal_places=2, allow_null=True
+        max_digits=12, decimal_places=2, allow_null=True, required=False
     )
     publicatiedatumVerleningsbesluit = serializers.DateField(allow_null=True)
     bedragVastgesteld = serializers.DecimalField(
