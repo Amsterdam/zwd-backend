@@ -284,10 +284,10 @@ class SubsidyItemSerializer(serializers.Serializer):
     dossiernummer = serializers.CharField()
     aanvrager = serializers.CharField()
     regelingnaam = serializers.CharField()
-    beleidsterrein = serializers.CharField(allow_null=True)
-    organisatieonderdeel = serializers.CharField(allow_null=True)
-    projectnaam = serializers.CharField(allow_null=True)
-    typePeriodiciteit = serializers.CharField(allow_null=True)
+    beleidsterrein = serializers.CharField(allow_null=True, required=False)
+    organisatieonderdeel = serializers.CharField(allow_null=True, required=False)
+    projectnaam = serializers.CharField(allow_null=True, required=False)
+    typePeriodiciteit = serializers.CharField(allow_null=True, required=False)
     bedragAangevraagd = serializers.DecimalField(
         max_digits=12, decimal_places=2, allow_null=True
     )
