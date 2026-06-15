@@ -2,7 +2,6 @@ import logging
 
 import requests
 from django.conf import settings
-from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +15,12 @@ class SubsidyClient:
         Returns a list of subsidy objects for the given HOA name,
         an empty list if no application is found, or None if the external API is unavailable.
         """
-        query_params = urlencode({"aanvrager": hoa_name})
-        url = f"{self.url}?{query_params}"
-
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(
+                self.url,
+                params={"aanvrager": hoa_name},
+                timeout=5,
+            )
             response.raise_for_status()
 
             try:
