@@ -298,6 +298,6 @@ class SubsidyItemSerializer(serializers.Serializer):
     bedragVastgesteld = serializers.DecimalField(
         max_digits=12, decimal_places=2, allow_null=True, required=False
     )
-    publicatiedatumVaststellingsbesluit = serializers.DateField(allow_null=True)
-    subsidiejaar = serializers.IntegerField(allow_null=True)
-    datumOverzicht = serializers.DateField(allow_null=True)
+    publicatiedatumVaststellingsbesluit = serializers.DateField(allow_null=True, required=False)
+    subsidiejaar = serializers.IntegerField(allow_null=True, required=False)
+    datumOverzicht = serializers.DateField(allow_null=True, required=False)
