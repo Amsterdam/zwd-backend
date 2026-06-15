@@ -676,4 +676,4 @@ class HomeownerAssociationTest(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 503)
-        self.assertEqual(response.data["detail"], "Status onbekend")
+        self.assertEqual(response.data["detail"], "Status unavailable for subsidy API")
