@@ -234,7 +234,7 @@ class HomeOwnerAssociationView(
 
     @extend_schema(
         methods=["get"],
-        responses={200: SubsidyItemSerializer(many=True)},
+        responses={200: SubsidyItemSerializer(many=True), 503: None},
         description="Retrieve subsidy applications for a homeowner association",
     )
     @action(
