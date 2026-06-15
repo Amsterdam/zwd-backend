@@ -289,7 +289,7 @@ class SubsidyItemSerializer(serializers.Serializer):
     projectnaam = serializers.CharField(allow_null=True, required=False)
     typePeriodiciteit = serializers.CharField(allow_null=True, required=False)
     bedragAangevraagd = serializers.DecimalField(
-        max_digits=12, decimal_places=2, allow_null=True
+        max_digits=12, decimal_places=2, allow_null=True, required=False
     )
     bedragVerleend = serializers.DecimalField(
         max_digits=12, decimal_places=2, allow_null=True
