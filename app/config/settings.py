@@ -343,6 +343,11 @@ DSO_API_URL = os.getenv("DSO_API_URL", "https://default.api.url")
 
 KVK_API_URL = os.getenv("KVK_API_URL", "https://default.api.url")
 
+SUBSIDY_API_URL = os.getenv(
+    "SUBSIDY_API_URL",
+    "https://api.data.amsterdam.nl/v1/subsidies/openbaar_subsidieregister",
+)
+
 AZURE_CONTAINER = os.getenv("AZURE_CONTAINER")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING", None)
 AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME", None)
