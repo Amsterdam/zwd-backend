@@ -277,3 +277,27 @@ class CourseParticipantImportSerializer(serializers.Serializer):
 
     def validate_file(self, value):
         return validate_csv_file(value)
+
+
+class SubsidyItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    dossiernummer = serializers.CharField()
+    aanvrager = serializers.CharField()
+    regelingnaam = serializers.CharField()
+    beleidsterrein = serializers.CharField(allow_null=True)
+    organisatieonderdeel = serializers.CharField(allow_null=True)
+    projectnaam = serializers.CharField(allow_null=True)
+    typePeriodiciteit = serializers.CharField(allow_null=True)
+    bedragAangevraagd = serializers.DecimalField(
+        max_digits=12, decimal_places=2, allow_null=True
+    )
+    bedragVerleend = serializers.DecimalField(
+        max_digits=12, decimal_places=2, allow_null=True
+    )
+    publicatiedatumVerleningsbesluit = serializers.DateField(allow_null=True)
+    bedragVastgesteld = serializers.DecimalField(
+        max_digits=12, decimal_places=2, allow_null=True
+    )
+    publicatiedatumVaststellingsbesluit = serializers.DateField(allow_null=True)
+    subsidiejaar = serializers.IntegerField(allow_null=True)
+    datumOverzicht = serializers.DateField(allow_null=True)

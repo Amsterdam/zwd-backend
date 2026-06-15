@@ -1,4 +1,5 @@
 import django_filters
+from clients.subsidy_client import SubsidyClient
 from rest_framework import viewsets, mixins
 
 from utils.pagination import CustomPagination
@@ -22,6 +23,7 @@ from .serializers import (
     ImportResultSerializer,
     LetterImportSerializer,
     NeighborhoodSerializer,
+    SubsidyItemSerializer,
     WijkSerializer,
 )
 from rest_framework.decorators import action
@@ -229,6 +231,32 @@ class HomeOwnerAssociationView(
 
         note.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        methods=["get"],
+        responses={200: SubsidyItemSerializer(many=True)},
+        description="Retrieve subsidy applications for a homeowner association",
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="subsidy",
+        filter_backends=[],
+        pagination_class=None,
+    )
+    def subsidy(self, request, pk=None):
+        hoa = self.get_object()
+        subsidy_client = SubsidyClient()
+        items = subsidy_client.get_subsidy_by_hoa_name(hoa.name)
+
+        if items is None:
+            return Response(
+                {"detail": "Status onbekend"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        serializer = SubsidyItemSerializer(items, many=True)
+        return Response(serializer.data)
 
     @action(
         detail=False,

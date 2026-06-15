@@ -622,3 +622,58 @@ class HomeownerAssociationTest(APITestCase):
         from django.utils import timezone
 
         return timezone.timedelta(**kwargs)
+
+    @patch("apps.homeownerassociation.views.SubsidyClient")
+    def test_subsidy_found(self, MockSubsidyClient):
+        """Scenario 1: subsidieaanvraag gevonden → lijst met objecten"""
+        hoa = baker.make(HomeownerAssociation)
+        MockSubsidyClient.return_value.get_subsidy_by_hoa_name.return_value = [
+            {
+                "id": 37,
+                "dossiernummer": "2026/02771",
+                "aanvrager": "Vereniging van Eigenaars Test",
+                "regelingnaam": "Subsidieregeling Groen in Amsterdam",
+                "beleidsterrein": "Ruimte en duurzaamheid",
+                "organisatieonderdeel": "Ruimte en Duurzaamheid",
+                "projectnaam": "aanvraag subsidie groendak",
+                "typePeriodiciteit": "Eenmalig",
+                "bedragAangevraagd": 31350,
+                "bedragVerleend": 31350,
+                "publicatiedatumVerleningsbesluit": "2026-06-10",
+                "bedragVastgesteld": None,
+                "publicatiedatumVaststellingsbesluit": None,
+                "subsidiejaar": 2026,
+                "datumOverzicht": "2026-06-11",
+            }
+        ]
+
+        url = reverse("homeownerassociation-subsidy", args=[hoa.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["dossiernummer"], "2026/02771")
+
+    @patch("apps.homeownerassociation.views.SubsidyClient")
+    def test_subsidy_not_found(self, MockSubsidyClient):
+        """Scenario 2: geen subsidieaanvraag → lege lijst"""
+        hoa = baker.make(HomeownerAssociation)
+        MockSubsidyClient.return_value.get_subsidy_by_hoa_name.return_value = []
+
+        url = reverse("homeownerassociation-subsidy", args=[hoa.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    @patch("apps.homeownerassociation.views.SubsidyClient")
+    def test_subsidy_external_api_unavailable(self, MockSubsidyClient):
+        """Scenario 3: externe API niet beschikbaar → 503"""
+        hoa = baker.make(HomeownerAssociation)
+        MockSubsidyClient.return_value.get_subsidy_by_hoa_name.return_value = None
+
+        url = reverse("homeownerassociation-subsidy", args=[hoa.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.data["detail"], "Status onbekend")
