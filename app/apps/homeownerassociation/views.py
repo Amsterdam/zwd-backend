@@ -251,7 +251,7 @@ class HomeOwnerAssociationView(
 
         if items is None:
             return Response(
-                {"detail": "Status onbekend"},
+                {"detail": "Status unavailable for subsidy API"},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
