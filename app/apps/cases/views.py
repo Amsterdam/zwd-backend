@@ -6,7 +6,11 @@ from apps.events.serializers import CaseEventSerializer
 from apps.events.mixins import CaseEventsMixin
 from apps.advisor.mixins import CaseAdvisorMixin
 from apps.workflow.models import CaseWorkflow, WorkflowOption
-from apps.workflow.serializers import CaseWorkflowSerializer, WorkflowOptionSerializer
+from apps.workflow.serializers import (
+    CaseWorkflowInstanceSerializer,
+    CaseWorkflowSerializer,
+    WorkflowOptionSerializer,
+)
 from rest_framework import mixins, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -227,6 +231,23 @@ class CaseViewSet(
             case=case, completed=False, tasks__isnull=False
         ).distinct()
         serializer = CaseWorkflowSerializer(workflows, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses=CaseWorkflowInstanceSerializer(many=True),
+        description="Retrieve all workflow instances for this case, including completed ones and those without open tasks.",
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="workflow-instances",
+        filter_backends=[],
+        pagination_class=None,
+    )
+    def get_workflow_instances(self, request, pk=None):
+        case = self.get_object()
+        workflow_instances = CaseWorkflow.objects.filter(case=case)
+        serializer = CaseWorkflowInstanceSerializer(workflow_instances, many=True)
         return Response(serializer.data)
 
     def create(self, request):
