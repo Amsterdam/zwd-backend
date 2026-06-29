@@ -87,6 +87,19 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
         ).data
 
 
+class CaseWorkflowInstanceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CaseWorkflow
+        fields = (
+            "id",
+            "workflow_type",
+            "workflow_version",
+            "completed",
+            "main_workflow",
+        )
+
+
 class GenericCompletedTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = GenericCompletedTask
