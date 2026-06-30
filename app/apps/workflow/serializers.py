@@ -1,5 +1,6 @@
 import re
 
+from apps.workflow.task_state import get_current_task_specs
 from apps.cases.models import Case
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -88,6 +89,7 @@ class CaseWorkflowSerializer(serializers.ModelSerializer):
 
 
 class CaseWorkflowInstanceSerializer(serializers.ModelSerializer):
+    current_task_specs = serializers.SerializerMethodField()
 
     class Meta:
         model = CaseWorkflow
@@ -97,7 +99,12 @@ class CaseWorkflowInstanceSerializer(serializers.ModelSerializer):
             "workflow_version",
             "completed",
             "main_workflow",
+            "current_task_specs",
         )
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_current_task_specs(self, obj):
+        return get_current_task_specs(obj)
 
 
 class GenericCompletedTaskSerializer(serializers.ModelSerializer):

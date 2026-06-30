@@ -246,7 +246,7 @@ class CaseViewSet(
     )
     def get_workflow_instances(self, request, pk=None):
         case = self.get_object()
-        workflow_instances = CaseWorkflow.objects.filter(case=case)
+        workflow_instances = CaseWorkflow.objects.filter(case=case).order_by("-id")
         serializer = CaseWorkflowInstanceSerializer(workflow_instances, many=True)
         return Response(serializer.data)
 
