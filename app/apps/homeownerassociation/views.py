@@ -250,7 +250,7 @@ class HomeOwnerAssociationView(
         subsidy_client = SubsidyClient()
         kvk_client = KvkClient()
         kvk_names = kvk_client.get_kvk_names(hoa.name)
-        unique_names = list(dict.fromkeys(kvk_names))
+        unique_names = list(dict.fromkeys(kvk_names or [hoa.name]))
         items = []
         for kvk_name in unique_names:
             subsidy_items = subsidy_client.get_subsidy_by_hoa_name(kvk_name)
