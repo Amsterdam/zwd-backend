@@ -624,7 +624,8 @@ class HomeownerAssociationTest(APITestCase):
         return timezone.timedelta(**kwargs)
 
     @patch("apps.homeownerassociation.views.SubsidyClient")
-    def test_subsidy_found(self, MockSubsidyClient):
+    @patch("apps.homeownerassociation.views.KvkClient")
+    def test_subsidy_found(self, MockKvkClient, MockSubsidyClient):
         """Scenario 1: subsidieaanvraag gevonden → lijst met objecten"""
         hoa = baker.make(HomeownerAssociation)
         MockSubsidyClient.return_value.get_subsidy_by_hoa_name.return_value = [
@@ -645,6 +646,9 @@ class HomeownerAssociationTest(APITestCase):
                 "subsidiejaar": 2026,
                 "datumOverzicht": "2026-06-11",
             }
+        ]
+        MockKvkClient.return_value.get_kvk_names.return_value = [
+            "Vereniging van Eigenaars Test"
         ]
 
         url = reverse("homeownerassociation-subsidy", args=[hoa.id])
