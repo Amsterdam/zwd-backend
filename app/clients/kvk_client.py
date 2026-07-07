@@ -25,3 +25,24 @@ class KvkClient:
         except requests.RequestException as e:
             print(f"KVK-API request failed: {e}")
             return None
+
+    def get_kvk_names(self, hoa_name):
+        query_params = urlencode({"q": hoa_name})
+        url = f"{self.url}?{query_params}"
+        try:
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            try:
+                response_data = response.json()
+            except ValueError:
+                return []
+
+            results = response_data.get("resultatenHR", [])
+            return [
+                result.get("handelsnaam")
+                for result in results
+                if isinstance(result.get("handelsnaam"), str)
+            ]
+        except requests.RequestException as e:
+            print(f"KVK-API request failed: {e}")
+            return []

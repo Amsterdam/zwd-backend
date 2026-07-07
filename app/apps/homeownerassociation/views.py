@@ -1,4 +1,5 @@
 import django_filters
+from clients.kvk_client import KvkClient
 from clients.subsidy_client import SubsidyClient
 from rest_framework import viewsets, mixins
 
@@ -247,13 +248,18 @@ class HomeOwnerAssociationView(
     def subsidy(self, request, pk=None):
         hoa = self.get_object()
         subsidy_client = SubsidyClient()
-        items = subsidy_client.get_subsidy_by_hoa_name(hoa.name)
-
-        if items is None:
-            return Response(
-                {"detail": "Status unavailable for subsidy API"},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
+        kvk_client = KvkClient()
+        kvk_names = kvk_client.get_kvk_names(hoa.name)
+        unique_names = list(dict.fromkeys(kvk_names))
+        items = []
+        for kvk_name in unique_names:
+            subsidy_items = subsidy_client.get_subsidy_by_hoa_name(kvk_name)
+            if subsidy_items is None:
+                return Response(
+                    {"detail": "Status unavailable for subsidy API"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+            items.extend(subsidy_items)
 
         serializer = SubsidyItemSerializer(items, many=True)
         return Response(serializer.data)
