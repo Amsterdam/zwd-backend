@@ -116,8 +116,8 @@
     <bpmn:userTask id="task_inkooporder_en_bedrag" name="Inkoopordernummer en bedrag startfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_inkooporder" label="Inkoopordernummer" type="string" />
-          <camunda:formField id="form_inkooporder_bedrag" label="Bedrag" type="string" />
+          <camunda:formField id="form_inkooporder" label="Inkoopordernummer" type="shorttext" />
+          <camunda:formField id="form_inkooporder_bedrag" label="Bedrag" type="shorttext" />
           <camunda:formField id="form_inkooporder_datum" label="Factuurdatum" type="date" />
         </camunda:formData>
       </bpmn:extensionElements>
@@ -145,8 +145,8 @@
     <bpmn:userTask id="task_inkooporder_en_bedrag_tussenfactuur" name="Inkoopordernummer en bedrag tussenfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_inkooporder" label="Inkoopordernummer" type="string" />
-          <camunda:formField id="form_inkooporder_bedrag" label="Bedrag" type="string" />
+          <camunda:formField id="form_inkooporder" label="Inkoopordernummer" type="shorttext" />
+          <camunda:formField id="form_inkooporder_bedrag" label="Bedrag" type="shorttext" />
           <camunda:formField id="form_inkooporder_datum" label="Factuurdatum" type="date" />
         </camunda:formData>
       </bpmn:extensionElements>
@@ -335,8 +335,8 @@
     <bpmn:userTask id="task_inkooporder_en_bedrag_eindfactuur" name="Inkoopordernummer en bedrag eindfactuur">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="form_inkooporder" label="Inkoopordernummer" type="string" />
-          <camunda:formField id="form_inkooporder_bedrag" label="Bedrag" type="string" />
+          <camunda:formField id="form_inkooporder" label="Inkoopordernummer" type="shorttext" />
+          <camunda:formField id="form_inkooporder_bedrag" label="Bedrag" type="shorttext" />
           <camunda:formField id="form_inkooporder_datum" label="Factuurdatum" type="date" />
         </camunda:formData>
       </bpmn:extensionElements>
