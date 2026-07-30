@@ -190,7 +190,8 @@
       <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="form_aanvraag_ingediend" label="Heeft de vve na 2021 al een advies ontvangen?" type="enum">
-            <camunda:value id="yes" name="Ja" />
+            <camunda:value id="yes" name="Ja, aanvraag afwijzen" />
+            <camunda:value id="yes_continue" name="Ja, maar toch doorgaan met deze aanvraag" />
             <camunda:value id="no" name="Nee" />
           </camunda:formField>
           <camunda:formField id="form_aanvraag_ingediend_dossier" label="Dossiernummer">
