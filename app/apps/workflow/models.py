@@ -239,7 +239,8 @@ class CaseWorkflow(models.Model):
         trans_types = {
             "enum": "select",
             "boolean": "checkbox",
-            "string": "text",
+            "string": "text",  # default to text for TextArea input in the form builder
+            "shorttext": "shorttext",  # this property will generate en regular one row text input in the form builder
             "long": "number",
             "expression": "expression",
             "file": "file",

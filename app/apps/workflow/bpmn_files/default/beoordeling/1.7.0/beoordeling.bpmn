@@ -194,7 +194,7 @@
             <camunda:value id="yes_continue" name="Ja, maar toch doorgaan met deze aanvraag" />
             <camunda:value id="no" name="Nee" />
           </camunda:formField>
-          <camunda:formField id="form_aanvraag_ingediend_dossier" label="Dossiernummer">
+          <camunda:formField id="form_aanvraag_ingediend_dossier" label="Dossiernummer" type="shorttext">
             <camunda:validation>
               <camunda:constraint name="optional" config="true" />
             </camunda:validation>
