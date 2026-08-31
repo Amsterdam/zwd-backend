@@ -38,6 +38,14 @@ class CaseApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_expanded_case_list_includes_workflow_name_and_version(self):
+        homeowner_association = baker.make(
+            HomeownerAssociation,
+            number_of_apartments=13,
+        )
+        Case.objects.filter(id=self.case).update(
+            homeowner_association=homeowner_association
+        )
+
         CaseWorkflow.objects.create(
             case_id=self.case,
             workflow_type="director",
