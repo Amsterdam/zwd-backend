@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from apps.workflow.models import WorkflowOption
+from apps.workflow.models import CaseWorkflow, WorkflowOption
 from apps.advisor.models import Advisor
 from apps.cases.models import (
     AdviceType,
@@ -36,6 +36,38 @@ class CaseApiTest(APITestCase):
         url = reverse("cases-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_expanded_case_list_includes_workflow_name_and_version(self):
+        CaseWorkflow.objects.create(
+            case_id=self.case,
+            workflow_type="director",
+            workflow_version="2.1.0",
+            main_workflow=True,
+        )
+        CaseWorkflow.objects.create(
+            case_id=self.case,
+            workflow_type="sub_workflow",
+            workflow_version="1.2.0",
+            main_workflow=False,
+        )
+
+        url = reverse("cases-list")
+        response = self.client.get(url, {"expand": "true"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        case_data = next(
+            item for item in response.data["results"] if item["id"] == self.case
+        )
+        self.assertEqual(
+            case_data["workflows"],
+            [
+                {"workflow_type": "director", "workflow_version": "2.1.0"},
+                {
+                    "workflow_type": "sub_workflow",
+                    "workflow_version": "1.2.0",
+                },
+            ],
+        )
 
     def test_retrieve_case(self):
         self._create_case()

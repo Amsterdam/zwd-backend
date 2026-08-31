@@ -188,6 +188,21 @@ class CaseViewSet(
     ]
     filterset_class = CaseFilter
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        if self.action == "list" and self.request.query_params.get("expand") == "true":
+            return queryset.prefetch_related(
+                Prefetch(
+                    "workflows",
+                    queryset=CaseWorkflow.objects.only(
+                        "id", "case_id", "workflow_type", "workflow_version"
+                    ),
+                )
+            )
+
+        return queryset
+
     def get_serializer_class(self):
         if self.action == "create_document" or self.action == "get_documents":
             return CaseDocumentSerializer
