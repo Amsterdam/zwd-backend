@@ -1,4 +1,4 @@
-from apps.workflow.models import WorkflowOption
+from apps.workflow.models import CaseWorkflow, WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
     CaseHomeownerAssociationSerializer,
@@ -14,7 +14,6 @@ from apps.cases.models import (
     CaseDocument,
     CaseStatus,
 )
-from apps.workflow.serializers import CaseWorkflowSerializer
 from rest_framework import serializers
 import magic
 import os
@@ -129,11 +128,18 @@ class CaseListSerializer(serializers.ModelSerializer):
         return obj.status.name if obj.status else None
 
 
+class ExpandedCaseListWorkflowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CaseWorkflow
+        fields = ("workflow_type", "workflow_version")
+
+
 class ExpandedCaseListSerializer(serializers.ModelSerializer):
     homeowner_association = HomeownerAssociationWithoutContactsSerializer()
     status = serializers.SerializerMethodField()
     advisor = serializers.SerializerMethodField()
     additional_fields = serializers.SerializerMethodField()
+    workflows = ExpandedCaseListWorkflowSerializer(many=True, read_only=True)
 
     class Meta:
         model = Case
