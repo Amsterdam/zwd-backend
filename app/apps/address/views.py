@@ -40,6 +40,7 @@ class AddressViewSet(
             "ligt_in_beschermd_gebied": hoa.ligt_in_beschermd_gebied,
             "monument_status": hoa.monument_status,
             "name": hoa.name,
+            "homeowner_association_id": hoa.id,
             "neighborhood": hoa.neighborhood.name if hoa.neighborhood else None,
             "number_of_apartments": hoa.number_of_apartments,
             "wijk": hoa.wijk.name if hoa.wijk else None,
