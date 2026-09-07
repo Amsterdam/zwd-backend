@@ -23,3 +23,4 @@ class MijnAmsterdamSerializer(serializers.Serializer):
     wijk = serializers.CharField(allow_null=True, required=False)
     zip_code = serializers.CharField(allow_null=True, required=False)
     cases = MijnAmsterdamCaseListSerializer(many=True)
+    is_priority_neighborhood = serializers.BooleanField()
