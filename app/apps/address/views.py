@@ -45,6 +45,7 @@ class AddressViewSet(
             "wijk": hoa.wijk.name if hoa.wijk else None,
             "zip_code": hoa.zip_code,
             "cases": Case.objects.filter(homeowner_association=hoa),
+            "is_priority_neighborhood": hoa.is_priority_neighborhood,
         }
 
         serializer = MijnAmsterdamSerializer(response_data)
