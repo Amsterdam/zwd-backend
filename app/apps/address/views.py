@@ -2,7 +2,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets
 
-from apps.cases.models import Case
+from apps.cases.models import AdviceType, ApplicationType, Case
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.address.serializers import (
     AddressSerializer,
@@ -47,6 +47,15 @@ class AddressViewSet(
             "zip_code": hoa.zip_code,
             "cases": Case.objects.filter(homeowner_association=hoa),
             "is_priority_neighborhood": hoa.is_priority_neighborhood,
+            "has_advice_case": Case.objects.filter(
+                homeowner_association=hoa,
+                application_type=ApplicationType.ADVICE.value,
+                advice_type__in=(
+                    AdviceType.ENERGY_ADVICE.value,
+                    AdviceType.HBO.value,
+                ),
+            ).exists(),
+            "has_major_shareholder": hoa.has_major_shareholder,
         }
 
         serializer = MijnAmsterdamSerializer(response_data)
