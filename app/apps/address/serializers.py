@@ -24,4 +24,6 @@ class MijnAmsterdamSerializer(serializers.Serializer):
     zip_code = serializers.CharField(allow_null=True, required=False)
     cases = MijnAmsterdamCaseListSerializer(many=True)
     is_priority_neighborhood = serializers.BooleanField()
+    has_advice_case = serializers.BooleanField()
     homeowner_association_id = serializers.IntegerField()
+    has_major_shareholder = serializers.BooleanField()
