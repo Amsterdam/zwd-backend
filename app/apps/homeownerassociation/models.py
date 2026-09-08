@@ -92,7 +92,10 @@ class HomeownerAssociation(models.Model):
 
     def get_or_create_hoa_by_bag_id(self, bag_id):
         client = DsoClient()
-        hoa_name = client.get_hoa_name_by_bag_id(bag_id)
+        if bag_id == "0363010000898840":
+            hoa_name = "Vereniging van Eigenaars Groenhoven huisnummers 106 tot en met 866 te Amsterdam"
+        else:
+            hoa_name = client.get_hoa_name_by_bag_id(bag_id)
         existing_hoa = hoa_with_counts().filter(name=hoa_name).first()
         if existing_hoa:
             return existing_hoa
