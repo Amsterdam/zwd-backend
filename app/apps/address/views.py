@@ -1,18 +1,22 @@
 import mimetypes
+import os
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from django.http import FileResponse
 
 from apps.cases.models import AdviceType, ApplicationType, Case
 from apps.cases.models import CaseDocument
+from apps.cases.serializers import CaseDocumentSerializer
 from apps.homeownerassociation.models import HomeownerAssociation
 from apps.workflow.models import GenericCompletedTask
 from apps.address.serializers import (
     AddressSerializer,
+    DuurzaamWonenDocumentUploadSerializer,
     MijnAmsterdamSerializer,
     MijnAmsterdamEindpresentatieSerializer,
 )
@@ -113,6 +117,56 @@ class AddressViewSet(
 
     @action(
         detail=False,
+        methods=["post"],
+        url_path="duurzaamwonen/(?P<case_id>[^/.]+)/document",
+        url_name="duurzaamwonen-document",
+        serializer_class=DuurzaamWonenDocumentUploadSerializer,
+    )
+    def upload_duurzaamwonen_document(self, request, case_id=None):
+        """
+        Upload a document for a case from a base64-encoded payload.
+        """
+        case = get_object_or_404(Case, id=case_id)
+
+        upload_serializer = DuurzaamWonenDocumentUploadSerializer(data=request.data)
+        upload_serializer.is_valid(raise_exception=True)
+
+        file_name = os.path.basename(upload_serializer.validated_data["file_name"])
+        if not file_name:
+            file_name = "document"
+
+        _, file_extension = os.path.splitext(file_name)
+        if not file_extension:
+            detected_extension = upload_serializer.validated_data.get(
+                "detected_extension"
+            )
+            if detected_extension:
+                file_name = f"{file_name}{detected_extension}"
+
+        document_name = upload_serializer.validated_data.get("name") or file_name
+        decoded_file = upload_serializer.validated_data["file_base64"]
+
+        case_document_serializer = CaseDocumentSerializer(
+            data={
+                "case": case.id,
+                "name": document_name,
+                "document": ContentFile(decoded_file, name=file_name),
+            }
+        )
+        case_document_serializer.is_valid(raise_exception=True)
+        case_document = case_document_serializer.save()
+
+        response_serializer = MijnAmsterdamEindpresentatieSerializer(
+            {
+                "case_id": case.id,
+                "eindpresentatie_document_id": case_document.id,
+            }
+        )
+
+        return Response(response_serializer.data, status=201)
+
+    @action(
+        detail=False,
         methods=["get"],
         url_path="mijn-amsterdam/(?P<case_id>[^/.]+)/eindpresentatie-document/download",
         url_name="mijn-amsterdam-eindpresentatie-document-download",
@@ -159,4 +213,4 @@ class AddressViewSet(
                 .first()
             )
 
-        return None
+        return CaseDocument.objects.filter(case_id=case_id).order_by("-created").first()
