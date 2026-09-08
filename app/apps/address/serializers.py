@@ -27,3 +27,8 @@ class MijnAmsterdamSerializer(serializers.Serializer):
     has_advice_case = serializers.BooleanField()
     homeowner_association_id = serializers.IntegerField()
     has_major_shareholder = serializers.BooleanField()
+
+
+class MijnAmsterdamEindpresentatieSerializer(serializers.Serializer):
+    case_id = serializers.IntegerField()
+    eindpresentatie_document_id = serializers.IntegerField(allow_null=True)
