@@ -3,7 +3,7 @@ services:
   zwd-backend:
     build: app
     hostname: zwd-backend
-    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
+    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-ams-woon/zwd/backend}:${VERSION:-latest}
     ports:
       - 8081:8000
     networks:
@@ -15,7 +15,7 @@ services:
     tty: true
 
   zwd_celery_worker:
-    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-salmagundi/zwd-backend}:${VERSION:-latest}
+    image: ${REGISTRY:-127.0.0.1:5001}/${REPOSITORY:-ams-woon/zwd/backend}:${VERSION:-latest}
     container_name: zwd_celery_worker
     hostname: zwd_celery_worker
     entrypoint: /app/deploy/docker-entrypoint.celery.sh
