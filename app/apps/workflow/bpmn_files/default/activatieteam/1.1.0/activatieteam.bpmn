@@ -458,7 +458,7 @@
         <di:waypoint x="1972" y="200" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_11i0bvv_di" bpmnElement="Flow_11i0bvv">
-        <di:waypoint x="1990" y="500" />
+        <di:waypoint x="1990" y="505" />
         <di:waypoint x="1990" y="470" />
         <di:waypoint x="2060" y="470" />
       </bpmndi:BPMNEdge>
