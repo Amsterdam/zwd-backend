@@ -249,19 +249,11 @@ class HomeOwnerAssociationView(
         hoa = self.get_object()
         subsidy_client = SubsidyClient()
         kvk_client = KvkClient()
-        kvk_names = kvk_client.get_kvk_names(hoa.name)
-        unique_names = list(dict.fromkeys(kvk_names or [hoa.name]))
-        items = []
-        for kvk_name in unique_names:
+        kvk_name = kvk_client.get_kvk_names(hoa.name)
+        subsidy_items = []
+        if kvk_name is not None:
             subsidy_items = subsidy_client.get_subsidy_by_hoa_name(kvk_name)
-            if subsidy_items is None:
-                return Response(
-                    {"detail": "Status unavailable for subsidy API"},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
-            items.extend(subsidy_items)
-
-        serializer = SubsidyItemSerializer(items, many=True)
+        serializer = SubsidyItemSerializer(subsidy_items, many=True)
         return Response(serializer.data)
 
     @action(
