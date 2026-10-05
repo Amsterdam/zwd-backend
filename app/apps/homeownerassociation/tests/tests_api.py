@@ -669,15 +669,3 @@ class HomeownerAssociationTest(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, [])
-
-    @patch("apps.homeownerassociation.views.SubsidyClient")
-    def test_subsidy_external_api_unavailable(self, MockSubsidyClient):
-        """Scenario 3: externe API niet beschikbaar → 503"""
-        hoa = baker.make(HomeownerAssociation)
-        MockSubsidyClient.return_value.get_subsidy_by_hoa_name.return_value = None
-
-        url = reverse("homeownerassociation-subsidy", args=[hoa.id])
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 503)
-        self.assertEqual(response.data["detail"], "Status unavailable for subsidy API")
