@@ -38,11 +38,9 @@ class KvkClient:
                 return []
 
             results = response_data.get("resultatenHR", [])
-            return [
-                result.get("handelsnaam")
-                for result in results
-                if isinstance(result.get("handelsnaam"), str)
-            ]
+            if results:
+                return results[0].get("handelsnaam")
+            return None
         except requests.RequestException as e:
             print(f"KVK-API request failed: {e}")
             return []
