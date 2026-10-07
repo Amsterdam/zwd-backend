@@ -1,5 +1,6 @@
 from datetime import date
 from django.test import TestCase
+from django.forms import modelform_factory
 from unittest.mock import patch
 
 
@@ -14,6 +15,14 @@ from model_bakery import baker
 
 
 class HomeownerAssociationModelTest(TestCase):
+    def test_optional_protection_fields_are_not_required_in_model_form(self):
+        form_class = modelform_factory(HomeownerAssociation, fields="__all__")
+        form = form_class()
+
+        self.assertFalse(form.fields["monument_status"].required)
+        self.assertFalse(form.fields["ligt_in_beschermd_gebied"].required)
+        self.assertFalse(form.fields["beschermd_stadsdorpsgezicht"].required)
+
     @patch("apps.homeownerassociation.models.DsoClient")
     def test_get_or_create_hoa_by_bag_id_new_hoa(self, MockDsoClient):
         # Mock the DsoClient and its methods

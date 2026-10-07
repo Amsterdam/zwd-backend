@@ -77,9 +77,11 @@ class HomeownerAssociation(models.Model):
         on_delete=models.DO_NOTHING,
         null=True,
     )
-    monument_status = models.CharField(max_length=255, null=True)
-    ligt_in_beschermd_gebied = models.CharField(max_length=255, null=True)
-    beschermd_stadsdorpsgezicht = models.CharField(max_length=255, null=True)
+    monument_status = models.CharField(max_length=255, null=True, blank=True)
+    ligt_in_beschermd_gebied = models.CharField(max_length=255, null=True, blank=True)
+    beschermd_stadsdorpsgezicht = models.CharField(
+        max_length=255, null=True, blank=True
+    )
     kvk_nummer = models.CharField(max_length=255, null=True, blank=True)
     annotation = models.TextField(null=True, blank=True)
 
