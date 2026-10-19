@@ -3,7 +3,7 @@ LABEL maintainer="datapunt@amsterdam.nl"
 
 ENV PYTHONUNBUFFERED=1 \
   POETRY_VIRTUALENVS_CREATE=false \
-  POETRY_VERSION=2.1.4
+  POETRY_VERSION=2.4.1
 
 RUN apt-get update && apt-get install -y \
   libpq-dev \
