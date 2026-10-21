@@ -1,9 +1,12 @@
 from time import sleep
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.http import HttpResponse
+from django.template.response import TemplateResponse
 from django.utils import timezone
 from openpyxl import Workbook
 
+from apps.homeownerassociation.models import HomeownerAssociation
 from apps.workflow.models import CaseWorkflow
 from apps.workflow.tasks import task_create_main_worflow_for_case, task_start_workflow
 from .models import (
@@ -14,6 +17,7 @@ from .models import (
     CaseDocument,
     CaseStatus,
 )
+from .archive import build_archive_plan, execute_archive_plan
 from .retention import (
     filter_retention_expired,
     filter_retention_running,
@@ -93,6 +97,71 @@ def export_queryset_to_excel(modeladmin, request, queryset):
     response["Content-Disposition"] = 'attachment; filename="zwd_zaken_export.xlsx"'
     wb.save(response)
     return response
+
+
+ARCHIVE_PREVIEW_LIMIT = 50
+
+
+def _preview(ids):
+    return {
+        "ids": ids[:ARCHIVE_PREVIEW_LIMIT],
+        "remaining": len(ids) - ARCHIVE_PREVIEW_LIMIT,
+    }
+
+
+@admin.action(description="Zaken met verlopen bewaartermijn archiveren")
+def archive_cases(modeladmin, request, queryset):
+    plan = build_archive_plan(queryset)
+
+    if request.POST.get("post") == "yes":
+        if not plan.case_ids:
+            modeladmin.message_user(
+                request, "Er zijn geen zaken gearchiveerd.", messages.WARNING
+            )
+            return None
+        counts = execute_archive_plan(plan)
+        modeladmin.message_user(
+            request,
+            f"{len(plan.case_ids)} zaken gearchiveerd, {plan.skipped_count} overgeslagen. "
+            f"Verwijderd: {counts['workflows']} workflows, {counts['tasks']} taken, "
+            f"{counts['documents']} documenten, {counts['completed_tasks']} afgeronde taken, "
+            f"{counts['events']} tijdlijn-events en {counts['contacts']} contactpersonen.",
+            messages.SUCCESS,
+        )
+        return None
+
+    # Dry-run: show what will happen without changing anything
+    hoa_keep = _preview(plan.hoa_ids_keep_contacts)
+    hoa_keep["names"] = HomeownerAssociation.objects.filter(
+        id__in=hoa_keep["ids"]
+    ).values_list("name", flat=True)
+    context = {
+        **modeladmin.admin_site.each_context(request),
+        "title": "Zaken archiveren",
+        "opts": modeladmin.model._meta,
+        "plan": plan,
+        "counts": plan.counts(),
+        "skipped": [
+            (label, len(ids), _preview(ids))
+            for label, ids in [
+                ("Nog niet afgesloten", plan.skipped_open_ids),
+                (
+                    "Afgesloten, maar de bewaartermijn loopt nog",
+                    plan.skipped_not_expired_ids,
+                ),
+                ("Al eerder gearchiveerd", plan.skipped_archived_ids),
+            ]
+        ],
+        "hoa_keep": hoa_keep,
+        # With "select all" the confirmation posts select_across instead of every
+        # pk, to stay below DATA_UPLOAD_MAX_NUMBER_FIELDS. Django still requires
+        # at least one selected pk to dispatch the action.
+        "select_across": request.POST.get("select_across") == "1",
+        "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+    }
+    return TemplateResponse(
+        request, "admin/cases/case/archive_confirmation.html", context
+    )
 
 
 @admin.action(description="Fix request_date from created")
@@ -179,7 +248,12 @@ class CaseAdmin(admin.ModelAdmin):
         "archived_at",
     )
     autocomplete_fields = ["homeowner_association"]
-    actions = [restart_workflow, fix_request_date, export_queryset_to_excel]
+    actions = [
+        restart_workflow,
+        fix_request_date,
+        export_queryset_to_excel,
+        archive_cases,
+    ]
 
 
 @admin.register(CaseDocument)
