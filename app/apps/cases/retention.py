@@ -1,4 +1,6 @@
 from datetime import date
+from django.db.models import Q
+from django.utils import timezone
 
 BEWAARTERMIJN_SUCCESVOL_JAREN = 5
 BEWAARTERMIJN_AFGEBROKEN_JAREN = 1
@@ -48,3 +50,65 @@ def get_result_label(case):
         return ""
     case_close = get_case_close(case)
     return case_close.reason.name if case_close else RESULTAAT_ONBEKEND
+
+
+def retention_cutoff(years, today=None):
+    """
+    Cases with an end_date before this date have an expired retention period,
+    e.g. with 1 year on 2028-01-01 the cutoff is 2027-01-01, so a case closed
+    on 2026-10-21 is expired from that day on.
+    """
+    today = today or timezone.localdate()
+    return date(today.year - years, 1, 1)
+
+
+def _successful_expired_q(today=None):
+    return Q(
+        caseclose__reason__is_successful=True,
+        end_date__lt=retention_cutoff(BEWAARTERMIJN_SUCCESVOL_JAREN, today),
+    )
+
+
+def _unsuccessful_expired_q(today=None):
+    return Q(
+        caseclose__reason__is_successful=False,
+        end_date__lt=retention_cutoff(BEWAARTERMIJN_AFGEBROKEN_JAREN, today),
+    )
+
+
+def _unknown_expired_q(today=None):
+    return Q(
+        caseclose__isnull=True,
+        end_date__lt=retention_cutoff(BEWAARTERMIJN_ONBEKEND_JAREN, today),
+    )
+
+
+def _closed_not_archived(queryset):
+    return queryset.filter(end_date__isnull=False, archived_at__isnull=True)
+
+
+def filter_successful_expired(queryset, today=None):
+    return _closed_not_archived(queryset).filter(_successful_expired_q(today))
+
+
+def filter_unsuccessful_expired(queryset, today=None):
+    return _closed_not_archived(queryset).filter(_unsuccessful_expired_q(today))
+
+
+def filter_unknown_expired(queryset, today=None):
+    return _closed_not_archived(queryset).filter(_unknown_expired_q(today))
+
+
+def filter_retention_expired(queryset, today=None):
+    """Closed, not yet archived cases whose retention period has expired."""
+    return _closed_not_archived(queryset).filter(
+        _successful_expired_q(today)
+        | _unsuccessful_expired_q(today)
+        | _unknown_expired_q(today)
+    )
+
+
+def filter_retention_running(queryset, today=None):
+    """Closed, not yet archived cases whose retention period is still running."""
+    expired = filter_retention_expired(queryset, today)
+    return _closed_not_archived(queryset).exclude(pk__in=expired.values("pk"))

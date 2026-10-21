@@ -1,6 +1,7 @@
 from time import sleep
 from django.contrib import admin
 from django.http import HttpResponse
+from django.utils import timezone
 from openpyxl import Workbook
 
 from apps.workflow.models import CaseWorkflow
@@ -14,6 +15,11 @@ from .models import (
     CaseStatus,
 )
 from .retention import (
+    filter_retention_expired,
+    filter_retention_running,
+    filter_successful_expired,
+    filter_unknown_expired,
+    filter_unsuccessful_expired,
     get_case_close,
     get_result_label,
     get_retention_expiry_date,
@@ -50,6 +56,7 @@ def export_queryset_to_excel(modeladmin, request, queryset):
         "Succesvol",
         "Bewaartermijn (jaren)",
         "Bewaartermijn verloopt op",
+        "Gearchiveerd op",
     ]
     wb_sheet.append(headers)
 
@@ -74,6 +81,9 @@ def export_queryset_to_excel(modeladmin, request, queryset):
                 successful,
                 get_retention_years(case) or "",
                 _format_date(get_retention_expiry_date(case)),
+                _format_date(
+                    timezone.localtime(case.archived_at) if case.archived_at else None
+                ),
             ]
         )
 
@@ -114,6 +124,33 @@ def restart_workflow(modeladmin, request, queryset):
             start_workflow_task.wait(timeout=None, interval=0.5)
 
 
+class BewaartermijnFilter(admin.SimpleListFilter):
+    title = "Bewaartermijn"
+    parameter_name = "bewaartermijn"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("verlopen", "Alle verlopen bewaartermijnen"),
+            ("succesvol_5_jaar", "Verlopen: succesvol (5 jaar)"),
+            ("afgebroken_1_jaar", "Verlopen: afgebroken (1 jaar)"),
+            ("onbekend_5_jaar", "Verlopen: onbekend resultaat (5 jaar)"),
+            ("lopend", "Lopende bewaartermijn"),
+        )
+
+    def queryset(self, request, queryset):
+        filters = {
+            "verlopen": filter_retention_expired,
+            "succesvol_5_jaar": filter_successful_expired,
+            "afgebroken_1_jaar": filter_unsuccessful_expired,
+            "onbekend_5_jaar": filter_unknown_expired,
+            "lopend": filter_retention_running,
+        }
+        filter_function = filters.get(self.value())
+        if filter_function:
+            return filter_function(queryset)
+        return queryset
+
+
 @admin.register(Case)
 class CaseAdmin(admin.ModelAdmin):
     list_display = (
@@ -127,9 +164,11 @@ class CaseAdmin(admin.ModelAdmin):
         "updated",
         "request_date",
         "end_date",
+        "archived_at",
     )
     search_fields = ("id", "legacy_id")
     list_filter = (
+        BewaartermijnFilter,
         "application_type",
         "advice_type",
         "status",
@@ -137,6 +176,7 @@ class CaseAdmin(admin.ModelAdmin):
         "updated",
         "request_date",
         "end_date",
+        "archived_at",
     )
     autocomplete_fields = ["homeowner_association"]
     actions = [restart_workflow, fix_request_date, export_queryset_to_excel]
