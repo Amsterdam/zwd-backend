@@ -1,5 +1,7 @@
 from time import sleep
 from django.contrib import admin
+from django.http import HttpResponse
+from openpyxl import Workbook
 
 from apps.workflow.models import CaseWorkflow
 from apps.workflow.tasks import task_create_main_worflow_for_case, task_start_workflow
@@ -11,7 +13,76 @@ from .models import (
     CaseDocument,
     CaseStatus,
 )
+from .retention import (
+    get_case_close,
+    get_result_label,
+    get_retention_expiry_date,
+    get_retention_years,
+)
 from django.db import transaction
+
+
+def _format_date(value):
+    return value.strftime("%d-%m-%Y") if value else ""
+
+
+@admin.action(description="Geselecteerde zaken exporteren naar Excel")
+def export_queryset_to_excel(modeladmin, request, queryset):
+    queryset = queryset.select_related(
+        "homeowner_association", "status"
+    ).prefetch_related("caseclose_set__reason")
+
+    wb = Workbook()
+    wb_sheet = wb.active
+    wb_sheet.title = "Zaken"
+
+    headers = [
+        "Zaak ID",
+        "Dossier ID",
+        "Legacy ID",
+        "VvE",
+        "Aanvraagtype",
+        "Adviestype",
+        "Status",
+        "Aanvraagdatum",
+        "Einddatum",
+        "Resultaat",
+        "Succesvol",
+        "Bewaartermijn (jaren)",
+        "Bewaartermijn verloopt op",
+    ]
+    wb_sheet.append(headers)
+
+    for case in queryset:
+        case_close = get_case_close(case)
+        if case_close:
+            successful = "Ja" if case_close.reason.is_successful else "Nee"
+        else:
+            successful = ""
+        wb_sheet.append(
+            [
+                case.id,
+                case.prefixed_dossier_id or "",
+                case.legacy_id or "",
+                case.homeowner_association.name if case.homeowner_association else "",
+                case.application_type or "",
+                case.advice_type or "",
+                case.status.name if case.status else "",
+                _format_date(case.request_date),
+                _format_date(case.end_date),
+                get_result_label(case),
+                successful,
+                get_retention_years(case) or "",
+                _format_date(get_retention_expiry_date(case)),
+            ]
+        )
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="zwd_zaken_export.xlsx"'
+    wb.save(response)
+    return response
 
 
 @admin.action(description="Fix request_date from created")
@@ -68,7 +139,7 @@ class CaseAdmin(admin.ModelAdmin):
         "end_date",
     )
     autocomplete_fields = ["homeowner_association"]
-    actions = [restart_workflow, fix_request_date]
+    actions = [restart_workflow, fix_request_date, export_queryset_to_excel]
 
 
 @admin.register(CaseDocument)
