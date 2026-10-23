@@ -55,14 +55,14 @@ class ArchivePlan:
         }
 
 
-def build_archive_plan(queryset, today=None):
+def build_archive_plan(queryset, reference_date=None):
     """
     Determines which cases in the queryset can be archived (retention period
     expired) and which homeowner associations lose their contacts.
     """
     plan = ArchivePlan()
     expired_ids = set(
-        filter_retention_expired(queryset, today).values_list("pk", flat=True)
+        filter_retention_expired(queryset, reference_date).values_list("pk", flat=True)
     )
 
     for pk, end_date, archived_at in queryset.order_by("pk").values_list(
