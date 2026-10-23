@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} delete-confirmation{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; Zaken archiveren
+</div>
+{% endblock %}
+
+{% block content %}
+{% if plan.case_ids %}
+<p>Controleer dit overzicht voordat je bevestigt. Er is nog niets gewijzigd.</p>
+
+<h2>{{ plan.case_ids|length }} {{ plan.case_ids|length|pluralize:"zaak wordt,zaken worden" }} gearchiveerd</h2>
+<p>De zaken, afsluitreden en activatieteam-gegevens blijven bewaard. Het volgende wordt definitief verwijderd:</p>
+<ul>
+    <li>Workflows: {{ counts.workflows }}</li>
+    <li>Taken: {{ counts.tasks }}</li>
+    <li>Documenten (inclusief bestanden): {{ counts.documents }}</li>
+    <li>Afgeronde taken: {{ counts.completed_tasks }}</li>
+    <li>Tijdlijn-events: {{ counts.events }}</li>
+    <li>Contactpersonen: {{ counts.contacts }} bij {{ plan.hoa_ids_delete_contacts|length }} VvE's</li>
+</ul>
+{% else %}
+<p>Geen van de geselecteerde zaken kan worden gearchiveerd. Er wordt niets gewijzigd.</p>
+<p>Alleen afgesloten zaken waarvan de bewaartermijn is verlopen kunnen worden gearchiveerd. Gebruik de filter <strong>Bewaartermijn → Alle verlopen bewaartermijnen</strong> om die zaken te selecteren.</p>
+{% endif %}
+
+{% if plan.hoa_ids_keep_contacts %}
+<h2>Contactpersonen blijven staan bij {{ plan.hoa_ids_keep_contacts|length }} VvE's</h2>
+<p>Deze VvE's hebben nog een andere zaak die niet gearchiveerd is.</p>
+<ul>
+    {% for name in hoa_keep.names %}<li>{{ name }}</li>{% endfor %}
+    {% if hoa_keep.remaining > 0 %}<li>…en {{ hoa_keep.remaining }} meer</li>{% endif %}
+</ul>
+{% endif %}
+
+{% if plan.skipped_count %}
+<h2>{{ plan.skipped_count }} {{ plan.skipped_count|pluralize:"zaak wordt,zaken worden" }} niet gearchiveerd</h2>
+<ul>
+    {% for label, count, preview in skipped %}{% if count %}
+    <li style="white-space: normal; overflow-wrap: anywhere;">
+        <strong>{{ label }} ({{ count }})</strong><br>
+        Zaak-ID's: {{ preview.ids|join:", " }}{% if preview.remaining > 0 %} …en {{ preview.remaining }} meer{% endif %}
+    </li>
+    {% endif %}{% endfor %}
+</ul>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+<div>
+    {% if plan.case_ids %}
+        {% if select_across %}
+        <input type="hidden" name="select_across" value="1">
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ plan.case_ids.0|unlocalize }}">
+        {% else %}
+        {% for pk in plan.case_ids %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ pk|unlocalize }}">
+        {% endfor %}
+        {% endif %}
+        <input type="hidden" name="action" value="archive_cases">
+        <input type="hidden" name="post" value="yes">
+        <input type="submit" value="Bevestigen en archiveren">
+    {% endif %}
+    <a href="#" class="button cancel-link">{% if plan.case_ids %}Annuleren{% else %}Terug naar zaken{% endif %}</a>
+</div>
+</form>
+{% endblock %}
