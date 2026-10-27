@@ -12,7 +12,6 @@ dependencies = [
     "azure-monitor-opentelemetry~=1.6",
     "azure-storage-blob~=12.24",
     "celery~=5.5",
-    "debugpy~=1.8",
     "Django~=5.2",
     "django_celery_results~=2.5",
     "django-celery-beat~=2.7",
@@ -23,20 +22,11 @@ dependencies = [
     "djangorestframework~=3.15",
     "djangorestframework-simplejwt~=5.5",
     "drf-spectacular~=0.27",
-    "flake8~=7.0",
-    "inflection~=0.5",
-    "jsonschema~=4.24",
-    "jsonschema-specifications~=2024.10",
-    "model-bakery~=1.18",
     "mozilla-django-oidc~=4.0",
-    "pre-commit~=3.0",
     "psycopg2-binary~=2.9",
     "python-magic~=0.4",
     "redis~=6.3",
-    "referencing~=0.36",
-    "rpds-py~=0.26",
     "spiffworkflow~=3.1",
-    "uritemplate~=4.1",
     "watchdog~=6.0",
     "openpyxl>=3.1.5,<4.0.0",
     "packaging (>=26.2,<27.0)",
@@ -44,6 +34,7 @@ dependencies = [
 
 [tool.poetry]
 package-mode = false
+requires-poetry = ">=2.4,<3.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -51,5 +42,8 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pre-commit (>=3.3.3,<4.0.0)"
+    "debugpy~=1.8",
+    "flake8~=7.0",
+    "model-bakery~=1.18",
+    "pre-commit (>=3.3.3,<4.0.0)",
 ]
