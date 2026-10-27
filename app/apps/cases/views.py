@@ -42,6 +42,7 @@ from drf_spectacular.types import OpenApiTypes
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
+from django.utils import timezone
 from apps.workflow.tasks import task_create_main_worflow_for_case
 from apps.workflow.tasks import task_start_workflow
 from apps.advisor.models import Advisor
@@ -200,6 +201,9 @@ class CaseViewSet(
                     ),
                 )
             )
+
+        if self.action == "retrieve":
+            return queryset.prefetch_related("caseclose_set__reason")
 
         return queryset
 
@@ -435,6 +439,8 @@ class CaseViewSet(
         if serializer.is_valid():
             advisor_id = request.data.get("advisor")
             advisor = get_object_or_404(Advisor, pk=advisor_id)
+            if case.advisor_id != advisor.id:
+                case.advisor_assigned_at = timezone.now()
             case.advisor = advisor
             case.save()
             return Response("Case updated", status=status.HTTP_200_OK)

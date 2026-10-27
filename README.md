@@ -50,6 +50,9 @@ LOCAL_DEVELOPMENT_AUTHENTICATION=False
 
 Visit the Admin at http://localhost:8081/admin/
 
+### Archiving cases
+
+Cases whose retention period has expired can be archived via an action in the Django admin. See [docs/archivering.md](docs/archivering.md) (in Dutch) for the retention periods, what is deleted and kept and how to use the action.
 
 ### DSO API
 
