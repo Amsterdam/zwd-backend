@@ -76,6 +76,7 @@ class Case(ModelEventEmitter):
         null=True,
         blank=True,
     )
+    advisor_assigned_at = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(auto_now=True)
     request_date = models.DateField(default=timezone.now)

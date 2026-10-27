@@ -78,6 +78,7 @@ class ArchiveCaseTest(ArchiveTestCase):
 
         case = Case.objects.get(id=self.case.id)
         self.assertIsNotNone(case.archived_at)
+        self.assertEqual(case.status.name, "Gearchiveerd")
         self.assertTrue(CaseClose.objects.filter(case=case).exists())
         self.assertEqual(ActivationTeam.objects.get(case=case).subject, "Onderwerp")
         self.assertTrue(HomeownerAssociation.objects.filter(id=self.hoa.id).exists())

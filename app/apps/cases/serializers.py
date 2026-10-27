@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from apps.workflow.models import CaseWorkflow, WorkflowOption
 from apps.homeownerassociation.serializers import (
     ContactSerializer,
@@ -19,6 +20,7 @@ import magic
 import os
 
 from apps.advisor.serializers import CaseAdvisorSerializer
+from apps.cases.retention import get_case_close
 
 
 class ActivationTeamSerializer(serializers.ModelSerializer):
@@ -27,12 +29,22 @@ class ActivationTeamSerializer(serializers.ModelSerializer):
         fields = ("type", "subject", "meeting_date")
 
 
+class CaseResultSerializer(serializers.ModelSerializer):
+    reason = serializers.CharField(source="reason.name")
+    is_successful = serializers.BooleanField(source="reason.is_successful")
+
+    class Meta:
+        model = CaseClose
+        fields = ("reason", "is_successful", "description", "created")
+
+
 class CaseSerializer(serializers.ModelSerializer):
     workflows = CaseWorkflowSerializer(many=True)
     homeowner_association = CaseHomeownerAssociationSerializer()
     status = serializers.SerializerMethodField()
     activation_team = ActivationTeamSerializer(required=False)
     advisor = CaseAdvisorSerializer(read_only=True)
+    result = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -40,6 +52,7 @@ class CaseSerializer(serializers.ModelSerializer):
             "activation_team",
             "advice_type",
             "application_type",
+            "archived_at",
             "created",
             "description",
             "end_date",
@@ -49,12 +62,19 @@ class CaseSerializer(serializers.ModelSerializer):
             "prefixed_dossier_id",
             "request_date",
             "advisor",
+            "advisor_assigned_at",
+            "result",
             "status",
             "workflows",
         )
 
     def get_status(self, obj):
         return obj.status.name if obj.status else None
+
+    @extend_schema_field(CaseResultSerializer(allow_null=True))
+    def get_result(self, obj):
+        case_close = get_case_close(obj)
+        return CaseResultSerializer(case_close).data if case_close else None
 
 
 class CaseCreateSerializer(serializers.ModelSerializer):

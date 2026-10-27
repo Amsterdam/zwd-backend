@@ -6,11 +6,11 @@ from apps.cases.retention import (
     filter_retention_expired,
     filter_retention_running,
     filter_successful_expired,
-    filter_unknown_expired,
     filter_unsuccessful_expired,
     get_result_label,
     get_retention_expiry_date,
     get_retention_years,
+    is_successful,
 )
 from apps.homeownerassociation.models import HomeownerAssociation
 from django.contrib.auth import get_user_model
@@ -45,11 +45,12 @@ class RetentionTest(TestCase):
         self.assertEqual(get_retention_years(case), 1)
         self.assertEqual(get_retention_expiry_date(case), date(2027, 12, 31))
 
-    def test_closed_case_without_case_close_has_five_year_retention(self):
+    def test_closed_case_without_case_close_is_treated_as_successful(self):
         case = baker.make(Case, end_date=date(2020, 3, 1))
+        self.assertTrue(is_successful(case))
         self.assertEqual(get_retention_years(case), 5)
         self.assertEqual(get_retention_expiry_date(case), date(2025, 12, 31))
-        self.assertEqual(get_result_label(case), "Onbekend")
+        self.assertEqual(get_result_label(case), "Geen resultaat geregistreerd")
 
     def test_open_case_has_no_retention(self):
         case = baker.make(Case, end_date=None)
@@ -86,13 +87,11 @@ class RetentionFilterTest(TestCase):
         today = date(2028, 1, 1)
         cases = Case.objects.all()
         self.assertEqual(
-            self._ids(filter_successful_expired(cases, today)), {self.successful.id}
+            self._ids(filter_successful_expired(cases, today)),
+            {self.successful.id, self.unknown.id},
         )
         self.assertEqual(
             self._ids(filter_unsuccessful_expired(cases, today)), {self.unsuccessful.id}
-        )
-        self.assertEqual(
-            self._ids(filter_unknown_expired(cases, today)), {self.unknown.id}
         )
         self.assertEqual(
             self._ids(filter_retention_expired(cases, today)),
@@ -177,6 +176,7 @@ class ExportQuerysetToExcelTest(TestCase):
         self.assertEqual(row["Succesvol"], "Nee")
         self.assertEqual(row["Bewaartermijn (jaren)"], 1)
         self.assertEqual(row["Bewaartermijn verloopt op"], "31-12-2026")
+        self.assertEqual(row["Selectiecategorie"], "21.2")
         self.assertIsNone(row["Gearchiveerd op"])
 
     def test_export_archived_case(self):
@@ -188,22 +188,35 @@ class ExportQuerysetToExcelTest(TestCase):
         row = dict(zip(rows[0], rows[1]))
         self.assertEqual(row["Gearchiveerd op"], "05-01-2026")
 
+    def test_export_advisor_assigned_at(self):
+        case = make_closed_case(True, date(2025, 1, 1))
+        assigned_at = timezone.make_aware(timezone.datetime(2024, 11, 3, 9, 30))
+        Case.objects.filter(id=case.id).update(advisor_assigned_at=assigned_at)
+
+        rows = self._export_rows(Case.objects.all())
+        row = dict(zip(rows[0], rows[1]))
+        self.assertEqual(row["Adviseur toegekend op"], "03-11-2024")
+        self.assertEqual(row["Selectiecategorie"], "21.1")
+
     def test_export_closed_case_without_case_close(self):
         baker.make(Case, legacy_id="L-1", end_date=date(2019, 6, 1))
 
         rows = self._export_rows(Case.objects.all())
         row = dict(zip(rows[0], rows[1]))
-        self.assertEqual(row["Resultaat"], "Onbekend")
-        self.assertIsNone(row["Succesvol"])
+        self.assertEqual(row["Resultaat"], "Geen resultaat geregistreerd")
+        self.assertEqual(row["Succesvol"], "Ja")
         self.assertEqual(row["Bewaartermijn (jaren)"], 5)
         self.assertEqual(row["Bewaartermijn verloopt op"], "31-12-2024")
+        self.assertEqual(row["Selectiecategorie"], "21.1")
 
     def test_export_open_case_has_empty_retention(self):
         baker.make(Case)
 
         rows = self._export_rows(Case.objects.all())
         row = dict(zip(rows[0], rows[1]))
+        self.assertIsNone(row["Adviseur toegekend op"])
         self.assertIsNone(row["Einddatum"])
         self.assertIsNone(row["Resultaat"])
         self.assertIsNone(row["Bewaartermijn (jaren)"])
         self.assertIsNone(row["Bewaartermijn verloopt op"])
+        self.assertIsNone(row["Selectiecategorie"])

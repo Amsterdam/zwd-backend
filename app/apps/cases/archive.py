@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
-from apps.cases.models import Case, CaseDocument
+from apps.cases.models import Case, CaseDocument, CaseStatus
 from apps.events.models import CaseEvent
 from apps.homeownerassociation.models import Contact
 from apps.workflow.models import CaseUserTask, CaseWorkflow, GenericCompletedTask
@@ -120,8 +120,11 @@ def archive_case(case_id):
         GenericCompletedTask.objects.filter(case_id=case_id).delete()
         CaseEvent.objects.filter(case_id=case_id).delete()
 
+        status, _ = CaseStatus.objects.get_or_create(name="Gearchiveerd")
         # update() instead of save(): Case.save() would emit a new CaseEvent
-        Case.objects.filter(pk=case_id).update(archived_at=timezone.now())
+        Case.objects.filter(pk=case_id).update(
+            archived_at=timezone.now(), status=status
+        )
 
 
 def delete_hoa_contacts(hoa_ids):

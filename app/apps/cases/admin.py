@@ -22,12 +22,12 @@ from .retention import (
     filter_retention_expired,
     filter_retention_running,
     filter_successful_expired,
-    filter_unknown_expired,
     filter_unsuccessful_expired,
-    get_case_close,
     get_result_label,
     get_retention_expiry_date,
     get_retention_years,
+    get_selection_category,
+    is_successful,
 )
 from django.db import transaction
 
@@ -55,19 +55,20 @@ def export_queryset_to_excel(modeladmin, request, queryset):
         "Adviestype",
         "Status",
         "Aanvraagdatum",
+        "Adviseur toegekend op",
         "Einddatum",
         "Resultaat",
         "Succesvol",
         "Bewaartermijn (jaren)",
         "Bewaartermijn verloopt op",
+        "Selectiecategorie",
         "Gearchiveerd op",
     ]
     wb_sheet.append(headers)
 
     for case in queryset:
-        case_close = get_case_close(case)
-        if case_close:
-            successful = "Ja" if case_close.reason.is_successful else "Nee"
+        if case.end_date:
+            successful = "Ja" if is_successful(case) else "Nee"
         else:
             successful = ""
         wb_sheet.append(
@@ -80,11 +81,17 @@ def export_queryset_to_excel(modeladmin, request, queryset):
                 case.advice_type or "",
                 case.status.name if case.status else "",
                 _format_date(case.request_date),
+                _format_date(
+                    timezone.localtime(case.advisor_assigned_at)
+                    if case.advisor_assigned_at
+                    else None
+                ),
                 _format_date(case.end_date),
                 get_result_label(case),
                 successful,
                 get_retention_years(case) or "",
                 _format_date(get_retention_expiry_date(case)),
+                get_selection_category(case),
                 _format_date(
                     timezone.localtime(case.archived_at) if case.archived_at else None
                 ),
@@ -200,9 +207,8 @@ class BewaartermijnFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return (
             ("verlopen", "Alle verlopen bewaartermijnen"),
-            ("succesvol_5_jaar", "Verlopen: succesvol (5 jaar)"),
+            ("succesvol_5_jaar", "Verlopen: succesvol of geen resultaat (5 jaar)"),
             ("afgebroken_1_jaar", "Verlopen: afgebroken (1 jaar)"),
-            ("onbekend_5_jaar", "Verlopen: onbekend resultaat (5 jaar)"),
             ("lopend", "Lopende bewaartermijn"),
         )
 
@@ -211,7 +217,6 @@ class BewaartermijnFilter(admin.SimpleListFilter):
             "verlopen": filter_retention_expired,
             "succesvol_5_jaar": filter_successful_expired,
             "afgebroken_1_jaar": filter_unsuccessful_expired,
-            "onbekend_5_jaar": filter_unknown_expired,
             "lopend": filter_retention_running,
         }
         filter_function = filters.get(self.value())

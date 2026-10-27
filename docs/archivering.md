@@ -14,9 +14,9 @@ Dat hangt af van hoe de zaak is afgesloten:
 |---|---|
 | Succesvol afgerond (bijvoorbeeld HBO, advies of activatieteam) | 5 jaar |
 | Eerder afgebroken of afgewezen | 1 jaar |
-| Onbekend (afgesloten zaak zonder afsluitreden, zoals oude geïmporteerde zaken) | 5 jaar |
+| Geen resultaat geregistreerd (afgesloten zaak zonder afsluitreden, zoals oude geïmporteerde zaken) | 5 jaar |
 
-Of een zaak succesvol is, volgt uit de afsluitreden die bij het afsluiten is gekozen.
+Of een zaak succesvol is, volgt uit de afsluitreden die bij het afsluiten is gekozen. Is er geen resultaat geregistreerd, dan gaan we ervan uit dat de zaak succesvol was. Zo'n zaak telt dus overal mee als succesvol: in de filter, in de Excelexport (kolom *Succesvol* is *Ja*, kolom *Resultaat* is *Geen resultaat geregistreerd*) en bij het archiveren.
 
 **De termijn telt in hele kalenderjaren.** De termijn begint op 1 januari van het jaar ná de einddatum en eindigt op 31 december. Een voorbeeld:
 
@@ -57,14 +57,13 @@ Heeft de VvE nog een andere zaak die open is, of een zaak die nog niet gearchive
 Archiveren gebeurt in de Django admin, op de lijst met zaken (`/admin/cases/case/`). Iedereen met toegang tot die pagina kan het doen. In de zwd-frontend zit geen knop hiervoor.
 
 1. **Zoek de zaken op.** Kies rechts bij de filter **Bewaartermijn** de optie **Alle verlopen bewaartermijnen**. Je kunt ook kiezen voor:
-   - *Verlopen: succesvol (5 jaar)*
+   - *Verlopen: succesvol of geen resultaat (5 jaar)*
    - *Verlopen: afgebroken (1 jaar)*
-   - *Verlopen: onbekend resultaat (5 jaar)*
    - *Lopende bewaartermijn*: afgesloten zaken waarvan de termijn nog niet voorbij is
 
    Gearchiveerde zaken vallen buiten deze filters.
 
-2. **Exporteer de zaken eerst (aanbevolen).** Selecteer de zaken en kies de actie **Geselecteerde zaken exporteren naar Excel**. Je krijgt een Excelbestand met per zaak onder andere de VvE, de einddatum, het resultaat, de bewaartermijn en de datum waarop die verloopt. Bewaar dit bijvoorbeeld als vernietigingsverslag.
+2. **Exporteer de zaken eerst (aanbevolen).** Selecteer de zaken en kies de actie **Geselecteerde zaken exporteren naar Excel**. Je krijgt een Excelbestand met per zaak onder andere de VvE, de einddatum, het resultaat, de bewaartermijn, de datum waarop die verloopt en de selectiecategorie (*21.1* bij 5 jaar, *21.2* bij 1 jaar). Bewaar dit bijvoorbeeld als vernietigingsverslag.
 
 3. **Start het archiveren.** Selecteer de zaken (of alles) en kies de actie **Zaken met verlopen bewaartermijn archiveren**.
 

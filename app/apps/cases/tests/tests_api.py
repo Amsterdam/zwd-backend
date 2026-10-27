@@ -10,6 +10,8 @@ from apps.cases.models import (
     AdviceType,
     ApplicationType,
     Case,
+    CaseClose,
+    CaseCloseReason,
     CaseDocument,
     CaseStatus,
 )
@@ -83,6 +85,22 @@ class CaseApiTest(APITestCase):
         url = reverse("cases-detail", args=[case_id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data["result"])
+
+    def test_retrieve_closed_case_includes_result(self):
+        reason = baker.make(CaseCloseReason, name="Besluit genomen", is_successful=True)
+        case = Case.objects.get(id=self.case)
+        baker.make(CaseClose, case=case, reason=reason, description="Klaar")
+
+        url = reverse("cases-detail", args=[self.case])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        result = response.data["result"]
+        self.assertEqual(result["reason"], "Besluit genomen")
+        self.assertTrue(result["is_successful"])
+        self.assertEqual(result["description"], "Klaar")
+        self.assertIn("created", result)
 
     def test_retrieve_cases_filter_by_district(self):
         district_name = "District A"
@@ -287,6 +305,22 @@ class CaseApiTest(APITestCase):
         data = {"advisor": advisor.id}
         response = self.client.patch(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(Case.objects.get(id=self.case).advisor_assigned_at)
+
+        response = self.client.get(reverse("cases-detail", args=[self.case]))
+        self.assertIsNotNone(response.data["advisor_assigned_at"])
+
+    def test_update_advisor_keeps_date_for_same_advisor(self):
+        url = reverse("cases-update-advisor", args=[self.case])
+        advisor = baker.make("Advisor")
+        self.client.patch(url, {"advisor": advisor.id}, format="json")
+        assigned_at = Case.objects.get(id=self.case).advisor_assigned_at
+
+        self.client.patch(url, {"advisor": advisor.id}, format="json")
+
+        self.assertEqual(
+            Case.objects.get(id=self.case).advisor_assigned_at, assigned_at
+        )
 
     def test_update_advisor_not_found(self):
         url = reverse("cases-update-advisor", args=[self.case])
