@@ -93,6 +93,10 @@ class CaseFilter(django_filters.FilterSet):
     is_small_hoa = django_filters.BooleanFilter(
         method="filter_is_small_hoa", label="HOA has <= 12 apartments"
     )
+    case_close_reason = django_filters.ModelMultipleChoiceFilter(
+        queryset=CaseCloseReason.objects.all(),
+        method="filter_case_close_reason",
+    )
 
     def filter_closed_cases(self, queryset, _, value):
         if value:
@@ -159,6 +163,11 @@ class CaseFilter(django_filters.FilterSet):
             return queryset.filter(homeowner_association__number_of_apartments__lte=12)
         if value is False:
             return queryset.filter(homeowner_association__number_of_apartments__gt=12)
+        return queryset
+
+    def filter_case_close_reason(self, queryset, _, value):
+        if value:
+            return queryset.filter(caseclose__reason__in=value).distinct()
         return queryset
 
 
