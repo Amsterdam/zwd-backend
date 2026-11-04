@@ -2,7 +2,12 @@ import logging
 import django_filters
 from rest_framework import status
 from apps.advisor.models import Advisor
-from apps.cases.models import CaseStatus, AdviceType, ApplicationType
+from apps.cases.models import (
+    AdviceType,
+    ApplicationType,
+    CaseCloseReason,
+    CaseStatus,
+)
 from apps.homeownerassociation.models import District, Neighborhood, Wijk
 from utils.pagination import CustomPagination
 from apps.cases.serializers import CaseDocumentWithTaskSerializer
@@ -77,6 +82,10 @@ class CaseUserTaskFilter(django_filters.FilterSet):
         field_name="case__request_date"
     )
     search = django_filters.CharFilter(method="filter_search", label="Search")
+    case_close_reason = django_filters.ModelMultipleChoiceFilter(
+        queryset=CaseCloseReason.objects.all(),
+        method="filter_case_close_reason",
+    )
 
     def filter_district(self, queryset, _, value):
         if value:
@@ -120,6 +129,11 @@ class CaseUserTaskFilter(django_filters.FilterSet):
     def filter_advisor(self, queryset, _, value):
         if value:
             return queryset.filter(case__advisor__in=value)
+        return queryset
+
+    def filter_case_close_reason(self, queryset, _, value):
+        if value:
+            return queryset.filter(case__caseclose__reason__in=value).distinct()
         return queryset
 
     def filter_search(self, queryset, _, value):
