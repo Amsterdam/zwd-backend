@@ -42,6 +42,7 @@ from drf_spectacular.types import OpenApiTypes
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.http import FileResponse
+from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from apps.workflow.tasks import task_create_main_worflow_for_case
 from apps.workflow.tasks import task_start_workflow
@@ -297,14 +298,22 @@ class CaseViewSet(
             ):
                 ActivationTeam.objects.create(case=case, **activation_team_data)
 
+        # Cases created with a DRF token come from the external form and skip the
+        # "beoordeling" step; cases created via the frontend (OIDC) do not.
+        skip_beoordeling = isinstance(request.auth, Token)
+
         # Start the main workflow for the case
-        self.start_workflow(case, request.user.id)
+        self.start_workflow(case, request.user.id, skip_beoordeling)
 
         return Response(CaseSerializer(case).data, status=201)
 
-    def start_workflow(self, case, user_id):
+    def start_workflow(self, case, user_id, skip_beoordeling=False):
         task = task_create_main_worflow_for_case.delay(
-            case_id=case.id, data={"initiated_by": user_id}
+            case_id=case.id,
+            data={
+                "initiated_by": user_id,
+                "skip_beoordeling": {"value": skip_beoordeling},
+            },
         )
         task.wait(timeout=None, interval=0.5)
         start_workflow_task = task_start_workflow.delay(
