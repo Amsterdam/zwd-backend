@@ -1,19 +1,14 @@
-import mimetypes
 import os
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
-from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from django.http import FileResponse
 
 from apps.cases.models import AdviceType, ApplicationType, Case
-from apps.cases.models import CaseDocument
 from apps.cases.serializers import CaseDocumentSerializer
 from apps.homeownerassociation.models import HomeownerAssociation
-from apps.workflow.models import GenericCompletedTask
 from apps.address.serializers import (
     AddressSerializer,
     DuurzaamWonenDocumentUploadSerializer,
@@ -94,29 +89,6 @@ class AddressViewSet(
 
     @action(
         detail=False,
-        methods=["get"],
-        url_path="mijn-amsterdam/(?P<case_id>[^/.]+)/eindpresentatie-document",
-        url_name="mijn-amsterdam-eindpresentatie-document",
-        serializer_class=MijnAmsterdamEindpresentatieSerializer,
-    )
-    def get_mijn_amsterdam_eindpresentatie_document(self, request, case_id=None):
-        """
-        Retrieve the document linked to the completed "Upload eindpresentatie" task for a case.
-        Returns null when the task/document link is not present.
-        """
-        case = get_object_or_404(Case, id=case_id)
-        document = self._get_eindpresentatie_document_for_case(case.id)
-
-        serializer = MijnAmsterdamEindpresentatieSerializer(
-            {
-                "case_id": case.id,
-                "eindpresentatie_document_id": document.id if document else None,
-            }
-        )
-        return Response(serializer.data)
-
-    @action(
-        detail=False,
         methods=["post"],
         url_path="duurzaamwonen/(?P<case_id>[^/.]+)/document",
         url_name="duurzaamwonen-document",
@@ -164,53 +136,3 @@ class AddressViewSet(
         )
 
         return Response(response_serializer.data, status=201)
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="mijn-amsterdam/(?P<case_id>[^/.]+)/eindpresentatie-document/download",
-        url_name="mijn-amsterdam-eindpresentatie-document-download",
-    )
-    def download_mijn_amsterdam_eindpresentatie_document(self, request, case_id=None):
-        """
-        Download the document linked to the completed "Eindpresentatie" task for a case.
-        """
-        case = get_object_or_404(Case, id=case_id)
-        case_document = self._get_eindpresentatie_document_for_case(case.id)
-
-        if not case_document:
-            return Response({"detail": "Document not found."}, status=404)
-
-        file_name = case_document.document.name
-        mime_type, _ = mimetypes.guess_type(file_name)
-        content_type = mime_type or "application/octet-stream"
-
-        with default_storage.open(file_name, "rb") as file:
-            response = FileResponse(file, content_type=content_type)
-            response["Content-Disposition"] = f'attachment; filename="{file_name}"'
-            return response
-
-    def _get_eindpresentatie_document_for_case(self, case_id):
-        completed_task = (
-            GenericCompletedTask.objects.filter(
-                case_id=case_id,
-                task_name="Activity_0qoynbp",
-            )
-            .order_by("-date_added")
-            .first()
-        )
-
-        if not completed_task:
-            return None
-
-        mapped_form_data = (completed_task.variables or {}).get("mapped_form_data", {})
-        document_name = (mapped_form_data.get("document_name") or {}).get("value")
-
-        if document_name:
-            return (
-                CaseDocument.objects.filter(case_id=case_id, name=document_name)
-                .order_by("-created")
-                .first()
-            )
-
-        return CaseDocument.objects.filter(case_id=case_id).order_by("-created").first()

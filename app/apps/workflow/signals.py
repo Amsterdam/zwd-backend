@@ -30,6 +30,7 @@ def case_workflow_pre_save(sender, instance, **kwargs):
                 "build_year": {"value": hoa.build_year},
                 "has_major_shareholder": {"value": hoa.has_major_shareholder},
                 "is_priority_neighborhood": {"value": hoa.is_priority_neighborhood},
+                "skip_beoordeling": {"value": False},
             }
         )
         existing_main_workflow = CaseWorkflow.objects.filter(
