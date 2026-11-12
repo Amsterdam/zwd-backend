@@ -2,7 +2,9 @@ from unittest.mock import patch
 from django.core import management
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from apps.workflow.models import CaseWorkflow, WorkflowOption
 from apps.advisor.models import Advisor
@@ -506,6 +508,41 @@ class CaseApiTest(APITestCase):
             response.data["application_type"], ApplicationType.ADVICE.value
         )
         self.assertEqual(response.data["advice_type"], AdviceType.ENERGY_ADVICE.value)
+
+    def _post_advice_case(self, client):
+        homeowner_association = baker.make(
+            HomeownerAssociation, number_of_apartments=13
+        )
+        data = {
+            "application_type": ApplicationType.ADVICE.value,
+            "advice_type": AdviceType.ENERGY_ADVICE.value,
+            "homeowner_association": homeowner_association.id,
+            "request_date": timezone.now().date().isoformat(),
+        }
+        return client.post(reverse("cases-list"), data, format="json")
+
+    @patch("apps.cases.views.CaseViewSet.start_workflow")
+    def test_create_case_via_frontend_does_not_skip_beoordeling(
+        self, mock_start_workflow
+    ):
+        response = self._post_advice_case(self.client)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(mock_start_workflow.call_args.args[2])
+
+    @patch("apps.cases.views.CaseViewSet.start_workflow")
+    def test_create_case_via_token_skips_beoordeling(self, mock_start_workflow):
+        user = get_user_model().objects.create(
+            email="extern@formulier.nl", username="extern_formulier"
+        )
+        token = Token.objects.create(user=user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+        response = self._post_advice_case(client)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(mock_start_workflow.call_args.args[2])
 
     def test_filter_cases_by_activation_team_application_type(self):
         """Test filtering cases by Activation Team application type"""
