@@ -39,11 +39,6 @@ class MijnAmsterdamSerializer(serializers.Serializer):
     has_major_shareholder = serializers.BooleanField()
 
 
-class MijnAmsterdamEindpresentatieSerializer(serializers.Serializer):
-    case_id = serializers.IntegerField()
-    eindpresentatie_document_id = serializers.IntegerField(allow_null=True)
-
-
 class DuurzaamWonenDocumentUploadSerializer(serializers.Serializer):
     file_name = serializers.CharField(max_length=255)
     file_base64 = serializers.CharField()
@@ -88,3 +83,8 @@ class DuurzaamWonenDocumentUploadSerializer(serializers.Serializer):
 
         attrs["detected_extension"] = detected_extension
         return attrs
+
+
+class DuurzaamWonenDocumentResponseSerializer(serializers.Serializer):
+    case_id = serializers.IntegerField()
+    document_id = serializers.IntegerField()

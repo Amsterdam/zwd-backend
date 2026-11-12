@@ -13,7 +13,7 @@ from apps.address.serializers import (
     AddressSerializer,
     DuurzaamWonenDocumentUploadSerializer,
     MijnAmsterdamSerializer,
-    MijnAmsterdamEindpresentatieSerializer,
+    DuurzaamWonenDocumentResponseSerializer,
 )
 from apps.homeownerassociation.mixins import HomeownerAssociationMixin
 
@@ -75,7 +75,7 @@ class AddressViewSet(
         detail=True,
         methods=["get"],
         url_path="duurzaamwonen",
-        serializer_class=MijnAmsterdamSerializer,
+        serializer_class=DuurzaamWonenDocumentResponseSerializer,
     )
     def get_duurzaamwonen(self, request, pk=None):
         """
@@ -84,7 +84,7 @@ class AddressViewSet(
         """
         response_data = self._build_platform_response_data(pk)
 
-        serializer = MijnAmsterdamSerializer(response_data)
+        serializer = DuurzaamWonenDocumentResponseSerializer(response_data)
         return Response(serializer.data)
 
     @action(
@@ -128,10 +128,10 @@ class AddressViewSet(
         case_document_serializer.is_valid(raise_exception=True)
         case_document = case_document_serializer.save()
 
-        response_serializer = MijnAmsterdamEindpresentatieSerializer(
+        response_serializer = DuurzaamWonenDocumentResponseSerializer(
             {
                 "case_id": case.id,
-                "eindpresentatie_document_id": case_document.id,
+                "document_id": case_document.id,
             }
         )
 

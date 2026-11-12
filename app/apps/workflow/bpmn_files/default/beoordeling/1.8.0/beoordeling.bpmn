@@ -48,9 +48,6 @@
         <bpmn:flowNodeRef>Gateway_1pdulle</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_upload_deelnemerslijst_verplichte_cursus</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_0jaysq0</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>task_upload_aanvraag_formulier</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_0xumr2i</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_1so3vlp</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_049hit6</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_bestuur</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>timer_extra_info</bpmn:flowNodeRef>
@@ -67,11 +64,13 @@
         <bpmn:flowNodeRef>Activity_159r4lf</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Event_0km2ggy</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_skip_aanvraag</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gateway_join_aanvraag</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_1w1swgw</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_status_in_behandeling</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_16fvnma</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>task_controle_informatie_website</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0xumr2i</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>task_upload_aanvraag_formulier</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1so3vlp</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:exclusiveGateway id="Gateway_1tmui51" default="Flow_0o1lwrx">
@@ -119,7 +118,7 @@
           </camunda:formField>
         </camunda:formData>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_controle_informatie</bpmn:incoming>
+      <bpmn:incoming>Flow_09objfh</bpmn:incoming>
       <bpmn:outgoing>Flow_0ee0ab2</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_0lck87v">
@@ -405,25 +404,6 @@
     <bpmn:endEvent id="Event_0jaysq0">
       <bpmn:incoming>Flow_1dal7zp</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="task_upload_aanvraag_formulier" name="Upload aanvraagformulier">
-      <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="form_upload_aanvraag_form" label="Upload het aanvraagformulier" type="file" />
-        </camunda:formData>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0lq18c0</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ajxfee</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:scriptTask id="Activity_0xumr2i" name="Status update: &#34;Volledigheid&#34;">
-      <bpmn:incoming>Flow_0ajxfee</bpmn:incoming>
-      <bpmn:outgoing>Flow_09objfh</bpmn:outgoing>
-      <bpmn:script>set_status("Volledigheid")</bpmn:script>
-    </bpmn:scriptTask>
-    <bpmn:scriptTask id="Activity_1so3vlp" name="Status update: &#34;Aanvraag invoeren&#34;">
-      <bpmn:incoming>Flow_aanvraag_invoeren</bpmn:incoming>
-      <bpmn:outgoing>Flow_0lq18c0</bpmn:outgoing>
-      <bpmn:script>set_status("Aanvraag invoeren")</bpmn:script>
-    </bpmn:scriptTask>
     <bpmn:startEvent id="Event_049hit6">
       <bpmn:outgoing>Flow_0zdexh9</bpmn:outgoing>
     </bpmn:startEvent>
@@ -451,7 +431,7 @@
     <bpmn:sequenceFlow id="Flow_1y54pnc" sourceRef="task_mail_gebruiker_controle_informatie" targetRef="task_monitoren_extra_informatie" />
     <bpmn:sequenceFlow id="Flow_0ee0ab2" sourceRef="task_controle_informatie" targetRef="Gateway_16fvnma" />
     <bpmn:sequenceFlow id="Flow_0js6nja" sourceRef="Gateway_16fvnma" targetRef="Gateway_0y8v8h9" />
-    <bpmn:sequenceFlow id="Flow_09objfh" sourceRef="Activity_0xumr2i" targetRef="Gateway_join_aanvraag" />
+    <bpmn:sequenceFlow id="Flow_09objfh" sourceRef="Activity_0xumr2i" targetRef="task_controle_informatie" />
     <bpmn:sequenceFlow id="Flow_152efhd" sourceRef="task_informeer_projectleider_adviseur" targetRef="Gateway_0lck87v" />
     <bpmn:sequenceFlow id="Flow_1mil6xn" sourceRef="Gateway_1a71jts" targetRef="Gateway_0lck87v" />
     <bpmn:sequenceFlow id="Flow_0mo2q8p" sourceRef="Gateway_0lck87v" targetRef="task_email_vve" />
@@ -611,16 +591,11 @@
       <bpmn:outgoing>Flow_aanvraag_invoeren</bpmn:outgoing>
       <bpmn:outgoing>Flow_skip_aanvraag</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:exclusiveGateway id="Gateway_join_aanvraag">
-      <bpmn:incoming>Flow_09objfh</bpmn:incoming>
-      <bpmn:outgoing>Flow_controle_informatie</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_aanvraag_invoeren" sourceRef="Gateway_skip_aanvraag" targetRef="Activity_1so3vlp" />
     <bpmn:sequenceFlow id="Flow_skip_aanvraag" name="Ja" sourceRef="Gateway_skip_aanvraag" targetRef="Activity_status_in_behandeling">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">skip_beoordeling.get("value") == True</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_in_behandeling" sourceRef="Activity_status_in_behandeling" targetRef="task_controle_informatie_website" />
-    <bpmn:sequenceFlow id="Flow_controle_informatie" sourceRef="Gateway_join_aanvraag" targetRef="task_controle_informatie" />
     <bpmn:scriptTask id="Activity_1w1swgw" name="Status update: &#34;Beoordelen&#34;">
       <bpmn:incoming>Flow_1dfae84</bpmn:incoming>
       <bpmn:outgoing>Flow_1v8pztr</bpmn:outgoing>
@@ -663,6 +638,25 @@
       <bpmn:incoming>Flow_in_behandeling</bpmn:incoming>
       <bpmn:outgoing>Flow_0a78972</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:scriptTask id="Activity_0xumr2i" name="Status update: &#34;Volledigheid&#34;">
+      <bpmn:incoming>Flow_0ajxfee</bpmn:incoming>
+      <bpmn:outgoing>Flow_09objfh</bpmn:outgoing>
+      <bpmn:script>set_status("Volledigheid")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:userTask id="task_upload_aanvraag_formulier" name="Upload aanvraagformulier">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="form_upload_aanvraag_form" label="Upload het aanvraagformulier" type="file" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0lq18c0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ajxfee</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:scriptTask id="Activity_1so3vlp" name="Status update: &#34;Aanvraag invoeren&#34;">
+      <bpmn:incoming>Flow_aanvraag_invoeren</bpmn:incoming>
+      <bpmn:outgoing>Flow_0lq18c0</bpmn:outgoing>
+      <bpmn:script>set_status("Aanvraag invoeren")</bpmn:script>
+    </bpmn:scriptTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="V">
@@ -822,18 +816,6 @@
       <bpmndi:BPMNShape id="Event_0jaysq0_di" bpmnElement="Event_0jaysq0">
         <dc:Bounds x="4702" y="762" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_05u0fmk" bpmnElement="task_upload_aanvraag_formulier">
-        <dc:Bounds x="570" y="740" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0l3y4ib" bpmnElement="Activity_0xumr2i">
-        <dc:Bounds x="710" y="740" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1so3vlp_di" bpmnElement="Activity_1so3vlp">
-        <dc:Bounds x="420" y="740" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0d85rgj" bpmnElement="Event_049hit6">
         <dc:Bounds x="242" y="762" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -882,9 +864,6 @@
           <dc:Bounds x="310" y="717.5" width="59" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_join_aanvraag_di" bpmnElement="Gateway_join_aanvraag" isMarkerVisible="true">
-        <dc:Bounds x="845" y="755" width="50" height="50" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_153h1dn" bpmnElement="Activity_1w1swgw">
         <dc:Bounds x="1330" y="740" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -894,6 +873,18 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_11edbme" bpmnElement="task_controle_informatie_website">
         <dc:Bounds x="620" y="880" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0l3y4ib" bpmnElement="Activity_0xumr2i">
+        <dc:Bounds x="760" y="740" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_05u0fmk" bpmnElement="task_upload_aanvraag_formulier">
+        <dc:Bounds x="620" y="740" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1so3vlp_di" bpmnElement="Activity_1so3vlp">
+        <dc:Bounds x="460" y="740" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0yawjbc_di" bpmnElement="timer_extra_info">
@@ -947,8 +938,8 @@
         <di:waypoint x="1204" y="780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_09objfh_di" bpmnElement="Flow_09objfh">
-        <di:waypoint x="810" y="780" />
-        <di:waypoint x="845" y="780" />
+        <di:waypoint x="860" y="780" />
+        <di:waypoint x="939" y="780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_152efhd_di" bpmnElement="Flow_152efhd">
         <di:waypoint x="3859" y="540" />
@@ -1224,12 +1215,12 @@
         <di:waypoint x="4620" y="945" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0lq18c0_di" bpmnElement="Flow_0lq18c0">
-        <di:waypoint x="520" y="780" />
-        <di:waypoint x="570" y="780" />
+        <di:waypoint x="560" y="780" />
+        <di:waypoint x="620" y="780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ajxfee_di" bpmnElement="Flow_0ajxfee">
-        <di:waypoint x="670" y="780" />
-        <di:waypoint x="710" y="780" />
+        <di:waypoint x="720" y="780" />
+        <di:waypoint x="760" y="780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0zdexh9_di" bpmnElement="Flow_0zdexh9">
         <di:waypoint x="278" y="780" />
@@ -1289,7 +1280,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_aanvraag_invoeren_di" bpmnElement="Flow_aanvraag_invoeren">
         <di:waypoint x="365" y="780" />
-        <di:waypoint x="420" y="780" />
+        <di:waypoint x="460" y="780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_skip_aanvraag_di" bpmnElement="Flow_skip_aanvraag">
         <di:waypoint x="340" y="805" />
@@ -1302,10 +1293,6 @@
       <bpmndi:BPMNEdge id="Flow_in_behandeling_di" bpmnElement="Flow_in_behandeling">
         <di:waypoint x="520" y="930" />
         <di:waypoint x="620" y="930" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_controle_informatie_di" bpmnElement="Flow_controle_informatie">
-        <di:waypoint x="895" y="780" />
-        <di:waypoint x="939" y="780" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0a78972_di" bpmnElement="Flow_0a78972">
         <di:waypoint x="720" y="920" />
