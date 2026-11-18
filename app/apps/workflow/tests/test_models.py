@@ -102,6 +102,24 @@ class WorkflowModelTest(TestCase):
         history_qs = CaseWorkflowStateHistory.objects.filter(workflow=child_workflow)
         self.assertFalse(history_qs.exists())
 
+    def test_skip_beoordeling_defaults_to_false(self):
+        workflow = CaseWorkflow.objects.create(
+            case=self._make_case(), workflow_type="director"
+        )
+        self.assertEqual(workflow.data["skip_beoordeling"], {"value": False})
+
+    def test_skip_beoordeling_is_kept_and_inherited_by_subworkflow(self):
+        workflow = CaseWorkflow.objects.create(
+            case=self._make_case(),
+            workflow_type="director",
+            data={"skip_beoordeling": {"value": True}},
+        )
+        self.assertEqual(workflow.data["skip_beoordeling"], {"value": True})
+
+        workflow._start_child_workflow("beoordeling", workflow.id)
+        child = CaseWorkflow.objects.get(parent_workflow=workflow)
+        self.assertEqual(child.data["skip_beoordeling"], {"value": True})
+
     def _make_case(self):
         hoa = baker.make(
             HomeownerAssociation,
